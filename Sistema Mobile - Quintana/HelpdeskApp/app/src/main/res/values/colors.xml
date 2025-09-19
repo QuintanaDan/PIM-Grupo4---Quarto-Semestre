@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cores Principais -->
+    <color name="primary">#6366f1</color>              <!-- Azul/Roxo Principal -->
+    <color name="gradient_start">#667eea</color>        <!-- Gradiente Início -->
+    <color name="gradient_end">#764ba2</color>          <!-- Gradiente Fim -->
+    <color name="white">#ffffff</color>                 <!-- Branco -->
+
+    <!-- Cores de Texto -->
+    <color name="text_dark">#333333</color>             <!-- Cinza Escuro (Texto) -->
+    <color name="text_secondary">#64748b</color>        <!-- Cinza Azulado (Texto) -->
+
+    <!-- Cores de Background -->
+    <color name="background_light">#f8fafc</color>      <!-- Cinza Claro (Background) -->
+    <color name="background_footer">#1e293b</color>     <!-- Cinza Escuro (Footer) -->
+
+    <!-- Cores de Borda -->
+    <color name="border_footer">#334155</color>         <!-- Cinza Médio (Borda Footer) -->
+    <color name="border_light">#e2e8f0</color>          <!-- Borda clara adicional -->
+
+    <!-- Cores de Links -->
+    <color name="link_footer">#94a3b8</color>           <!-- Cinza Claro (Links Footer) -->
+
+    <!-- Cores de Notificação -->
+    <color name="notification_info">#3b82f6</color>     <!-- Azul Notificação -->
+    <color name="notification_error">#ef4444</color>    <!-- Vermelho Notificação -->
+    <color name="notification_success">#10b981</color>  <!-- Verde Sucesso -->
+    <color name="notification_warning">#f59e0b</color>  <!-- Laranja Aviso -->
+
+    <!-- Cores de Prioridade para Chamados -->
+    <color name="priority_low">#10b981</color>          <!-- Verde -->
+    <color name="priority_medium">#f59e0b</color>       <!-- Laranja -->
+    <color name="priority_high">#ef4444</color>         <!-- Vermelho -->
+    <color name="priority_critical">#dc2626</color>     <!-- Vermelho Escuro -->
+
+    <!-- Cores de Status -->
+    <color name="status_open">#3b82f6</color>           <!-- Azul -->
+    <color name="status_progress">#f59e0b</color>       <!-- Laranja -->
+    <color name="status_resolved">#10b981</color>       <!-- Verde -->
+    <color name="status_closed">#6b7280</color>         <!-- Cinza -->
+</resources>

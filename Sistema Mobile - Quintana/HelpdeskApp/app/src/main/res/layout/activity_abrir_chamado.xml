@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_light">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/gradient_primary"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎫 Abrir Novo Chamado"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- Formulário -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/etTitulo"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:hint="Título do problema"
+                android:inputType="textCapSentences"
+                android:textColor="@color/text_dark"
+                android:maxLength="100"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/edit_text_background" />
+
+            <EditText
+                android:id="@+id/etDescricao"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:hint="Descreva o problema detalhadamente"
+                android:inputType="textMultiLine|textCapSentences"
+                android:gravity="top"
+                android:textColor="@color/text_dark"
+                android:maxLength="500"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/edit_text_background" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Categoria:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:layout_marginBottom="8dp" />
+
+            <Spinner
+                android:id="@+id/spinnerCategoria"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/edit_text_background" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Prioridade:"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/rgPrioridade"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="24dp">
+
+                <RadioButton
+                    android:id="@+id/rbBaixa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🟢 Baixa - Não afeta o trabalho"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_dark" />
+
+                <RadioButton
+                    android:id="@+id/rbMedia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🟡 Média - Afeta parcialmente"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_dark"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/rbAlta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🟠 Alta - Afeta significativamente"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_dark" />
+
+                <RadioButton
+                    android:id="@+id/rbCritica"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔴 Crítica - Sistema parado"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_dark" />
+
+            </RadioGroup>
+
+            <Button
+                android:id="@+id/btnEnviarChamado"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="📤 ENVIAR CHAMADO"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/notification_success"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/btnCancelar"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="❌ CANCELAR"
+                android:textSize="16sp"
+                android:textColor="@color/notification_error"
+                android:background="@drawable/button_outline_red" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
