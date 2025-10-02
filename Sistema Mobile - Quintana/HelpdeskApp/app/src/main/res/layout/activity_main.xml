@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background_light">
+    android:background="@color/background_light"
+    tools:context=".MainActivity">
 
-    <!-- Header com gradiente -->
+    <!-- UM SÓ FILHO DIRETO DO SCROLLVIEW -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/gradient_primary"
         android:padding="24dp">
 
+        <!-- Header -->
         <TextView
             android:id="@+id/tvBemVindo"
             android:layout_width="match_parent"
@@ -20,103 +21,125 @@
             android:text="Bem-vindo!"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@color/white"
-            android:gravity="center"
+            android:textColor="@color/text_dark"
+            android:textAlignment="center"
             android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/tvTipoUsuario"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Tipo: Cliente"
+            android:text="Tipo: Usuário"
             android:textSize="16sp"
+            android:textColor="@color/text_secondary"
+            android:textAlignment="center"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Pergunta -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="O que você deseja fazer?"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_dark"
+            android:textAlignment="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Botões Principais -->
+        <Button
+            android:id="@+id/btnAbrirChamado"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="📋 ABRIR NOVO CHAMADO"
+            android:textSize="16sp"
+            android:textStyle="bold"
             android:textColor="@color/white"
-            android:gravity="center"
-            android:alpha="0.9" />
+            android:backgroundTint="@color/primary"
+            android:layout_marginBottom="12dp"
+            android:elevation="2dp" />
+
+        <Button
+            android:id="@+id/btnMeusChamados"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="📄 MEUS CHAMADOS"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/notification_info"
+            android:layout_marginBottom="12dp"
+            android:elevation="2dp" />
+
+        <Button
+            android:id="@+id/btnBuscarChamado"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="🔍 BUSCAR CHAMADO"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/notification_warning"
+            android:layout_marginBottom="12dp"
+            android:elevation="2dp" />
+
+        <Button
+            android:id="@+id/btnTodosChamados"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="📊 TODOS OS CHAMADOS (ADMIN)"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/status_closed"
+            android:layout_marginBottom="24dp"
+            android:elevation="2dp"
+            android:visibility="gone" />
+
+        <!-- Seção Diversidade -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🌍 Diversidade e Inclusão"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_dark"
+            android:textAlignment="center"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnDiversidade"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="🤝 Conheça a MOVER"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/theme_ancestral_primary"
+            android:layout_marginBottom="8dp"
+            android:elevation="2dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Acesse conteúdos sobre diversidade, inclusão e oportunidades para pessoas negras na tecnologia"
+            android:textSize="12sp"
+            android:textColor="@color/text_secondary"
+            android:textAlignment="center"
+            android:layout_marginBottom="32dp" />
 
         <!-- Botão Logout -->
         <Button
             android:id="@+id/btnLogout"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
             android:text="🚪 SAIR"
-            android:textSize="12sp"
+            android:textSize="14sp"
+            android:textStyle="bold"
             android:textColor="@color/white"
-            android:background="@drawable/button_logout"
-            android:layout_gravity="end"
-            android:layout_marginTop="12dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp" />
+            android:backgroundTint="@color/notification_error"
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
 
-    <!-- Conteúdo principal -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="O que você deseja fazer?"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_dark"
-                android:layout_marginBottom="16dp" />
-
-            <Button
-                android:id="@+id/btnAbrirChamado"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:text="🎫 ABRIR NOVO CHAMADO"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/primary"
-                android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/btnMeusChamados"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:text="📋 MEUS CHAMADOS"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/notification_info"
-                android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/btnBuscarChamado"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:text="🔍 BUSCAR CHAMADO"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/notification_warning"
-                android:layout_marginBottom="12dp" />
-
-            <Button
-                android:id="@+id/btnTodosChamados"
-                android:layout_width="match_parent"
-                android:layout_height="64dp"
-                android:text="📊 TODOS OS CHAMADOS (ADMIN)"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/gradient_end"
-                android:layout_marginBottom="12dp"
-                android:visibility="gone" />
-
-        </LinearLayout>
-
-    </ScrollView>
-
-</LinearLayout>
+</ScrollView>

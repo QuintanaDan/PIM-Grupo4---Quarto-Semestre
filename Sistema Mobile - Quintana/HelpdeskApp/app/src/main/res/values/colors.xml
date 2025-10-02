@@ -1,41 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Cores Principais -->
-    <color name="primary">#6366f1</color>              <!-- Azul/Roxo Principal -->
-    <color name="gradient_start">#667eea</color>        <!-- Gradiente Início -->
-    <color name="gradient_end">#764ba2</color>          <!-- Gradiente Fim -->
-    <color name="white">#ffffff</color>                 <!-- Branco -->
+    <!-- ========== CORES PRINCIPAIS DO SISTEMA ========== -->
+    <color name="primary">#6366f1</color> <!-- Azul/Roxo Principal -->
+    <color name="gradient_start">#667eea</color> <!-- Gradiente Início -->
+    <color name="gradient_end">#764ba2</color> <!-- Gradiente Fim -->
+    <color name="white">#ffffff</color> <!-- Branco -->
 
-    <!-- Cores de Texto -->
-    <color name="text_dark">#333333</color>             <!-- Cinza Escuro (Texto) -->
-    <color name="text_secondary">#64748b</color>        <!-- Cinza Azulado (Texto) -->
+    <!-- ========== CORES DE TEXTO ========== -->
+    <color name="text_dark">#333333</color> <!-- Cinza Escuro (Texto) -->
+    <color name="text_secondary">#64748b</color> <!-- Cinza Azulado (Texto) -->
 
-    <!-- Cores de Background -->
-    <color name="background_light">#f8fafc</color>      <!-- Cinza Claro (Background) -->
-    <color name="background_footer">#1e293b</color>     <!-- Cinza Escuro (Footer) -->
+    <!-- ========== CORES DE BACKGROUND ========== -->
+    <color name="background_light">#f8fafc</color> <!-- Cinza Claro (Background) -->
+    <color name="background_footer">#1e293b</color> <!-- Cinza Escuro (Footer) -->
 
-    <!-- Cores de Borda -->
-    <color name="border_footer">#334155</color>         <!-- Cinza Médio (Borda Footer) -->
-    <color name="border_light">#e2e8f0</color>          <!-- Borda clara adicional -->
+    <!-- ========== CORES DE BORDA ========== -->
+    <color name="border_footer">#334155</color> <!-- Cinza Médio (Borda Footer) -->
+    <color name="border_light">#e2e8f0</color> <!-- Borda clara adicional -->
 
-    <!-- Cores de Links -->
-    <color name="link_footer">#94a3b8</color>           <!-- Cinza Claro (Links Footer) -->
+    <!-- ========== CORES DE LINKS ========== -->
+    <color name="link_footer">#94a3b8</color> <!-- Cinza Claro (Links Footer) -->
 
-    <!-- Cores de Notificação -->
-    <color name="notification_info">#3b82f6</color>     <!-- Azul Notificação -->
-    <color name="notification_error">#ef4444</color>    <!-- Vermelho Notificação -->
-    <color name="notification_success">#10b981</color>  <!-- Verde Sucesso -->
-    <color name="notification_warning">#f59e0b</color>  <!-- Laranja Aviso -->
+    <!-- ========== CORES DE NOTIFICAÇÃO ========== -->
+    <color name="notification_info">#3b82f6</color> <!-- Azul Notificação -->
+    <color name="notification_error">#ef4444</color> <!-- Vermelho Notificação -->
+    <color name="notification_success">#10b981</color> <!-- Verde Sucesso -->
+    <color name="notification_warning">#f59e0b</color> <!-- Laranja Aviso -->
 
-    <!-- Cores de Prioridade para Chamados -->
-    <color name="priority_low">#10b981</color>          <!-- Verde -->
-    <color name="priority_medium">#f59e0b</color>       <!-- Laranja -->
-    <color name="priority_high">#ef4444</color>         <!-- Vermelho -->
-    <color name="priority_critical">#dc2626</color>     <!-- Vermelho Escuro -->
+    <!-- ========== CORES DE PRIORIDADE PARA CHAMADOS ========== -->
+    <color name="priority_low">#10b981</color> <!-- Verde -->
+    <color name="priority_medium">#f59e0b</color> <!-- Laranja -->
+    <color name="priority_high">#ef4444</color> <!-- Vermelho -->
+    <color name="priority_critical">#dc2626</color> <!-- Vermelho Escuro -->
 
-    <!-- Cores de Status -->
-    <color name="status_open">#3b82f6</color>           <!-- Azul -->
-    <color name="status_progress">#f59e0b</color>       <!-- Laranja -->
-    <color name="status_resolved">#10b981</color>       <!-- Verde -->
-    <color name="status_closed">#6b7280</color>         <!-- Cinza -->
+    <!-- ========== CORES DE STATUS ========== -->
+    <color name="status_open">#3b82f6</color> <!-- Azul -->
+    <color name="status_progress">#f59e0b</color> <!-- Laranja -->
+    <color name="status_resolved">#10b981</color> <!-- Verde -->
+    <color name="status_closed">#6b7280</color> <!-- Cinza -->
+
+    <!-- ========== TEMA CLARO - AMANHECER ========== -->
+    <color name="theme_light_primary">#4CAF50</color> <!-- Verde esperança -->
+    <color name="theme_light_primary_variant">#2E7D32</color> <!-- Verde escuro -->
+    <color name="theme_light_primary_surface">#E8F5E8</color> <!-- Verde claro suave -->
+    <color name="theme_light_accent">#FFC107</color> <!-- Dourado vibrante -->
+    <color name="theme_light_accent_surface">#FFF8E1</color> <!-- Dourado suave -->
+    <color name="theme_light_background">#FAFAFA</color> <!-- Branco suave -->
+    <color name="theme_light_surface">#FFFFFF</color> <!-- Branco puro -->
+    <color name="theme_light_text_primary">#212121</color> <!-- Texto escuro -->
+    <color name="theme_light_text_secondary">#757575</color> <!-- Texto secundário -->
+
+    <!-- ========== TEMA ESCURO - ANOITECER ========== -->
+    <color name="theme_dark_primary">#2E7D32</color> <!-- Verde médio -->
+    <color name="theme_dark_primary_variant">#1B5E20</color> <!-- Verde escuro profundo -->
+    <color name="theme_dark_primary_surface">#4CAF50</color> <!-- Verde claro -->
+    <color name="theme_dark_accent">#FFC107</color> <!-- Dourado médio -->
+    <color name="theme_dark_accent_variant">#FF8F00</color> <!-- Dourado escuro -->
+    <color name="theme_dark_background">#121212</color> <!-- Preto suave -->
+    <color name="theme_dark_surface">#1E1E1E</color> <!-- Cinza escuro -->
+    <color name="theme_dark_text_primary">#FFFFFF</color> <!-- Texto claro -->
+    <color name="theme_dark_text_secondary">#CCCCCC</color> <!-- Texto secundário claro -->
+
+    <!-- ========== TEMA ANCESTRAL - AFRO-BRASILEIRO ========== -->
+    <color name="theme_ancestral_primary">#8B4513</color> <!-- Terra vermelha -->
+    <color name="theme_ancestral_secondary">#DAA520</color> <!-- Ouro ancestral -->
+    <color name="theme_ancestral_accent">#228B22</color> <!-- Verde mata atlântica -->
+    <color name="theme_ancestral_surface_primary">#2F1B14</color> <!-- Fundo terra -->
+    <color name="theme_ancestral_surface_secondary">#3D2317</color> <!-- Surface terra -->
+    <color name="theme_ancestral_text">#F5DEB3</color> <!-- Texto dourado suave -->
+    <color name="theme_ancestral_blue">#4682B4</color> <!-- Azul Iemanjá -->
+    <color name="theme_ancestral_purple">#6A0DAD</color> <!-- Roxo realeza africana -->
+    <color name="theme_ancestral_brown">#654321</color> <!-- Marrom baobá -->
 </resources>
