@@ -12,18 +12,17 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.util.Log;
-
 import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;
 
 public class AbrirChamadoActivity extends AppCompatActivity {
+    private static final String TAG = "AbrirChamado";
 
     private EditText etTitulo, etDescricao;
     private Spinner spinnerCategoria;
     private RadioGroup rgPrioridade;
     private Button btnEnviarChamado, btnCancelar;
-
     private SessionManager sessionManager;
     private ChamadoDAO chamadoDAO;
 
@@ -41,9 +40,10 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         inicializarComponentes();
         configurarSpinner();
         configurarEventos();
-
         sessionManager = new SessionManager(this);
         chamadoDAO = new ChamadoDAO(this);
+
+        Log.d(TAG, "Activity inicializada com sucesso");
     }
 
     private void inicializarComponentes() {
@@ -53,6 +53,8 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         rgPrioridade = findViewById(R.id.rgPrioridade);
         btnEnviarChamado = findViewById(R.id.btnEnviarChamado);
         btnCancelar = findViewById(R.id.btnCancelar);
+
+        Log.d(TAG, "Componentes inicializados");
     }
 
     private void configurarSpinner() {
@@ -70,6 +72,8 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, categorias);
         spinnerCategoria.setAdapter(adapter);
+
+        Log.d(TAG, "Spinner configurado com " + categorias.length + " categorias");
     }
 
     private void configurarEventos() {
@@ -83,173 +87,212 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         btnCancelar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "Cancelando abertura de chamado");
                 finish();
             }
         });
+
+        Log.d(TAG, "Eventos configurados");
     }
 
     private void enviarChamado() {
-        Log.d("AbrirChamado", "=== INICIANDO ENVIO DE CHAMADO ===");
+        Log.d(TAG, "=== INICIANDO ENVIO DE CHAMADO ===");
 
         try {
+            // Coletar dados do formulário
             String titulo = etTitulo.getText().toString().trim();
             String descricao = etDescricao.getText().toString().trim();
             int categoriaPosition = spinnerCategoria.getSelectedItemPosition();
-            int prioridadeSelecionada = obterPrioridadeSelecionada();
+            String categoria = categoriaPosition > 0 ?
+                    spinnerCategoria.getSelectedItem().toString() : "";
+            String prioridadeSelecionada = obterPrioridadeSelecionada();
 
-            Log.d("AbrirChamado", "Dados coletados:");
-            Log.d("AbrirChamado", "  - Título: '" + titulo + "'");
-            Log.d("AbrirChamado", "  - Descrição: '" + descricao + "'");
-            Log.d("AbrirChamado", "  - Categoria: " + categoriaPosition);
-            Log.d("AbrirChamado", "  - Prioridade: " + prioridadeSelecionada);
+            Log.d(TAG, "Dados coletados:");
+            Log.d(TAG, "  - Título: '" + titulo + "'");
+            Log.d(TAG, "  - Descrição: '" + descricao + "'");
+            Log.d(TAG, "  - Categoria posição: " + categoriaPosition);
+            Log.d(TAG, "  - Categoria: '" + categoria + "'");
+            Log.d(TAG, "  - Prioridade: " + prioridadeSelecionada);
 
             // Validações
-            if (TextUtils.isEmpty(titulo)) {
-                Log.w("AbrirChamado", "❌ Validação falhou: Título vazio");
-                etTitulo.setError("Digite o título do problema");
-                etTitulo.requestFocus();
+            if (!validarFormulario(titulo, descricao, categoriaPosition)) {
+                Log.w(TAG, "❌ Validação do formulário falhou");
                 return;
             }
-
-            if (titulo.length() < 5) {
-                Log.w("AbrirChamado", "❌ Validação falhou: Título muito curto (" + titulo.length() + " chars)");
-                etTitulo.setError("Título deve ter pelo menos 5 caracteres");
-                etTitulo.requestFocus();
-                return;
-            }
-
-            if (TextUtils.isEmpty(descricao)) {
-                Log.w("AbrirChamado", "❌ Validação falhou: Descrição vazia");
-                etDescricao.setError("Descreva o problema");
-                etDescricao.requestFocus();
-                return;
-            }
-
-            if (descricao.length() < 10) {
-                Log.w("AbrirChamado", "❌ Validação falhou: Descrição muito curta (" + descricao.length() + " chars)");
-                etDescricao.setError("Descrição deve ter pelo menos 10 caracteres");
-                etDescricao.requestFocus();
-                return;
-            }
-
-            if (categoriaPosition == 0) {
-                Log.w("AbrirChamado", "❌ Validação falhou: Nenhuma categoria selecionada");
-                Toast.makeText(this, "Selecione uma categoria", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Log.d("AbrirChamado", "✅ Todas as validações passaram");
 
             // Verificar sessão
-            if (sessionManager == null) {
-                Log.e("AbrirChamado", "❌ ERRO: SessionManager é null!");
-                Toast.makeText(this, "Erro: Sessão não inicializada", Toast.LENGTH_SHORT).show();
-                finish();
-                return;
-            }
-
-            if (!sessionManager.isLoggedIn()) {
-                Log.e("AbrirChamado", "❌ ERRO: Usuário não está logado");
-                Toast.makeText(this, "Erro: Usuário não está logado", Toast.LENGTH_SHORT).show();
-                finish();
+            if (!validarSessao()) {
+                Log.e(TAG, "❌ Validação da sessão falhou");
                 return;
             }
 
             long clienteId = sessionManager.getUserId();
-            Log.d("AbrirChamado", "Cliente ID obtido: " + clienteId);
-
-            if (clienteId <= 0) {
-                Log.e("AbrirChamado", "❌ ERRO: ID do usuário inválido: " + clienteId);
-                Toast.makeText(this, "Erro: ID do usuário inválido", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Log.d("AbrirChamado", "✅ Sessão validada");
+            Log.d(TAG, "Cliente ID obtido: " + clienteId);
 
             // Criar o chamado
-            Log.d("AbrirChamado", "Criando objeto Chamado...");
+            Log.d(TAG, "Criando objeto Chamado...");
             Chamado novoChamado = new Chamado(titulo, descricao, clienteId);
 
             if (novoChamado == null) {
-                Log.e("AbrirChamado", "❌ ERRO: Falha ao criar objeto Chamado");
+                Log.e(TAG, "❌ ERRO: Falha ao criar objeto Chamado");
                 Toast.makeText(this, "Erro interno ao criar chamado", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            // Configurar dados adicionais do chamado
             novoChamado.setPrioridade(prioridadeSelecionada);
+            novoChamado.setCategoria(categoria);
 
-            Log.d("AbrirChamado", "Objeto Chamado criado:");
-            Log.d("AbrirChamado", "  - Número: " + novoChamado.getNumero());
-            Log.d("AbrirChamado", "  - Título: " + novoChamado.getTitulo());
-            Log.d("AbrirChamado", "  - Descrição: " + novoChamado.getDescricao());
-            Log.d("AbrirChamado", "  - Prioridade: " + novoChamado.getPrioridade());
-            Log.d("AbrirChamado", "  - Cliente ID: " + novoChamado.getClienteId());
-            Log.d("AbrirChamado", "  - Status: " + novoChamado.getStatus());
+            Log.d(TAG, "Objeto Chamado criado:");
+            Log.d(TAG, "  - Protocolo: " + novoChamado.getProtocoloFormatado());
+            Log.d(TAG, "  - Título: " + novoChamado.getTitulo());
+            Log.d(TAG, "  - Descrição: " + novoChamado.getDescricao());
+            Log.d(TAG, "  - Categoria: " + novoChamado.getCategoria());
+            Log.d(TAG, "  - Prioridade: " + novoChamado.getPrioridade());
+            Log.d(TAG, "  - Cliente ID: " + novoChamado.getClienteId());
+            Log.d(TAG, "  - Status: " + novoChamado.getStatus());
 
             // Verificar DAO
             if (chamadoDAO == null) {
-                Log.e("AbrirChamado", "❌ ERRO: ChamadoDAO é null!");
+                Log.e(TAG, "❌ ERRO: ChamadoDAO é null!");
                 Toast.makeText(this, "Erro: DAO não inicializado", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // Salvar no banco
-            Log.d("AbrirChamado", "Abrindo conexão com banco...");
-            chamadoDAO.open();
-
-            Log.d("AbrirChamado", "Salvando chamado no banco...");
+            Log.d(TAG, "Salvando chamado no banco...");
             long resultado = chamadoDAO.abrirChamado(novoChamado);
-
-            Log.d("AbrirChamado", "Fechando conexão com banco...");
-            chamadoDAO.close();
-
-            Log.d("AbrirChamado", "Resultado da operação: " + resultado);
+            Log.d(TAG, "Resultado da operação: " + resultado);
 
             if (resultado > 0) {
-                Log.d("AbrirChamado", "✅ SUCESSO! Chamado salvo com ID: " + resultado);
-                Toast.makeText(this, "✅ Chamado " + novoChamado.getNumero() + " aberto com sucesso!", Toast.LENGTH_LONG).show();
+                Log.d(TAG, "✅ SUCESSO! Chamado salvo com ID: " + resultado);
+
+                // Atualizar o ID do chamado para gerar protocolo correto
+                novoChamado.setId(resultado);
+
+                // Log de debug adicional
+                Log.d(TAG, "=== DEBUG INFO APÓS INSERÇÃO ===");
+                Log.d(TAG, "ID retornado: " + resultado);
+                Log.d(TAG, "Protocolo final: " + novoChamado.getProtocoloFormatado());
+                Log.d(TAG, "Data de criação: " + novoChamado.getDataCriacaoFormatada());
+
+                // Verificar se o chamado foi realmente inserido
+                Chamado chamadoVerificacao = chamadoDAO.buscarChamadoPorId(resultado);
+                if (chamadoVerificacao != null) {
+                    Log.d(TAG, "✅ Verificação: Chamado encontrado no banco");
+                    Log.d(TAG, "Título verificado: " + chamadoVerificacao.getTitulo());
+                } else {
+                    Log.w(TAG, "⚠️ Atenção: Chamado não encontrado na verificação");
+                }
+
+                Toast.makeText(this,
+                        "✅ Chamado " + novoChamado.getProtocoloFormatado() + " aberto com sucesso!",
+                        Toast.LENGTH_LONG).show();
+
+                // Fechar a activity após sucesso
                 finish();
+
             } else {
-                Log.e("AbrirChamado", "❌ FALHA! Erro ao salvar no banco (resultado: " + resultado + ")");
-                Toast.makeText(this, "❌ Erro ao abrir chamado. Tente novamente.", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "❌ FALHA! Erro ao salvar no banco (resultado: " + resultado + ")");
+                Toast.makeText(this, "❌ Erro ao abrir chamado. Tente novamente.",
+                        Toast.LENGTH_SHORT).show();
             }
 
         } catch (Exception e) {
-            Log.e("AbrirChamado", "❌ ERRO CRÍTICO ao enviar chamado: ", e);
-            Toast.makeText(this, "❌ Erro crítico: " + e.getMessage(), Toast.LENGTH_LONG).show();
-
-            try {
-                if (chamadoDAO != null) {
-                    chamadoDAO.close();
-                }
-            } catch (Exception ex) {
-                Log.e("AbrirChamado", "❌ Erro ao fechar DAO: ", ex);
-            }
+            Log.e(TAG, "❌ ERRO CRÍTICO ao enviar chamado: ", e);
+            Toast.makeText(this, "❌ Erro crítico: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
         }
 
-        Log.d("AbrirChamado", "=== FIM DO ENVIO DE CHAMADO ===");
+        Log.d(TAG, "=== FIM DO ENVIO DE CHAMADO ===");
     }
 
+    private boolean validarFormulario(String titulo, String descricao, int categoriaPosition) {
+        if (TextUtils.isEmpty(titulo)) {
+            Log.w(TAG, "❌ Validação falhou: Título vazio");
+            etTitulo.setError("Digite o título do problema");
+            etTitulo.requestFocus();
+            return false;
+        }
 
+        if (titulo.length() < 5) {
+            Log.w(TAG, "❌ Validação falhou: Título muito curto (" + titulo.length() + " chars)");
+            etTitulo.setError("Título deve ter pelo menos 5 caracteres");
+            etTitulo.requestFocus();
+            return false;
+        }
 
-    private int obterPrioridadeSelecionada() {
+        if (TextUtils.isEmpty(descricao)) {
+            Log.w(TAG, "❌ Validação falhou: Descrição vazia");
+            etDescricao.setError("Descreva o problema");
+            etDescricao.requestFocus();
+            return false;
+        }
+
+        if (descricao.length() < 10) {
+            Log.w(TAG, "❌ Validação falhou: Descrição muito curta (" + descricao.length() + " chars)");
+            etDescricao.setError("Descrição deve ter pelo menos 10 caracteres");
+            etDescricao.requestFocus();
+            return false;
+        }
+
+        if (categoriaPosition == 0) {
+            Log.w(TAG, "❌ Validação falhou: Nenhuma categoria selecionada");
+            Toast.makeText(this, "Selecione uma categoria", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        Log.d(TAG, "✅ Todas as validações do formulário passaram");
+        return true;
+    }
+
+    private boolean validarSessao() {
+        if (sessionManager == null) {
+            Log.e(TAG, "❌ ERRO: SessionManager é null!");
+            Toast.makeText(this, "Erro: Sessão não inicializada", Toast.LENGTH_SHORT).show();
+            finish();
+            return false;
+        }
+
+        if (!sessionManager.isLoggedIn()) {
+            Log.e(TAG, "❌ ERRO: Usuário não está logado");
+            Toast.makeText(this, "Erro: Usuário não está logado", Toast.LENGTH_SHORT).show();
+            finish();
+            return false;
+        }
+
+        long clienteId = sessionManager.getUserId();
+        if (clienteId <= 0) {
+            Log.e(TAG, "❌ ERRO: ID do usuário inválido: " + clienteId);
+            Toast.makeText(this, "Erro: ID do usuário inválido", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        Log.d(TAG, "✅ Sessão validada com sucesso");
+        return true;
+    }
+
+    private String obterPrioridadeSelecionada() {
         int selectedId = rgPrioridade.getCheckedRadioButtonId();
 
         if (selectedId == R.id.rbBaixa) {
-            return Chamado.PRIORIDADE_BAIXA;
+            return "Baixa";
         } else if (selectedId == R.id.rbMedia) {
-            return Chamado.PRIORIDADE_MEDIA;
+            return "Média";
         } else if (selectedId == R.id.rbAlta) {
-            return Chamado.PRIORIDADE_ALTA;
+            return "Alta";
         } else if (selectedId == R.id.rbCritica) {
-            return Chamado.PRIORIDADE_CRITICA;
+            return "Crítica";
         }
 
-        return Chamado.PRIORIDADE_MEDIA; // Padrão
+        // Se nenhuma prioridade foi selecionada, selecionar Média como padrão
+        Log.d(TAG, "Nenhuma prioridade selecionada, usando 'Média' como padrão");
+        return "Média";
     }
 
     @Override
     public boolean onSupportNavigateUp() {
+        Log.d(TAG, "Navegação para trás pressionada");
         finish();
         return true;
     }
@@ -257,12 +300,18 @@ public class AbrirChamadoActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        try {
-            if (chamadoDAO != null) {
-                chamadoDAO.close();
-            }
-        } catch (Exception e) {
-            // Ignorar erro ao fechar
-        }
+        Log.d(TAG, "Activity destruída");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "Activity pausada");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "Activity retomada");
     }
 }

@@ -15,7 +15,7 @@
         android:theme="@style/Theme.HelpdeskApp"
         tools:targetApi="31">
 
-        <!-- 🎯 ÚNICA TELA DE ENTRADA - LoginActivity -->
+        <!-- ÚNICA TELA DE ENTRADA - LoginActivity -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
 
-        <!-- 📱 TELAS INTERNAS (sem LAUNCHER) -->
+        <!-- TELAS INTERNAS (sem LAUNCHER) -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
@@ -41,9 +41,15 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
-            android:name=".DetalhesChamadoActivity"
+            android:name=".DetalheChamadoActivity"
             android:exported="false"
             android:parentActivityName=".MeusChamadosActivity" />
+
+        <activity
+            android:name=".BuscarChamadoActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateVisible" />
 
     </application>
 </manifest>

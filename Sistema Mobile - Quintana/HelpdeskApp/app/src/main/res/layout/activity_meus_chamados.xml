@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -23,12 +24,91 @@
 
     </LinearLayout>
 
+    <!-- NOVOS FILTROS -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🔍 Filtrar por status:"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnFiltroTodos"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:text="TODOS"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/botao_filtro_ativo" />
+
+                <Button
+                    android:id="@+id/btnFiltroAbertos"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:text="ABERTOS"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/botao_filtro_inativo" />
+
+                <Button
+                    android:id="@+id/btnFiltroAndamento"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:text="ANDAMENTO"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/botao_filtro_inativo" />
+
+                <Button
+                    android:id="@+id/btnFiltroFechados"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="FECHADOS"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/botao_filtro_inativo" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChamados"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
+        android:padding="8dp"
         android:visibility="visible" />
 
     <!-- Mensagem quando não há chamados -->
@@ -44,7 +124,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📭"
+            android:text="🔭"
             android:textSize="64sp"
             android:layout_marginBottom="16dp" />
 

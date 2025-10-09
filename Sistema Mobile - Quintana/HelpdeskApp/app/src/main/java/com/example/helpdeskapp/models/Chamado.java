@@ -1,224 +1,249 @@
 package com.example.helpdeskapp.models;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class Chamado {
-    // Constantes de Status
-    public static final int STATUS_ABERTO = 1;
-    public static final int STATUS_EM_ANDAMENTO = 2;
-    public static final int STATUS_RESOLVIDO = 3;
-    public static final int STATUS_FECHADO = 4;
-
-    // Constantes de Prioridade
-    public static final int PRIORIDADE_BAIXA = 1;
-    public static final int PRIORIDADE_MEDIA = 2;
-    public static final int PRIORIDADE_ALTA = 3;
-    public static final int PRIORIDADE_CRITICA = 4;
-
-    // Constantes de Categoria
-    public static final int CATEGORIA_HARDWARE = 1;
-    public static final int CATEGORIA_SOFTWARE = 2;
-    public static final int CATEGORIA_REDE = 3;
-    public static final int CATEGORIA_SISTEMA = 4;
-    public static final int CATEGORIA_OUTROS = 5;
-
-    // Atributos (adicione após os outros atributos)
-    private int categoria;
-
-
-    // Atributos
+public class Chamado implements Serializable {
     private long id;
-    private String numero;
     private String titulo;
     private String descricao;
-    private int status;
-    private int prioridade;
-    private long clienteId;
-    private String createdAt;
-    private String updatedAt;
+    private String categoria;
+    private String prioridade;
+    private String status;
+    private Date dataCriacao;
+    private String resposta;
+    private String usuario;
+    private String numero; // ADICIONADO
 
-    /// Construtor vazio
     public Chamado() {
-        this.status = STATUS_ABERTO;
-        this.prioridade = PRIORIDADE_MEDIA;
-        this.categoria = CATEGORIA_SISTEMA; // padrão
+        this.dataCriacao = new Date();
+        this.status = "Aberto";
+        this.resposta = "";
+        this.categoria = "Geral";
+        this.prioridade = "Média";
     }
 
-    // Construtor principal
     public Chamado(String titulo, String descricao, long clienteId) {
+        this();
         this.titulo = titulo;
         this.descricao = descricao;
-        this.clienteId = clienteId;
-        this.status = STATUS_ABERTO;
-        this.prioridade = PRIORIDADE_MEDIA;
-        this.categoria = CATEGORIA_SISTEMA; // padrão
-        this.numero = gerarNumero();
+        this.usuario = String.valueOf(clienteId);
     }
-
-    public int getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(int categoria) {
-        this.categoria = categoria;
-    }
-
-    public String getCategoriaTexto() {
-        switch (categoria) {
-            case CATEGORIA_HARDWARE: return "Hardware";
-            case CATEGORIA_SOFTWARE: return "Software";
-            case CATEGORIA_REDE: return "Rede";
-            case CATEGORIA_SISTEMA: return "Sistema";
-            case CATEGORIA_OUTROS: return "Outros";
-            default: return "Sistema";
-        }
-    }
-
-    public String getCategoriaTextoCompleto() {
-        switch (categoria) {
-            case CATEGORIA_HARDWARE: return "🔧 HARDWARE";
-            case CATEGORIA_SOFTWARE: return "💻 SOFTWARE";
-            case CATEGORIA_REDE: return "🌐 REDE";
-            case CATEGORIA_SISTEMA: return "⚙️ SISTEMA";
-            case CATEGORIA_OUTROS: return "📋 OUTROS";
-            default: return "⚙️ SISTEMA";
-        }
-    }
-
 
     // Getters e Setters
-    public long getId() {
-        return id;
-    }
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
 
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
+
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
+
+    public String getPrioridade() { return prioridade; }
+    public void setPrioridade(String prioridade) { this.prioridade = prioridade; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public Date getDataCriacao() { return dataCriacao; }
+    public void setDataCriacao(Date dataCriacao) { this.dataCriacao = dataCriacao; }
+
+    public String getResposta() { return resposta; }
+    public void setResposta(String resposta) { this.resposta = resposta; }
+
+    public String getUsuario() { return usuario; }
+    public void setUsuario(String usuario) { this.usuario = usuario; }
+
+    // MÉTODO ADICIONADO: getNumero
     public String getNumero() {
-        return numero;
+        if (numero != null && !numero.isEmpty()) {
+            return numero;
+        }
+        return getProtocoloFormatado();
     }
 
+    // MÉTODO ADICIONADO: setNumero
     public void setNumero(String numero) {
         this.numero = numero;
     }
 
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public int getPrioridade() {
-        return prioridade;
-    }
-
-    public void setPrioridade(int prioridade) {
-        this.prioridade = prioridade;
-    }
-
     public long getClienteId() {
-        return clienteId;
+        if (usuario != null && !usuario.isEmpty()) {
+            try {
+                return Long.parseLong(usuario);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        return 0;
     }
 
     public void setClienteId(long clienteId) {
-        this.clienteId = clienteId;
+        this.usuario = String.valueOf(clienteId);
     }
 
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    // Métodos utilitários
-    private String gerarNumero() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
-        String timestamp = sdf.format(new Date());
-        return "CH" + timestamp.substring(2); // Remove os primeiros 2 dígitos do ano
-    }
-
-    public String getStatusTexto() {
-        switch (status) {
-            case STATUS_ABERTO: return "Aberto";
-            case STATUS_EM_ANDAMENTO: return "Em Andamento";
-            case STATUS_RESOLVIDO: return "Resolvido";
-            case STATUS_FECHADO: return "Fechado";
-            default: return "Desconhecido";
+    public String getProtocoloFormatado() {
+        if (numero != null && !numero.isEmpty()) {
+            return numero;
+        }
+        if (id > 0) {
+            return String.format("CH%06d", id);
+        } else {
+            long timestamp = dataCriacao != null ? dataCriacao.getTime() : System.currentTimeMillis();
+            return String.format("CH%06d", (int)(timestamp % 1000000));
         }
     }
 
-    public String getPrioridadeTexto() {
-        switch (prioridade) {
-            case PRIORIDADE_BAIXA: return "Baixa";
-            case PRIORIDADE_MEDIA: return "Média";
-            case PRIORIDADE_ALTA: return "Alta";
-            case PRIORIDADE_CRITICA: return "Crítica";
-            default: return "Média";
+    public String getDataCriacaoFormatada() {
+        if (dataCriacao == null) {
+            return "Data não informada";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        return sdf.format(dataCriacao);
+    }
+
+    // MÉTODO ADICIONADO: getDataAberturaFormatada
+    public String getDataAberturaFormatada() {
+        return getDataCriacaoFormatada();
+    }
+
+    public String getDataCriacaoFormatadaComHora() {
+        if (dataCriacao == null) {
+            return "Data não informada";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        return sdf.format(dataCriacao);
+    }
+
+    public String getDataCriacaoFormatadaCompleta() {
+        if (dataCriacao == null) {
+            return "Data não informada";
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd 'de' MMMM 'de' yyyy 'às' HH:mm",
+                new Locale("pt", "BR"));
+        return sdf.format(dataCriacao);
+    }
+
+    public String getCorPrioridade() {
+        if (prioridade == null) return "#757575";
+        switch (prioridade.toLowerCase()) {
+            case "alta":
+            case "high":
+            case "crítica":
+                return "#F44336";
+            case "média":
+            case "media":
+            case "medium":
+                return "#FF9800";
+            case "baixa":
+            case "low":
+                return "#4CAF50";
+            default:
+                return "#757575";
         }
     }
 
-    public String getPrioridadeTextoCompleto() {
-        switch (prioridade) {
-            case PRIORIDADE_BAIXA: return "🟢 BAIXA";
-            case PRIORIDADE_MEDIA: return "🟡 MÉDIA";
-            case PRIORIDADE_ALTA: return "🟠 ALTA";
-            case PRIORIDADE_CRITICA: return "🔴 CRÍTICA";
-            default: return "🟡 MÉDIA";
+    public String getCorStatus() {
+        if (status == null) return "#757575";
+        switch (status.toLowerCase()) {
+            case "aberto":
+            case "open":
+            case "novo":
+                return "#4CAF50";
+            case "em andamento":
+            case "em_andamento":
+            case "progress":
+            case "progresso":
+                return "#FF9800";
+            case "fechado":
+            case "closed":
+            case "resolvido":
+            case "resolved":
+                return "#2196F3";
+            case "pendente":
+            case "pending":
+                return "#9C27B0";
+            default:
+                return "#757575";
         }
+    }
+
+    public boolean isValido() {
+        return titulo != null && !titulo.trim().isEmpty() &&
+                descricao != null && !descricao.trim().isEmpty() &&
+                categoria != null && !categoria.trim().isEmpty() &&
+                prioridade != null && !prioridade.trim().isEmpty();
     }
 
     public boolean isAberto() {
-        return status == STATUS_ABERTO;
-    }
-
-    public boolean isEmAndamento() {
-        return status == STATUS_EM_ANDAMENTO;
-    }
-
-    public boolean isResolvido() {
-        return status == STATUS_RESOLVIDO;
+        return status != null && (status.equalsIgnoreCase("aberto") ||
+                status.equalsIgnoreCase("open") ||
+                status.equalsIgnoreCase("novo"));
     }
 
     public boolean isFechado() {
-        return status == STATUS_FECHADO;
+        return status != null && (status.equalsIgnoreCase("fechado") ||
+                status.equalsIgnoreCase("closed") ||
+                status.equalsIgnoreCase("resolvido") ||
+                status.equalsIgnoreCase("resolved"));
     }
 
-    public boolean isPrioridadeCritica() {
-        return prioridade == PRIORIDADE_CRITICA;
+    public boolean isEmAndamento() {
+        return status != null && (status.equalsIgnoreCase("em andamento") ||
+                status.equalsIgnoreCase("progress") ||
+                status.equalsIgnoreCase("progresso"));
     }
 
     public boolean isPrioridadeAlta() {
-        return prioridade == PRIORIDADE_ALTA || prioridade == PRIORIDADE_CRITICA;
+        return prioridade != null && (prioridade.equalsIgnoreCase("alta") ||
+                prioridade.equalsIgnoreCase("high") ||
+                prioridade.equalsIgnoreCase("crítica"));
+    }
+
+    @Override
+    public String toString() {
+        return "Chamado{" +
+                "id=" + id +
+                ", titulo='" + titulo + '\'' +
+                ", categoria='" + categoria + '\'' +
+                ", prioridade='" + prioridade + '\'' +
+                ", status='" + status + '\'' +
+                ", dataCriacao=" + getDataCriacaoFormatada() +
+                ", usuario='" + usuario + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Chamado chamado = (Chamado) obj;
+        return id == chamado.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(id);
+    }
+
+    public Chamado clone() {
+        Chamado clone = new Chamado();
+        clone.setId(this.id);
+        clone.setTitulo(this.titulo);
+        clone.setDescricao(this.descricao);
+        clone.setCategoria(this.categoria);
+        clone.setPrioridade(this.prioridade);
+        clone.setStatus(this.status);
+        clone.setDataCriacao(this.dataCriacao != null ? new Date(this.dataCriacao.getTime()) : null);
+        clone.setResposta(this.resposta);
+        clone.setUsuario(this.usuario);
+        clone.setNumero(this.numero);
+        return clone;
     }
 }

@@ -2,34 +2,50 @@ package com.example.helpdeskapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.helpdeskapp.DetalhesChamadoActivity;
 import com.example.helpdeskapp.R;
 import com.example.helpdeskapp.models.Chamado;
+import com.example.helpdeskapp.DetalheChamadoActivity;
 import java.util.List;
 
 public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ChamadoViewHolder> {
+    private static final String TAG = "ChamadoAdapter";
 
-    private List<Chamado> chamados;
     private Context context;
-    private OnChamadoClickListener listener;
+    private List<Chamado> listaChamados;
+    private OnChamadoClickListener clickListener;
 
     public interface OnChamadoClickListener {
-        void onChamadoClick(Chamado chamado);
+        void onChamadoClick(Chamado chamado, int position);
+        void onChamadoLongClick(Chamado chamado, int position);
     }
 
-    public ChamadoAdapter(Context context, List<Chamado> chamados) {
+    public ChamadoAdapter(Context context, List<Chamado> listaChamados) {
         this.context = context;
-        this.chamados = chamados;
+        this.listaChamados = listaChamados;
+        this.clickListener = null;
+        Log.d(TAG, "Adapter criado com " + (listaChamados != null ? listaChamados.size() : 0) + " itens");
+    }
+
+    public ChamadoAdapter(Context context, List<Chamado> listaChamados, OnChamadoClickListener listener) {
+        this.context = context;
+        this.listaChamados = listaChamados;
+        this.clickListener = listener;
+        Log.d(TAG, "Adapter criado com listener personalizado e " +
+                (listaChamados != null ? listaChamados.size() : 0) + " itens");
     }
 
     public void setOnChamadoClickListener(OnChamadoClickListener listener) {
-        this.listener = listener;
+        this.clickListener = listener;
+        Log.d(TAG, "Listener definido: " + (listener != null ? "personalizado" : "removido"));
     }
 
     @NonNull
@@ -41,109 +57,280 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ChamadoV
 
     @Override
     public void onBindViewHolder(@NonNull ChamadoViewHolder holder, int position) {
-        Chamado chamado = chamados.get(position);
-
-        holder.tvNumero.setText(chamado.getNumero());
-        holder.tvTitulo.setText(chamado.getTitulo());
-        holder.tvDescricao.setText(chamado.getDescricao());
-        holder.tvStatus.setText(chamado.getStatusTexto());
-        holder.tvPrioridade.setText(chamado.getPrioridadeTextoCompleto());
-
-        // Data (se existir)
-        if (chamado.getCreatedAt() != null && !chamado.getCreatedAt().isEmpty()) {
-            holder.tvData.setText(formatarData(chamado.getCreatedAt()));
-        } else {
-            holder.tvData.setText("Data não disponível");
+        if (listaChamados == null || position >= listaChamados.size()) {
+            Log.w(TAG, "Lista vazia ou posição inválida: " + position);
+            return;
         }
 
-        // ✅ ÚNICO click listener (SEM LAMBDA)
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Abrir tela de detalhes
-                Intent intent = new Intent(context, DetalhesChamadoActivity.class);
-                intent.putExtra("chamado_id", chamado.getId());
-                intent.putExtra("numero_chamado", chamado.getNumero());
-                context.startActivity(intent);
+        Chamado chamado = listaChamados.get(position);
+        if (chamado == null) {
+            Log.w(TAG, "Chamado nulo na posição: " + position);
+            return;
+        }
 
-                // Se há listener customizado, chamar também
-                if (listener != null) {
-                    listener.onChamadoClick(chamado);
-                }
+        Log.d(TAG, "Binding chamado na posição " + position + ": " + chamado.getTitulo());
+
+        bindTexto(holder.txtNumero, chamado.getProtocoloFormatado(), "Nº não disponível");
+        bindTexto(holder.txtTitulo, chamado.getTitulo(), "Título não disponível");
+        bindTexto(holder.txtDescricao, limitarTexto(chamado.getDescricao(), 100), "Descrição não disponível");
+        bindTexto(holder.txtCategoria, chamado.getCategoria(), "Categoria não definida");
+        bindTexto(holder.txtStatus, chamado.getStatus(), "Status não definido");
+        bindTexto(holder.txtPrioridade, chamado.getPrioridade(), "Prioridade não definida");
+        bindTexto(holder.txtData, chamado.getDataCriacaoFormatada(), "Data não disponível");
+
+        aplicarCorStatus(holder.txtStatus, chamado);
+        aplicarCorPrioridade(holder.txtPrioridade, chamado);
+
+        holder.cardView.setOnClickListener(v -> {
+            Log.d(TAG, "Clique no chamado: " + chamado.getProtocoloFormatado());
+            if (clickListener != null) {
+                clickListener.onChamadoClick(chamado, position);
+            } else {
+                abrirDetalhes(chamado);
             }
         });
+
+        holder.cardView.setOnLongClickListener(v -> {
+            Log.d(TAG, "Clique longo no chamado: " + chamado.getProtocoloFormatado());
+            if (clickListener != null) {
+                clickListener.onChamadoLongClick(chamado, position);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void bindTexto(TextView textView, String texto, String textoDefault) {
+        if (textView != null) {
+            if (texto != null && !texto.trim().isEmpty()) {
+                textView.setText(texto);
+                textView.setVisibility(View.VISIBLE);
+            } else {
+                textView.setText(textoDefault);
+                textView.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private String limitarTexto(String texto, int limite) {
+        if (texto == null) return null;
+        if (texto.length() <= limite) return texto;
+        return texto.substring(0, limite) + "...";
+    }
+
+    private void aplicarCorStatus(TextView textView, Chamado chamado) {
+        if (textView == null || chamado == null) return;
+
+        try {
+            String corStatus = chamado.getCorStatus();
+            if (corStatus != null && !corStatus.isEmpty()) {
+                textView.setTextColor(Color.parseColor(corStatus));
+            } else {
+                String status = chamado.getStatus();
+                if (status != null) {
+                    switch (status.toLowerCase()) {
+                        case "aberto":
+                            textView.setTextColor(Color.parseColor("#FF9800"));
+                            break;
+                        case "em andamento":
+                            textView.setTextColor(Color.parseColor("#2196F3"));
+                            break;
+                        case "resolvido":
+                            textView.setTextColor(Color.parseColor("#4CAF50"));
+                            break;
+                        case "fechado":
+                            textView.setTextColor(Color.parseColor("#9E9E9E"));
+                            break;
+                        case "cancelado":
+                            textView.setTextColor(Color.parseColor("#F44336"));
+                            break;
+                        default:
+                            textView.setTextColor(Color.GRAY);
+                    }
+                } else {
+                    textView.setTextColor(Color.GRAY);
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Erro ao aplicar cor do status: " + e.getMessage());
+            textView.setTextColor(Color.GRAY);
+        }
+    }
+
+    private void aplicarCorPrioridade(TextView textView, Chamado chamado) {
+        if (textView == null || chamado == null) return;
+
+        try {
+            String corPrioridade = chamado.getCorPrioridade();
+            if (corPrioridade != null && !corPrioridade.isEmpty()) {
+                textView.setTextColor(Color.parseColor(corPrioridade));
+            } else {
+                String prioridade = chamado.getPrioridade();
+                if (prioridade != null) {
+                    switch (prioridade.toLowerCase()) {
+                        case "baixa":
+                            textView.setTextColor(Color.parseColor("#4CAF50"));
+                            break;
+                        case "média":
+                            textView.setTextColor(Color.parseColor("#FF9800"));
+                            break;
+                        case "alta":
+                            textView.setTextColor(Color.parseColor("#FF5722"));
+                            break;
+                        case "crítica":
+                            textView.setTextColor(Color.parseColor("#F44336"));
+                            break;
+                        default:
+                            textView.setTextColor(Color.GRAY);
+                    }
+                } else {
+                    textView.setTextColor(Color.GRAY);
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Erro ao aplicar cor da prioridade: " + e.getMessage());
+            textView.setTextColor(Color.GRAY);
+        }
+    }
+
+    private void abrirDetalhes(Chamado chamado) {
+        if (chamado == null) {
+            Log.e(TAG, "Tentativa de abrir detalhes com chamado nulo");
+            return;
+        }
+
+        try {
+            Intent intent = new Intent(context, DetalheChamadoActivity.class);
+            intent.putExtra("chamado_id", chamado.getId());
+            intent.putExtra("chamado_protocolo", chamado.getProtocoloFormatado());
+            intent.putExtra("chamado_titulo", chamado.getTitulo());
+            intent.putExtra("chamado_descricao", chamado.getDescricao());
+            intent.putExtra("chamado_categoria", chamado.getCategoria());
+            intent.putExtra("chamado_prioridade", chamado.getPrioridade());
+            intent.putExtra("chamado_status", chamado.getStatus());
+            intent.putExtra("chamado_data", chamado.getDataCriacaoFormatada());
+            intent.putExtra("chamado_resposta", chamado.getResposta());
+            intent.putExtra("chamado_cliente_id", chamado.getClienteId());
+
+            context.startActivity(intent);
+            Log.d(TAG, "Abrindo detalhes do chamado: " + chamado.getProtocoloFormatado());
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao abrir detalhes do chamado", e);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return chamados.size();
+        int count = listaChamados != null ? listaChamados.size() : 0;
+        Log.d(TAG, "getItemCount retornando: " + count);
+        return count;
     }
 
-    // ✅ MÉTODO formatarData que estava faltando
-    private String formatarData(String dataCompleta) {
-        try {
-            // Formato: 2025-09-14 20:31:33 -> 14/09/2025
-            String[] parts = dataCompleta.split(" ");
-            if (parts.length >= 1) {
-                String[] dateParts = parts[0].split("-");
-                if (dateParts.length >= 3) {
-                    return dateParts[2] + "/" + dateParts[1] + "/" + dateParts[0];
-                }
-            }
-        } catch (Exception e) {
-            // Se der erro, retorna a data original
-        }
-        return dataCompleta;
+    public void updateList(List<Chamado> novaLista) {
+        Log.d(TAG, "Atualizando lista. Itens antigos: " +
+                (this.listaChamados != null ? this.listaChamados.size() : 0) +
+                ", novos: " + (novaLista != null ? novaLista.size() : 0));
+
+        this.listaChamados = novaLista;
+        notifyDataSetChanged();
     }
 
-    // Métodos auxiliares (caso precise usar no futuro)
-    private String getStatusTexto(int status) {
-        switch (status) {
-            case Chamado.STATUS_ABERTO: return "ABERTO";
-            case Chamado.STATUS_EM_ANDAMENTO: return "EM ANDAMENTO";
-            case Chamado.STATUS_RESOLVIDO: return "RESOLVIDO";
-            case Chamado.STATUS_FECHADO: return "FECHADO";
-            default: return "DESCONHECIDO";
+    public void addItem(Chamado chamado) {
+        if (listaChamados != null && chamado != null) {
+            listaChamados.add(chamado);
+            int position = listaChamados.size() - 1;
+            notifyItemInserted(position);
+            Log.d(TAG, "Item adicionado na posição: " + position);
+        } else {
+            Log.w(TAG, "Não foi possível adicionar item: lista=" +
+                    (listaChamados != null) + ", chamado=" + (chamado != null));
         }
     }
 
-    private int getStatusBackground(int status) {
-        switch (status) {
-            case Chamado.STATUS_ABERTO: return R.drawable.status_aberto;
-            case Chamado.STATUS_EM_ANDAMENTO: return R.drawable.status_progresso;
-            case Chamado.STATUS_RESOLVIDO: return R.drawable.status_resolvido;
-            case Chamado.STATUS_FECHADO: return R.drawable.status_fechado;
-            default: return R.drawable.status_aberto;
+    public void removeItem(int position) {
+        if (listaChamados != null && position >= 0 && position < listaChamados.size()) {
+            Chamado removido = listaChamados.remove(position);
+            notifyItemRemoved(position);
+            Log.d(TAG, "Item removido da posição " + position + ": " +
+                    (removido != null ? removido.getTitulo() : "null"));
+        } else {
+            Log.w(TAG, "Não foi possível remover item da posição: " + position);
         }
     }
 
-    private String getPrioridadeTexto(int prioridade) {
-        switch (prioridade) {
-            case Chamado.PRIORIDADE_BAIXA: return "🟢 BAIXA";
-            case Chamado.PRIORIDADE_MEDIA: return "🟡 MÉDIA";
-            case Chamado.PRIORIDADE_ALTA: return "🟠 ALTA";
-            case Chamado.PRIORIDADE_CRITICA: return "🔴 CRÍTICA";
-            default: return "🟡 MÉDIA";
+    public void updateItem(int position, Chamado chamado) {
+        if (listaChamados != null && position >= 0 && position < listaChamados.size() && chamado != null) {
+            listaChamados.set(position, chamado);
+            notifyItemChanged(position);
+            Log.d(TAG, "Item atualizado na posição " + position + ": " + chamado.getTitulo());
+        } else {
+            Log.w(TAG, "Não foi possível atualizar item na posição: " + position);
+        }
+    }
+
+    public Chamado getItem(int position) {
+        if (listaChamados != null && position >= 0 && position < listaChamados.size()) {
+            return listaChamados.get(position);
+        }
+        return null;
+    }
+
+    public void clearList() {
+        if (listaChamados != null) {
+            int size = listaChamados.size();
+            listaChamados.clear();
+            notifyDataSetChanged();
+            Log.d(TAG, "Lista limpa. " + size + " itens removidos");
         }
     }
 
     public static class ChamadoViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNumero, tvTitulo, tvDescricao, tvStatus, tvPrioridade, tvData;
+        CardView cardView;
+        TextView txtNumero, txtTitulo, txtDescricao, txtCategoria, txtStatus, txtPrioridade, txtData;
 
         public ChamadoViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvNumero = itemView.findViewById(R.id.tvNumero);
-            tvTitulo = itemView.findViewById(R.id.tvTitulo);
-            tvDescricao = itemView.findViewById(R.id.tvDescricao);
-            tvStatus = itemView.findViewById(R.id.tvStatus);
-            tvPrioridade = itemView.findViewById(R.id.tvPrioridade);
-            tvData = itemView.findViewById(R.id.tvData);
-        }
-    }
 
-    // ✅ Método para atualizar lista
-    public void atualizarLista(List<Chamado> novosChamados) {
-        this.chamados = novosChamados;
-        notifyDataSetChanged();
+            if (itemView instanceof CardView) {
+                cardView = (CardView) itemView;
+            } else {
+                cardView = itemView.findViewById(R.id.cardView);
+                if (cardView == null) {
+                    cardView = null;
+                }
+            }
+
+            txtNumero = itemView.findViewById(R.id.tvNumeroChamado);
+            txtTitulo = itemView.findViewById(R.id.tvTitulo);
+            txtDescricao = itemView.findViewById(R.id.tvDescricao);
+            txtCategoria = itemView.findViewById(R.id.tvCategoria);
+            txtStatus = itemView.findViewById(R.id.tvStatusChamado);
+            txtPrioridade = itemView.findViewById(R.id.tvPrioridade);
+            txtData = itemView.findViewById(R.id.tvDataCriacao);
+
+            if (cardView == null) {
+                cardView = new CardView(itemView.getContext()) {
+                    @Override
+                    public void setOnClickListener(OnClickListener l) {
+                        itemView.setOnClickListener(l);
+                    }
+
+                    @Override
+                    public void setOnLongClickListener(OnLongClickListener l) {
+                        itemView.setOnLongClickListener(l);
+                    }
+                };
+            }
+
+            Log.d("ChamadoViewHolder", "Componentes inicializados:");
+            Log.d("ChamadoViewHolder", "  - CardView: " + (cardView != null));
+            Log.d("ChamadoViewHolder", "  - txtNumero: " + (txtNumero != null));
+            Log.d("ChamadoViewHolder", "  - txtTitulo: " + (txtTitulo != null));
+            Log.d("ChamadoViewHolder", "  - txtDescricao: " + (txtDescricao != null));
+            Log.d("ChamadoViewHolder", "  - txtCategoria: " + (txtCategoria != null));
+            Log.d("ChamadoViewHolder", "  - txtStatus: " + (txtStatus != null));
+            Log.d("ChamadoViewHolder", "  - txtPrioridade: " + (txtPrioridade != null));
+            Log.d("ChamadoViewHolder", "  - txtData: " + (txtData != null));
+        }
     }
 }

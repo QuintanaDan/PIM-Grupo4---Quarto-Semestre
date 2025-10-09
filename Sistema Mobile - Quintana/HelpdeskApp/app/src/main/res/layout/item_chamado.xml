@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_margin="4dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
+    app:cardElevation="3dp"
+    android:foreground="?android:attr/selectableItemBackground"
     android:clickable="true"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,7 +18,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header com número e status -->
+        <!-- Header: Número e Status -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,26 +26,27 @@
             android:layout_marginBottom="8dp">
 
             <TextView
-                android:id="@+id/tvNumero"
+                android:id="@+id/tvNumeroChamado"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="CH250914002339"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="@color/primary" />
+                android:textColor="@color/primary"
+                tools:ignore="HardcodedText" />
 
             <TextView
-                android:id="@+id/tvStatus"
+                android:id="@+id/tvStatusChamado"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ABERTO"
-                android:textSize="10sp"
+                android:text="🟢 ABERTO"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:textColor="@color/white"
-                android:background="@drawable/status_aberto"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp" />
+                android:textColor="@color/status_open"
+                android:background="@drawable/status_background"
+                android:padding="4dp"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
 
@@ -51,48 +55,72 @@
             android:id="@+id/tvTitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="limpressora"
+            android:text="Impressora com problema"
             android:textSize="16sp"
             android:textStyle="bold"
             android:textColor="@color/text_dark"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginBottom="4dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            tools:ignore="HardcodedText" />
 
         <!-- Descrição -->
         <TextView
             android:id="@+id/tvDescricao"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="impressora no esta funcionando direito e no imprimi"
+            android:text="Impressora não está funcionando direito e não imprime"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
+            android:layout_marginBottom="8dp"
             android:maxLines="2"
             android:ellipsize="end"
-            android:layout_marginBottom="12dp" />
+            tools:ignore="HardcodedText" />
 
-        <!-- Footer com prioridade e data -->
+        <!-- Informações adicionais -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tvPrioridade"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="🟡 MÉDIA"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_dark" />
-
-            <TextView
-                android:id="@+id/tvData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="14/09/2025"
+                android:text="🔴 ALTA"
                 android:textSize="12sp"
-                android:textColor="@color/text_secondary" />
+                android:textStyle="bold"
+                android:textColor="@color/priority_high"
+                android:background="@drawable/priority_badge"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/tvCategoria"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hardware"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:background="@drawable/categoria_background"
+                android:padding="4dp"
+                android:layout_marginEnd="8dp"
+                tools:ignore="HardcodedText" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvDataCriacao"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="14/09 18:45"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
 
