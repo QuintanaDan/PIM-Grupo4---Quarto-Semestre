@@ -2,7 +2,6 @@ package com.example.helpdeskapp;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -10,11 +9,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.helpdeskapp.adapters.ComentarioAdapter;
 import com.example.helpdeskapp.dao.ComentarioDAO;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.models.Comentario;
 import com.example.helpdeskapp.utils.SessionManager;
+
 import java.util.ArrayList;
 import java.util.List;
 

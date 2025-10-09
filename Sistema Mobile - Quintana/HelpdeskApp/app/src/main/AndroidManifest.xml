@@ -49,7 +49,7 @@
             android:name=".BuscarChamadoActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="stateVisible" />
+            android:windowSoftInputMode="stateVisible|adjustResize" />
 
     </application>
 </manifest>

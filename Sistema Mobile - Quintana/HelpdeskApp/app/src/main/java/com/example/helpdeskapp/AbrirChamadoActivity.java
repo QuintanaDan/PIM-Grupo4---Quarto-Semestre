@@ -7,11 +7,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.util.Log;
+
 import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;

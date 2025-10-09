@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -20,11 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BuscarChamadoActivity extends AppCompatActivity {
+    private static final String TAG = "BuscarChamado";
 
     private EditText etBuscar;
     private RecyclerView rvResultados;
     private LinearLayout layoutSemResultados;
     private TextView tvMensagemBusca;
+    private TextView tvContadorResultados;
 
     private ChamadoAdapter adapter;
     private ChamadoDAO chamadoDAO;
@@ -53,6 +56,7 @@ public class BuscarChamadoActivity extends AppCompatActivity {
         rvResultados = findViewById(R.id.rvResultados);
         layoutSemResultados = findViewById(R.id.layoutSemResultados);
         tvMensagemBusca = findViewById(R.id.tvMensagemBusca);
+        tvContadorResultados = findViewById(R.id.tvContadorResultados);
 
         chamadoDAO = new ChamadoDAO(this);
         sessionManager = new SessionManager(this);
@@ -95,6 +99,7 @@ public class BuscarChamadoActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
 
+        // Foco automático no campo de busca
         etBuscar.requestFocus();
     }
 
@@ -107,7 +112,10 @@ public class BuscarChamadoActivity extends AppCompatActivity {
                 todosOsChamados = new ArrayList<>();
             }
 
+            Log.d(TAG, "Total de chamados carregados: " + todosOsChamados.size());
+
         } catch (Exception e) {
+            Log.e(TAG, "Erro ao carregar chamados: ", e);
             Toast.makeText(this, "Erro ao carregar chamados: " + e.getMessage(),
                     Toast.LENGTH_SHORT).show();
         }
@@ -117,32 +125,95 @@ public class BuscarChamadoActivity extends AppCompatActivity {
         resultadosBusca.clear();
 
         if (termo.trim().isEmpty()) {
-            layoutSemResultados.setVisibility(View.VISIBLE);
-            rvResultados.setVisibility(View.GONE);
-            tvMensagemBusca.setText("Digite algo para buscar...");
+            mostrarMensagemInicial();
             return;
         }
 
-        String termoLower = termo.toLowerCase();
+        String termoLower = termo.toLowerCase().trim();
 
+        // Buscar em múltiplos campos
         for (Chamado chamado : todosOsChamados) {
-            if (chamado.getTitulo().toLowerCase().contains(termoLower) ||
-                    chamado.getDescricao().toLowerCase().contains(termoLower) ||
-                    chamado.getNumero().toLowerCase().contains(termoLower) ||
-                    chamado.getCategoria().toLowerCase().contains(termoLower)) {
+            if (contemTermo(chamado, termoLower)) {
                 resultadosBusca.add(chamado);
             }
         }
 
-        if (resultadosBusca.isEmpty()) {
-            layoutSemResultados.setVisibility(View.VISIBLE);
-            rvResultados.setVisibility(View.GONE);
-            tvMensagemBusca.setText("Nenhum resultado encontrado para \"" + termo + "\"");
-        } else {
-            layoutSemResultados.setVisibility(View.GONE);
-            rvResultados.setVisibility(View.VISIBLE);
-            adapter.updateList(resultadosBusca);
+        atualizarResultados(termo);
+    }
+
+    private boolean contemTermo(Chamado chamado, String termo) {
+        // Buscar no número
+        if (chamado.getNumero() != null &&
+                chamado.getNumero().toLowerCase().contains(termo)) {
+            return true;
         }
+
+        // Buscar no título
+        if (chamado.getTitulo() != null &&
+                chamado.getTitulo().toLowerCase().contains(termo)) {
+            return true;
+        }
+
+        // Buscar na descrição
+        if (chamado.getDescricao() != null &&
+                chamado.getDescricao().toLowerCase().contains(termo)) {
+            return true;
+        }
+
+        // Buscar na categoria
+        if (chamado.getCategoria() != null &&
+                chamado.getCategoria().toLowerCase().contains(termo)) {
+            return true;
+        }
+
+        // Buscar no status
+        if (chamado.getStatus() != null &&
+                chamado.getStatus().toLowerCase().contains(termo)) {
+            return true;
+        }
+
+        // Buscar na prioridade
+        if (chamado.getPrioridade() != null &&
+                chamado.getPrioridade().toLowerCase().contains(termo)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void atualizarResultados(String termo) {
+        if (resultadosBusca.isEmpty()) {
+            mostrarSemResultados(termo);
+        } else {
+            mostrarResultados();
+        }
+    }
+
+    private void mostrarMensagemInicial() {
+        layoutSemResultados.setVisibility(View.VISIBLE);
+        rvResultados.setVisibility(View.GONE);
+        tvContadorResultados.setVisibility(View.GONE);
+        tvMensagemBusca.setText("💡 Digite algo para buscar...\n\nVocê pode buscar por:\n• Número do chamado\n• Título\n• Descrição\n• Categoria\n• Status\n• Prioridade");
+    }
+
+    private void mostrarSemResultados(String termo) {
+        layoutSemResultados.setVisibility(View.VISIBLE);
+        rvResultados.setVisibility(View.GONE);
+        tvContadorResultados.setVisibility(View.GONE);
+        tvMensagemBusca.setText("😕 Nenhum resultado encontrado para:\n\"" + termo + "\"\n\nTente buscar por outra palavra-chave.");
+    }
+
+    private void mostrarResultados() {
+        layoutSemResultados.setVisibility(View.GONE);
+        rvResultados.setVisibility(View.VISIBLE);
+        tvContadorResultados.setVisibility(View.VISIBLE);
+
+        String texto = resultadosBusca.size() == 1 ?
+                "✅ 1 chamado encontrado" :
+                "✅ " + resultadosBusca.size() + " chamados encontrados";
+        tvContadorResultados.setText(texto);
+
+        adapter.updateList(resultadosBusca);
     }
 
     private void abrirDetalhes(Chamado chamado) {
@@ -163,5 +234,11 @@ public class BuscarChamadoActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         finish();
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "Activity destruída");
     }
 }

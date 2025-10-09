@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -32,12 +33,27 @@
                 android:id="@+id/etBuscar"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:hint="Digite o número, título ou descrição..."
+                android:hint="Digite para buscar..."
                 android:inputType="text"
                 android:padding="16dp"
                 android:background="@drawable/edit_text_background"
                 android:drawableStart="@drawable/ic_search"
-                android:drawablePadding="12dp" />
+                android:drawablePadding="12dp"
+                android:maxLines="1"
+                android:imeOptions="actionSearch" />
+
+            <!-- Contador de resultados -->
+            <TextView
+                android:id="@+id/tvContadorResultados"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="✅ 5 chamados encontrados"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
         </LinearLayout>
 
@@ -49,7 +65,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"
-        android:visibility="gone" />
+        android:clipToPadding="false"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:listitem="@layout/item_chamado" />
 
     <!-- Mensagem quando não há resultados -->
     <LinearLayout
@@ -59,23 +78,25 @@
         android:orientation="vertical"
         android:gravity="center"
         android:padding="32dp"
-        android:visibility="visible">
+        android:visibility="visible"
+        tools:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="🔍"
-            android:textSize="64sp"
-            android:layout_marginBottom="16dp" />
+            android:textSize="80sp"
+            android:layout_marginBottom="24dp" />
 
         <TextView
             android:id="@+id/tvMensagemBusca"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Digite algo para buscar..."
+            android:text="💡 Digite algo para buscar...\n\nVocê pode buscar por:\n• Número do chamado\n• Título\n• Descrição\n• Categoria\n• Status\n• Prioridade"
             android:textSize="16sp"
             android:textColor="@color/text_secondary"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:lineSpacingExtra="4dp" />
 
     </LinearLayout>
 
