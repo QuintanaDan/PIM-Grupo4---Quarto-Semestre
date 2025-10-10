@@ -11,7 +11,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Database info
     private static final String DATABASE_NAME = "helpdesk.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     // CONSTANTES GERAIS
     public static final String COLUMN_ID = "_id";
@@ -95,6 +95,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + "FOREIGN KEY(" + COMENTARIO_CHAMADO_ID + ") REFERENCES " + TABLE_CHAMADOS + "(" + COLUMN_CHAMADO_ID + "),"
                     + "FOREIGN KEY(" + COMENTARIO_USUARIO_ID + ") REFERENCES " + TABLE_USUARIOS + "(" + COLUMN_USER_ID + ")"
                     + ")";
+    // TABELA AVALIACOES
+    private static final String TABLE_AVALIACOES = "avaliacoes";
+    private static final String AVALIACAO_ID = "id";
+    private static final String AVALIACAO_CHAMADO_ID = "chamado_id";
+    private static final String AVALIACAO_NOTA = "nota";
+    private static final String AVALIACAO_COMENTARIO = "comentario";
+    private static final String AVALIACAO_DATA = "data_avaliacao";
+
+    // SQL CRIAR TABELA AVALIACOES
+    private static final String CREATE_TABLE_AVALIACOES =
+            "CREATE TABLE " + TABLE_AVALIACOES + " (" +
+                    AVALIACAO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    AVALIACAO_CHAMADO_ID + " INTEGER NOT NULL," +
+                    AVALIACAO_NOTA + " INTEGER NOT NULL," +
+                    AVALIACAO_COMENTARIO + " TEXT," +
+                    AVALIACAO_DATA + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                    "FOREIGN KEY(" + AVALIACAO_CHAMADO_ID + ") REFERENCES " +
+                    TABLE_CHAMADOS + "(" + COLUMN_CHAMADO_ID + ")" +
+                    ");";
+
+
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -115,11 +136,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL(CREATE_TABLE_COMENTARIOS);
             Log.d(TAG, "✅ Tabela comentarios criada com sucesso!");
 
+            // NOVO: Tabela de avaliações
+            Log.d(TAG, "Criando tabela avaliacoes: " + CREATE_TABLE_AVALIACOES);
+            db.execSQL(CREATE_TABLE_AVALIACOES);
+            Log.d(TAG, "✅ Tabela avaliacoes criada com sucesso!");
+
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao criar tabelas: ", e);
         }
     }
 
+    // Atualizar onUpgrade
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG, "Atualizando banco de dados de " + oldVersion + " para " + newVersion);
@@ -131,15 +158,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Log.d(TAG, "✅ Tabela comentarios adicionada com sucesso!");
             } catch (Exception e) {
                 Log.e(TAG, "❌ Erro ao criar tabela comentarios: ", e);
-                db.execSQL("DROP TABLE IF EXISTS " + TABLE_COMENTARIOS);
-                db.execSQL("DROP TABLE IF EXISTS " + TABLE_CHAMADOS);
-                db.execSQL("DROP TABLE IF EXISTS " + TABLE_USUARIOS);
-                onCreate(db);
+            }
+        }
+
+        if (oldVersion < 4) {
+            try {
+                Log.d(TAG, "Criando tabela avaliacoes: " + CREATE_TABLE_AVALIACOES);
+                db.execSQL(CREATE_TABLE_AVALIACOES);
+                Log.d(TAG, "✅ Tabela avaliacoes adicionada com sucesso!");
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Erro ao criar tabela avaliacoes: ", e);
             }
         }
     }
 
-    // MÉTODO ADICIONADO: debugInfo
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db, oldVersion, newVersion);
+    }
+
+    // MÉTODO debugInfo (ADICIONADO)
     public void debugInfo() {
         SQLiteDatabase db = this.getReadableDatabase();
         try {
@@ -173,15 +211,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao fazer debug: ", e);
+        } finally {
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
         }
     }
 
-    // GETTERS PARA COMENTÁRIOS
-    public static String getTableComentarios() { return TABLE_COMENTARIOS; }
-    public static String getComentarioId() { return COMENTARIO_ID; }
-    public static String getComentarioChamadoId() { return COMENTARIO_CHAMADO_ID; }
-    public static String getComentarioUsuarioId() { return COMENTARIO_USUARIO_ID; }
-    public static String getComentarioTexto() { return COMENTARIO_TEXTO; }
-    public static String getComentarioDataCriacao() { return COMENTARIO_DATA_CRIACAO; }
-    public static String getComentarioTipo() { return COMENTARIO_TIPO; }
+    // GETTERS PARA COMENTÁRIOS (CORRIGIDOS)
+    public static String getTableComentarios() {
+        return TABLE_COMENTARIOS;
+    }
+
+    public static String getComentarioId() {
+        return COMENTARIO_ID;
+    }
+
+    public static String getComentarioChamadoId() {
+        return COMENTARIO_CHAMADO_ID;
+    }
+
+    public static String getComentarioUsuarioId() {
+        return COMENTARIO_USUARIO_ID;
+    }
+
+    public static String getComentarioTexto() {
+        return COMENTARIO_TEXTO;
+    }
+
+    public static String getComentarioDataCriacao() {
+        return COMENTARIO_DATA_CRIACAO;
+    }
+
+    public static String getComentarioTipo() {
+        return COMENTARIO_TIPO;
+    }
+
+    public static String getTableAvaliacoes() { return TABLE_AVALIACOES; }
+    public static String getAvaliacaoId() { return AVALIACAO_ID; }
+    public static String getAvaliacaoChamadoId() { return AVALIACAO_CHAMADO_ID; }
+    public static String getAvaliacaoNota() { return AVALIACAO_NOTA; }
+    public static String getAvaliacaoComentario() { return AVALIACAO_COMENTARIO; }
+    public static String getAvaliacaoData() { return AVALIACAO_DATA; }
 }

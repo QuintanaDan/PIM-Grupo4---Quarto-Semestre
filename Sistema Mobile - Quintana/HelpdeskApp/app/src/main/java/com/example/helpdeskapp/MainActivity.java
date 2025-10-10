@@ -120,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
         cardTodosChamados.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "👨‍💼 Painel admin em desenvolvimento!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, AdminPanelActivity.class);
+                startActivity(intent);
             }
         });
 

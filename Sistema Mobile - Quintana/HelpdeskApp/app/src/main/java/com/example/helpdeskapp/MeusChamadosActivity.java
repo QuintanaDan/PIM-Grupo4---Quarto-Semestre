@@ -103,7 +103,6 @@ public class MeusChamadosActivity extends AppCompatActivity {
             for (Chamado chamado : todosOsChamados) {
                 String status = chamado.getStatus().toUpperCase();
 
-                // Verificar múltiplas variações do status
                 boolean corresponde = false;
 
                 switch (filtro) {
@@ -114,7 +113,8 @@ public class MeusChamadosActivity extends AppCompatActivity {
                         corresponde = status.contains("ANDAMENTO") || status.contains("PROGRESS") || status.equals("PROGRESSO");
                         break;
                     case "FECHADO":
-                        corresponde = status.contains("FECHADO") || status.contains("RESOLVIDO") || status.equals("CLOSED") || status.equals("RESOLVED");
+                        corresponde = status.contains("FECHADO") || status.contains("RESOLVIDO") ||
+                                status.equals("CLOSED") || status.equals("RESOLVED");
                         break;
                 }
 

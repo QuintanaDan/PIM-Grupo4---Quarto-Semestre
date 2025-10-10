@@ -46,10 +46,21 @@
             android:parentActivityName=".MeusChamadosActivity" />
 
         <activity
+            android:name=".AvaliarChamadoActivity"
+            android:exported="false"
+            android:parentActivityName=".DetalheChamadoActivity" />
+
+        <activity
             android:name=".BuscarChamadoActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="stateVisible|adjustResize" />
+
+        <!-- Painel Administrativo -->
+        <activity
+            android:name=".AdminPanelActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
 
     </application>
 </manifest>

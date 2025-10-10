@@ -22,7 +22,7 @@ public class AbrirChamadoActivity extends AppCompatActivity {
     private EditText etTitulo, etDescricao;
     private Spinner spinnerCategoria;
     private RadioGroup rgPrioridade;
-    private Button btnEnviarChamado, btnCancelar;
+    private Button btnSalvar, btnCancelar; // CORRIGIDO: era btnEnviarChamado
     private SessionManager sessionManager;
     private ChamadoDAO chamadoDAO;
 
@@ -51,7 +51,7 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         etDescricao = findViewById(R.id.etDescricao);
         spinnerCategoria = findViewById(R.id.spinnerCategoria);
         rgPrioridade = findViewById(R.id.rgPrioridade);
-        btnEnviarChamado = findViewById(R.id.btnEnviarChamado);
+        btnSalvar = findViewById(R.id.btnSalvar); // CORRIGIDO
         btnCancelar = findViewById(R.id.btnCancelar);
 
         Log.d(TAG, "Componentes inicializados");
@@ -77,7 +77,7 @@ public class AbrirChamadoActivity extends AppCompatActivity {
     }
 
     private void configurarEventos() {
-        btnEnviarChamado.setOnClickListener(new View.OnClickListener() {
+        btnSalvar.setOnClickListener(new View.OnClickListener() { // CORRIGIDO
             @Override
             public void onClick(View v) {
                 enviarChamado();

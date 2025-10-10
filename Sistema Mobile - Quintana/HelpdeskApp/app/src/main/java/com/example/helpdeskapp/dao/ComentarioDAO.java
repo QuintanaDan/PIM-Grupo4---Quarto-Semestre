@@ -23,10 +23,11 @@ public class ComentarioDAO {
 
     // ========== INSERIR COMENTÁRIO ==========
     public long inserirComentario(Comentario comentario) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        SQLiteDatabase db = null;
         long id = -1;
 
         try {
+            db = databaseHelper.getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(DatabaseHelper.getComentarioChamadoId(), comentario.getChamadoId());
             values.put(DatabaseHelper.getComentarioUsuarioId(), comentario.getUsuarioId());
@@ -47,7 +48,9 @@ public class ComentarioDAO {
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao inserir comentário: ", e);
         } finally {
-            db.close();
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
         }
 
         return id;
@@ -56,7 +59,8 @@ public class ComentarioDAO {
     // ========== BUSCAR COMENTÁRIOS POR CHAMADO ==========
     public List<Comentario> buscarComentariosPorChamado(long chamadoId) {
         List<Comentario> comentarios = new ArrayList<>();
-        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
 
         String query = "SELECT " +
                 "c." + DatabaseHelper.getComentarioId() + ", " +
@@ -72,7 +76,10 @@ public class ComentarioDAO {
                 "WHERE c." + DatabaseHelper.getComentarioChamadoId() + " = ? " +
                 "ORDER BY c." + DatabaseHelper.getComentarioDataCriacao() + " ASC";
 
-        try (Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(chamadoId)})) {
+        try {
+            db = databaseHelper.getReadableDatabase();
+            cursor = db.rawQuery(query, new String[]{String.valueOf(chamadoId)});
+
             Log.d(TAG, "🔍 Query executada: " + query);
             Log.d(TAG, "🔍 Buscando comentários para chamado ID: " + chamadoId);
             Log.d(TAG, "🔍 Registros encontrados: " + cursor.getCount());
@@ -103,7 +110,12 @@ public class ComentarioDAO {
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao buscar comentários: ", e);
         } finally {
-            db.close();
+            if (cursor != null) {
+                cursor.close();
+            }
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
         }
 
         Log.d(TAG, "✅ Total de comentários encontrados: " + comentarios.size());
@@ -112,10 +124,11 @@ public class ComentarioDAO {
 
     // ========== ATUALIZAR COMENTÁRIO ==========
     public boolean atualizarComentario(Comentario comentario) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        SQLiteDatabase db = null;
         boolean sucesso = false;
 
         try {
+            db = databaseHelper.getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(DatabaseHelper.getComentarioTexto(), comentario.getTexto());
             values.put(DatabaseHelper.getComentarioTipo(), comentario.getTipo());
@@ -133,7 +146,9 @@ public class ComentarioDAO {
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao atualizar comentário: ", e);
         } finally {
-            db.close();
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
         }
 
         return sucesso;
@@ -141,10 +156,11 @@ public class ComentarioDAO {
 
     // ========== DELETAR COMENTÁRIO ==========
     public boolean deletarComentario(long comentarioId) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        SQLiteDatabase db = null;
         boolean sucesso = false;
 
         try {
+            db = databaseHelper.getWritableDatabase();
             int rowsAffected = db.delete(
                     DatabaseHelper.getTableComentarios(),
                     DatabaseHelper.getComentarioId() + " = ?",
@@ -157,7 +173,9 @@ public class ComentarioDAO {
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao deletar comentário: ", e);
         } finally {
-            db.close();
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
         }
 
         return sucesso;

@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">HelpdeskApp</string>
-
     <string name="logo_desc">Logotipo do Helpdesk</string>
+
+    <!-- Adicionar estas strings -->
+    <string name="abrir_chamado">Abrir Chamado</string>
+    <string name="meus_chamados">Meus Chamados</string>
+    <string name="buscar_chamado">Buscar Chamado</string>
+    <string name="todos_chamados">Todos Chamados</string>
+    <string name="logout">Sair</string>
 </resources>
