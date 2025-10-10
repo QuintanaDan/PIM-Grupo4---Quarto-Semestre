@@ -9,13 +9,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.helpdeskapp.adapters.ChamadoAdapter;
 import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +24,9 @@ public class MeusChamadosActivity extends AppCompatActivity {
     private RecyclerView rvChamados;
     private LinearLayout layoutSemChamados;
     private Button btnAbrirPrimeiroChamado;
+    private TextView tvContadorChamados;
 
-    // NOVOS BOTÕES DE FILTRO
+    // BOTÕES DE FILTRO
     private Button btnFiltroTodos, btnFiltroAbertos, btnFiltroAndamento, btnFiltroFechados;
 
     private SessionManager sessionManager;
@@ -61,8 +61,9 @@ public class MeusChamadosActivity extends AppCompatActivity {
         rvChamados = findViewById(R.id.rvChamados);
         layoutSemChamados = findViewById(R.id.layoutSemChamados);
         btnAbrirPrimeiroChamado = findViewById(R.id.btnAbrirPrimeiroChamado);
+        tvContadorChamados = findViewById(R.id.tvContadorChamados);
 
-        // NOVOS BOTÕES
+        // BOTÕES DE FILTRO
         btnFiltroTodos = findViewById(R.id.btnFiltroTodos);
         btnFiltroAbertos = findViewById(R.id.btnFiltroAbertos);
         btnFiltroAndamento = findViewById(R.id.btnFiltroAndamento);
@@ -101,21 +102,44 @@ public class MeusChamadosActivity extends AppCompatActivity {
         } else {
             for (Chamado chamado : todosOsChamados) {
                 String status = chamado.getStatus().toUpperCase();
-                if (status.contains(filtro) || status.equals(filtro)) {
+
+                // Verificar múltiplas variações do status
+                boolean corresponde = false;
+
+                switch (filtro) {
+                    case "ABERTO":
+                        corresponde = status.contains("ABERTO") || status.equals("NOVO") || status.equals("OPEN");
+                        break;
+                    case "EM ANDAMENTO":
+                        corresponde = status.contains("ANDAMENTO") || status.contains("PROGRESS") || status.equals("PROGRESSO");
+                        break;
+                    case "FECHADO":
+                        corresponde = status.contains("FECHADO") || status.contains("RESOLVIDO") || status.equals("CLOSED") || status.equals("RESOLVED");
+                        break;
+                }
+
+                if (corresponde) {
                     chamadosFiltrados.add(chamado);
                 }
             }
         }
 
+        atualizarContador();
+
         if (adapter != null) {
             adapter.updateList(chamadosFiltrados);
         }
 
-        Toast.makeText(this, chamadosFiltrados.size() + " chamado(s) encontrado(s)", Toast.LENGTH_SHORT).show();
+        String mensagem = chamadosFiltrados.size() == 1 ?
+                "1 chamado encontrado" :
+                chamadosFiltrados.size() + " chamados encontrados";
+        Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show();
+
+        Log.d(TAG, "Filtro aplicado: " + filtro + " - Resultados: " + chamadosFiltrados.size());
     }
 
     private void atualizarBotoesFiltro() {
-        // Resetar todos
+        // Resetar todos para inativo
         btnFiltroTodos.setBackgroundResource(R.drawable.botao_filtro_inativo);
         btnFiltroAbertos.setBackgroundResource(R.drawable.botao_filtro_inativo);
         btnFiltroAndamento.setBackgroundResource(R.drawable.botao_filtro_inativo);
@@ -135,6 +159,15 @@ public class MeusChamadosActivity extends AppCompatActivity {
             case "FECHADO":
                 btnFiltroFechados.setBackgroundResource(R.drawable.botao_filtro_ativo);
                 break;
+        }
+    }
+
+    private void atualizarContador() {
+        if (tvContadorChamados != null) {
+            String texto = chamadosFiltrados.size() == 1 ?
+                    "1 chamado" :
+                    chamadosFiltrados.size() + " chamados";
+            tvContadorChamados.setText(texto);
         }
     }
 
@@ -207,6 +240,7 @@ public class MeusChamadosActivity extends AppCompatActivity {
             });
 
             rvChamados.setAdapter(adapter);
+            atualizarContador();
             Log.d(TAG, "✅ RecyclerView configurado com sucesso!");
 
         } catch (Exception e) {
@@ -233,6 +267,9 @@ public class MeusChamadosActivity extends AppCompatActivity {
         Log.d(TAG, "Mostrando mensagem de lista vazia");
         rvChamados.setVisibility(View.GONE);
         layoutSemChamados.setVisibility(View.VISIBLE);
+        if (tvContadorChamados != null) {
+            tvContadorChamados.setText("0 chamados");
+        }
     }
 
     @Override

@@ -2,25 +2,26 @@ package com.example.helpdeskapp;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.widget.Button;
 import com.example.helpdeskapp.utils.SessionManager;
-
 import android.net.Uri;
 import android.content.Context;
-
 
 public class MainActivity extends AppCompatActivity {
 
     // ========== COMPONENTES DA INTERFACE ==========
     private TextView tvBemVindo, tvTipoUsuario;
-    private Button btnAbrirChamado, btnMeusChamados, btnBuscarChamado, btnTodosChamados, btnLogout, btnDiversidade;
+    private Button btnLogout;
+
+    // ========== CARDS ==========
+    private CardView cardAbrirChamado, cardMeusChamados, cardBuscarChamado, cardTodosChamados, cardDiversidade;
 
     // ========== MANAGERS ==========
     private SessionManager sessionManager;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
         // ========== VERIFICAR SESSÃO ==========
         sessionManager = new SessionManager(this);
+
         if (!sessionManager.isLoggedIn()) {
             redirecionarParaLogin();
             return;
@@ -55,12 +57,14 @@ public class MainActivity extends AppCompatActivity {
     private void inicializarComponentes() {
         tvBemVindo = findViewById(R.id.tvBemVindo);
         tvTipoUsuario = findViewById(R.id.tvTipoUsuario);
-        btnAbrirChamado = findViewById(R.id.btnAbrirChamado);
-        btnMeusChamados = findViewById(R.id.btnMeusChamados);
-        btnBuscarChamado = findViewById(R.id.btnBuscarChamado);
-        btnTodosChamados = findViewById(R.id.btnTodosChamados);
-        btnDiversidade = findViewById(R.id.btnDiversidade);
         btnLogout = findViewById(R.id.btnLogout);
+
+        // ========== INICIALIZAR CARDS ==========
+        cardAbrirChamado = findViewById(R.id.cardAbrirChamado);
+        cardMeusChamados = findViewById(R.id.cardMeusChamados);
+        cardBuscarChamado = findViewById(R.id.cardBuscarChamado);
+        cardTodosChamados = findViewById(R.id.cardTodosChamados);
+        cardDiversidade = findViewById(R.id.cardDiversidade);
     }
 
     private void configurarInformacoesUsuario() {
@@ -68,25 +72,25 @@ public class MainActivity extends AppCompatActivity {
         String email = sessionManager.getUserEmail();
 
         if (!nomeUsuario.isEmpty()) {
-            tvBemVindo.setText("Bem-vindo, " + nomeUsuario + "!");
+            tvBemVindo.setText("Olá, " + nomeUsuario + "! 👋");
         } else {
-            tvBemVindo.setText("Bem-vindo, " + email + "!");
+            tvBemVindo.setText("Olá, " + email + "! 👋");
         }
 
-        tvTipoUsuario.setText("Tipo: " + sessionManager.getUserTypeText());
+        tvTipoUsuario.setText(sessionManager.getUserTypeText());
     }
 
     private void configurarVisibilidadeBotoes() {
         if (sessionManager.isAdmin()) {
-            btnTodosChamados.setVisibility(View.VISIBLE);
+            cardTodosChamados.setVisibility(View.VISIBLE);
         } else {
-            btnTodosChamados.setVisibility(View.GONE);
+            cardTodosChamados.setVisibility(View.GONE);
         }
     }
 
     private void configurarEventos() {
-        // ========== ABRIR CHAMADO ==========
-        btnAbrirChamado.setOnClickListener(new View.OnClickListener() {
+        // ========== CARD ABRIR CHAMADO ==========
+        cardAbrirChamado.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, AbrirChamadoActivity.class);
@@ -94,8 +98,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // ========== MEUS CHAMADOS ==========
-        btnMeusChamados.setOnClickListener(new View.OnClickListener() {
+        // ========== CARD MEUS CHAMADOS ==========
+        cardMeusChamados.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, MeusChamadosActivity.class);
@@ -103,43 +107,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // ========== BUSCAR CHAMADO ==========
-        btnBuscarChamado.setOnClickListener(new View.OnClickListener() {
+        // ========== CARD BUSCAR CHAMADO ==========
+        cardBuscarChamado.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "🔍 Busca em desenvolvimento!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, BuscarChamadoActivity.class);
+                startActivity(intent);
             }
         });
 
-        // ========== TODOS CHAMADOS (ADMIN) ==========
-        btnTodosChamados.setOnClickListener(new View.OnClickListener() {
+        // ========== CARD TODOS CHAMADOS (ADMIN) ==========
+        cardTodosChamados.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(MainActivity.this, "👨‍💼 Painel admin em desenvolvimento!", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // ========== DIVERSIDADE ==========
-        btnDiversidade.setOnClickListener(new View.OnClickListener() {
+        // ========== CARD DIVERSIDADE ==========
+        cardDiversidade.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 abrirSiteDiversidade();
             }
         });
 
-        // ========== LOGOUT ==========
+        // ========== BOTÃO LOGOUT (CORRIGIDO) ==========
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mostrarConfirmacaoLogout();
-            }
-        });
-
-        btnBuscarChamado.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, BuscarChamadoActivity.class);
-                startActivity(intent);
             }
         });
     }
@@ -150,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         builder.setMessage("A MOVER é uma organização dedicada a promover diversidade e inclusão no mercado de tecnologia.\n\n" +
                 "Escolha uma opção:");
 
-        // ========== BOTÃO 1: TENTAR FORÇAR ABERTURA ==========
         builder.setPositiveButton("🌐 Abrir Site", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -158,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // ========== BOTÃO 2: VER INFORMAÇÕES ==========
         builder.setNeutralButton("📋 Ver Info", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -166,52 +161,39 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // ========== BOTÃO 3: CANCELAR ==========
         builder.setNegativeButton("❌ Cancelar", null);
-
         builder.show();
     }
 
-    // ========== MÉTODO QUE FORÇA A ABERTURA ==========
     private void tentarAbrirLinkForcado() {
         String url = "https://somosmover.org/quem-somos/";
 
         try {
-            // ========== MÉTODO 1: Intent sem verificação ==========
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            // FORÇA a abertura sem verificar se existe app
             startActivity(Intent.createChooser(intent, "Escolha um navegador"));
             Toast.makeText(this, "🌐 Tentando abrir o site...", Toast.LENGTH_SHORT).show();
 
         } catch (android.content.ActivityNotFoundException e) {
-            // Se não conseguir, tenta método 2
             tentarMetodoAlternativo(url);
-
         } catch (Exception e) {
-            // Se der erro, mostra informações
             Toast.makeText(this, "❌ Erro ao abrir: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             mostrarInformacoesMover();
         }
     }
 
-    // ========== MÉTODO ALTERNATIVO ==========
     private void tentarMetodoAlternativo(String url) {
         try {
-            // Tenta abrir sem chooser
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
             Toast.makeText(this, "🌐 Método alternativo: abrindo site...", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
-            // Última tentativa: mostrar opções para o usuário
             mostrarOpcoesManualParaAbrirSite(url);
         }
     }
 
-    // ========== OPÇÕES MANUAIS PARA O USUÁRIO ==========
     private void mostrarOpcoesManualParaAbrirSite(String url) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("📱 Abrir Site Manualmente");
@@ -224,7 +206,6 @@ public class MainActivity extends AppCompatActivity {
                         "🔗 LINK: " + url
         );
 
-        // ========== BOTÃO 1: COPIAR LINK ==========
         builder.setPositiveButton("📋 Copiar Link", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -232,7 +213,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // ========== BOTÃO 2: VER INFO NO APP ==========
         builder.setNeutralButton("📱 Ver no App", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -240,13 +220,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // ========== BOTÃO 3: FECHAR ==========
         builder.setNegativeButton("❌ Fechar", null);
-
         builder.show();
     }
 
-    // ========== FUNÇÃO PARA COPIAR LINK (já existente) ==========
     private void copiarLinkParaClipboard() {
         try {
             android.content.ClipboardManager clipboard =
@@ -260,7 +237,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // ========== INFORMAÇÕES COMPLETAS (já existente) ==========
     private void mostrarInformacoesMover() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("🌍 MOVER - Diversidade e Inclusão");
@@ -290,7 +266,6 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-
     private void mostrarConfirmacaoLogout() {
         new AlertDialog.Builder(this)
                 .setTitle("Confirmar Saída")
@@ -309,5 +284,4 @@ public class MainActivity extends AppCompatActivity {
         sessionManager.logout();
         redirecionarParaLogin();
     }
-
-} // ← CHAVE QUE FECHA A CLASSE
+}
