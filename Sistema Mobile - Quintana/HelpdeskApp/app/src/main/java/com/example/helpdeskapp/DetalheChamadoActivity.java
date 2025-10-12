@@ -1,30 +1,55 @@
 package com.example.helpdeskapp;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.helpdeskapp.adapters.AnexoAdapter;
 import com.example.helpdeskapp.adapters.ComentarioAdapter;
+import com.example.helpdeskapp.adapters.TagAdapter;
+import com.example.helpdeskapp.dao.AnexoDAO;
 import com.example.helpdeskapp.dao.AvaliacaoDAO;
 import com.example.helpdeskapp.dao.ComentarioDAO;
+import com.example.helpdeskapp.dao.TagDAO;
+import com.example.helpdeskapp.models.Anexo;
 import com.example.helpdeskapp.models.Avaliacao;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.models.Comentario;
+import com.example.helpdeskapp.models.Tag;
+import com.example.helpdeskapp.utils.FileHelper;
 import com.example.helpdeskapp.utils.SessionManager;
+import com.example.helpdeskapp.NotificationHelper;
+import com.example.helpdeskapp.utils.PDFHelper;
+import com.example.helpdeskapp.dao.TagDAO;
+import com.example.helpdeskapp.models.Tag;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DetalheChamadoActivity extends AppCompatActivity {
     private static final String TAG = "DetalheChamadoActivity";
+
+    private Button btnGerarPDF;
 
     // Componentes da interface - Informações do Chamado
     private TextView txtTituloDetalhe;
@@ -38,21 +63,45 @@ public class DetalheChamadoActivity extends AppCompatActivity {
     // Botões
     private Button btnVoltar;
     private Button btnAvaliarChamado;
+    private Button btnAnexarFoto; // NOVO
 
     // Componentes de Comentários
     private RecyclerView recyclerViewComentarios;
     private EditText etNovoComentario;
     private Button btnEnviarComentario;
 
+    // NOVO: Componentes de Anexos
+    private RecyclerView recyclerViewAnexos;
+    private TextView tvContadorAnexos;
+
     // Adapters e DAOs
     private ComentarioAdapter comentarioAdapter;
+    private AnexoAdapter anexoAdapter; // NOVO
     private ComentarioDAO comentarioDAO;
     private AvaliacaoDAO avaliacaoDAO;
+    private AnexoDAO anexoDAO; // NOVO
     private SessionManager sessionManager;
 
     // Dados
     private long chamadoId;
     private List<Comentario> listaComentarios;
+    private List<Anexo> listaAnexos; // NOVO
+
+    // NOVO: Gerenciamento de fotos
+    private File fotoAtual;
+    private Uri fotoUri;
+
+    // NOVO: Launchers para câmera e galeria
+    private ActivityResultLauncher<Intent> cameraLauncher;
+    private ActivityResultLauncher<Intent> galeriaLauncher;
+    private ActivityResultLauncher<String> permissaoCameraLauncher;
+    private ActivityResultLauncher<String> permissaoGaleriaLauncher;
+
+    private RecyclerView recyclerViewTags;
+    private TextView tvAdicionarTag;
+    private TagAdapter tagAdapter;
+    private TagDAO tagDAO;
+    private List<Tag> listaTagsChamado;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +111,13 @@ public class DetalheChamadoActivity extends AppCompatActivity {
         // Inicializar DAOs e Session
         comentarioDAO = new ComentarioDAO(this);
         avaliacaoDAO = new AvaliacaoDAO(this);
+        anexoDAO = new AnexoDAO(this); // NOVO
         sessionManager = new SessionManager(this);
         listaComentarios = new ArrayList<>();
+        listaAnexos = new ArrayList<>(); // NOVO
+
+        // NOVO: Inicializar launchers
+        inicializarLaunchers();
 
         // Inicializar componentes
         inicializarViews();
@@ -80,8 +134,9 @@ public class DetalheChamadoActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // Carregar comentários
+        // Carregar comentários e anexos
         carregarComentarios();
+        carregarAnexos(); // NOVO
     }
 
     private void inicializarViews() {
@@ -97,16 +152,88 @@ public class DetalheChamadoActivity extends AppCompatActivity {
         // Botões
         btnVoltar = findViewById(R.id.btnVoltar);
         btnAvaliarChamado = findViewById(R.id.btnAvaliarChamado);
+        btnAnexarFoto = findViewById(R.id.btnAnexarFoto); // NOVO
+        btnGerarPDF = findViewById(R.id.btnGerarPDF);
 
         // Componentes de Comentários
         recyclerViewComentarios = findViewById(R.id.recyclerViewComentarios);
         etNovoComentario = findViewById(R.id.etNovoComentario);
         btnEnviarComentario = findViewById(R.id.btnEnviarComentario);
 
-        // Configurar RecyclerView
-        recyclerViewComentarios.setLayoutManager(new LinearLayoutManager(this));
+        // NOVO: Componentes de Anexos
+        recyclerViewAnexos = findViewById(R.id.recyclerViewAnexos);
+        tvContadorAnexos = findViewById(R.id.tvContadorAnexos);
 
+        // Configurar RecyclerViews
+        recyclerViewComentarios.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewAnexos.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)); // NOVO
+
+        recyclerViewTags = findViewById(R.id.recyclerViewTags);
+        tvAdicionarTag = findViewById(R.id.tvAdicionarTag);
+
+        LinearLayoutManager layoutManagerTags = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false);
+        recyclerViewTags.setLayoutManager(layoutManagerTags);
+
+        tagDAO = new TagDAO(this);
+        listaTagsChamado = new ArrayList<>();
         Log.d(TAG, "Views inicializadas com sucesso");
+    }
+
+    // NOVO: Inicializar Launchers
+    private void inicializarLaunchers() {
+        // Launcher para câmera
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Log.d(TAG, "✅ Foto capturada com sucesso");
+                        processarFotoCapturada();
+                    } else {
+                        Log.w(TAG, "⚠️ Captura de foto cancelada");
+                    }
+                }
+        );
+
+        // Launcher para galeria
+        galeriaLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        Uri selectedImage = result.getData().getData();
+                        if (selectedImage != null) {
+                            Log.d(TAG, "✅ Imagem selecionada da galeria");
+                            processarImagemGaleria(selectedImage);
+                        }
+                    }
+                }
+        );
+
+        // Launcher para permissão de câmera
+        permissaoCameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        Log.d(TAG, "✅ Permissão de câmera concedida");
+                        abrirCamera();
+                    } else {
+                        Toast.makeText(this, "❌ Permissão de câmera negada", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        // Launcher para permissão de galeria
+        permissaoGaleriaLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        Log.d(TAG, "✅ Permissão de galeria concedida");
+                        abrirGaleria();
+                    } else {
+                        Toast.makeText(this, "❌ Permissão de galeria negada", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
     }
 
     private void configurarEventos() {
@@ -116,7 +243,246 @@ public class DetalheChamadoActivity extends AppCompatActivity {
         // Botão Enviar Comentário
         btnEnviarComentario.setOnClickListener(v -> enviarComentario());
 
+        // NOVO: Botão Anexar Foto
+        btnAnexarFoto.setOnClickListener(v -> mostrarDialogoAnexar());
+
+        btnGerarPDF.setOnClickListener(v -> mostrarDialogoGerarPDF());
+
+        tvAdicionarTag.setOnClickListener(v -> mostrarDialogoAdicionarTag());
+
         Log.d(TAG, "Eventos configurados");
+    }
+
+    // NOVO: Mostrar diálogo para escolher entre câmera ou galeria
+    private void mostrarDialogoAnexar() {
+        String[] opcoes = {"📷 Tirar Foto", "🖼️ Escolher da Galeria"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("Adicionar Anexo")
+                .setItems(opcoes, (dialog, which) -> {
+                    if (which == 0) {
+                        solicitarPermissaoCamera();
+                    } else {
+                        solicitarPermissaoGaleria();
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    // NOVO: Solicitar permissão de câmera
+    private void solicitarPermissaoCamera() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            abrirCamera();
+        } else {
+            permissaoCameraLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    // NOVO: Solicitar permissão de galeria
+    private void solicitarPermissaoGaleria() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
+                    == PackageManager.PERMISSION_GRANTED) {
+                abrirGaleria();
+            } else {
+                permissaoGaleriaLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES);
+            }
+        } else {
+            // Android 12 e anteriores
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                abrirGaleria();
+            } else {
+                permissaoGaleriaLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+        }
+    }
+
+    // NOVO: Abrir câmera
+    private void abrirCamera() {
+        try {
+            fotoAtual = FileHelper.criarArquivoFoto(this);
+            fotoUri = FileProvider.getUriForFile(this,
+                    getApplicationContext().getPackageName() + ".fileprovider",
+                    fotoAtual);
+
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, fotoUri);
+            cameraLauncher.launch(intent);
+
+            Log.d(TAG, "📷 Câmera aberta");
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao abrir câmera: ", e);
+            Toast.makeText(this, "Erro ao abrir câmera", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // NOVO: Abrir galeria
+    private void abrirGaleria() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        galeriaLauncher.launch(intent);
+        Log.d(TAG, "🖼️ Galeria aberta");
+    }
+
+    // NOVO: Processar foto capturada
+    private void processarFotoCapturada() {
+        if (fotoAtual != null && fotoAtual.exists()) {
+            salvarAnexo(fotoAtual);
+        } else {
+            Toast.makeText(this, "Erro ao processar foto", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // NOVO: Processar imagem da galeria
+    private void processarImagemGaleria(Uri imageUri) {
+        try {
+            String nomeArquivo = "IMG_" + System.currentTimeMillis() + ".jpg";
+            File arquivo = FileHelper.copiarArquivo(this, imageUri, nomeArquivo);
+
+            if (arquivo != null) {
+                salvarAnexo(arquivo);
+            } else {
+                Toast.makeText(this, "Erro ao copiar imagem", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao processar imagem da galeria: ", e);
+            Toast.makeText(this, "Erro ao processar imagem", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // NOVO: Salvar anexo no banco
+    private void salvarAnexo(File arquivo) {
+        try {
+            Anexo anexo = new Anexo();
+            anexo.setChamadoId(chamadoId);
+            anexo.setNomeArquivo(arquivo.getName());
+            anexo.setCaminho(arquivo.getAbsolutePath());
+            anexo.setTipo(FileHelper.obterTipoMime(arquivo.getName()));
+            anexo.setTamanho(FileHelper.obterTamanhoArquivo(arquivo));
+
+            long resultado = anexoDAO.inserirAnexo(anexo);
+
+            if (resultado > 0) {
+                Log.d(TAG, "✅ Anexo salvo com sucesso: " + resultado);
+                Toast.makeText(this, "✅ Foto anexada com sucesso!", Toast.LENGTH_SHORT).show();
+                carregarAnexos();
+            } else {
+                Toast.makeText(this, "❌ Erro ao salvar anexo", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao salvar anexo: ", e);
+            Toast.makeText(this, "Erro ao salvar anexo", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // NOVO: Carregar anexos
+    private void carregarAnexos() {
+        if (chamadoId > 0) {
+            try {
+                Log.d(TAG, "=== CARREGANDO ANEXOS ===");
+                listaAnexos = anexoDAO.buscarAnexosPorChamado(chamadoId);
+
+                if (listaAnexos == null) {
+                    listaAnexos = new ArrayList<>();
+                }
+
+                Log.d(TAG, "Total de anexos: " + listaAnexos.size());
+
+                // Atualizar contador
+                if (tvContadorAnexos != null) {
+                    String texto = listaAnexos.size() == 1 ?
+                            "1 anexo" : listaAnexos.size() + " anexos";
+                    tvContadorAnexos.setText(texto);
+                    tvContadorAnexos.setVisibility(listaAnexos.isEmpty() ? View.GONE : View.VISIBLE);
+                }
+
+                // Configurar adapter
+                if (anexoAdapter == null) {
+                    anexoAdapter = new AnexoAdapter(listaAnexos, this, new AnexoAdapter.OnAnexoClickListener() {
+                        @Override
+                        public void onAnexoClick(Anexo anexo) {
+                            abrirAnexo(anexo);
+                        }
+
+                        @Override
+                        public void onAnexoDeleteClick(Anexo anexo) {
+                            confirmarDeletarAnexo(anexo);
+                        }
+                    });
+                    recyclerViewAnexos.setAdapter(anexoAdapter);
+                } else {
+                    anexoAdapter.atualizarLista(listaAnexos);
+                }
+
+                // Mostrar/ocultar RecyclerView
+                recyclerViewAnexos.setVisibility(listaAnexos.isEmpty() ? View.GONE : View.VISIBLE);
+
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Erro ao carregar anexos: ", e);
+            }
+        }
+    }
+
+    // NOVO: Abrir anexo
+    private void abrirAnexo(Anexo anexo) {
+        try {
+            File arquivo = new File(anexo.getCaminho());
+
+            if (!arquivo.exists()) {
+                Toast.makeText(this, "❌ Arquivo não encontrado", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Uri uri = FileProvider.getUriForFile(this,
+                    getApplicationContext().getPackageName() + ".fileprovider",
+                    arquivo);
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, anexo.getTipo());
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivity(Intent.createChooser(intent, "Abrir com"));
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao abrir anexo: ", e);
+            Toast.makeText(this, "Erro ao abrir arquivo", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // NOVO: Confirmar deletar anexo
+    private void confirmarDeletarAnexo(Anexo anexo) {
+        new AlertDialog.Builder(this)
+                .setTitle("Deletar Anexo")
+                .setMessage("Deseja realmente deletar este anexo?")
+                .setPositiveButton("Sim", (dialog, which) -> deletarAnexo(anexo))
+                .setNegativeButton("Não", null)
+                .show();
+    }
+
+    // NOVO: Deletar anexo
+    private void deletarAnexo(Anexo anexo) {
+        try {
+            // Deletar do banco
+            boolean sucesso = anexoDAO.deletarAnexo(anexo.getId());
+
+            if (sucesso) {
+                // Deletar arquivo físico
+                FileHelper.deletarArquivo(anexo.getCaminho());
+
+                Toast.makeText(this, "✅ Anexo deletado", Toast.LENGTH_SHORT).show();
+                carregarAnexos();
+            } else {
+                Toast.makeText(this, "❌ Erro ao deletar anexo", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao deletar anexo: ", e);
+            Toast.makeText(this, "Erro ao deletar anexo", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void receberDadosChamado() {
@@ -323,6 +689,13 @@ public class DetalheChamadoActivity extends AppCompatActivity {
                 // Limpar campo
                 etNovoComentario.setText("");
 
+                // NOVO: Enviar notificação
+                NotificationHelper notificationHelper = new NotificationHelper(this);
+                notificationHelper.enviarNotificacaoNovoComentario(
+                        txtTituloDetalhe.getText().toString(),
+                        sessionManager.getUserName()
+                );
+
                 // Recarregar comentários
                 carregarComentarios();
 
@@ -448,11 +821,252 @@ public class DetalheChamadoActivity extends AppCompatActivity {
         }
     }
 
+    private void mostrarDialogoGerarPDF() {
+        final CharSequence[] opcoes = {
+                "📄 Gerar PDF (salvar no dispositivo)",
+                "📤 Gerar e Compartilhar (enviar para outros apps)"
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Relatório em PDF");
+        builder.setItems(opcoes, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    // Gerar PDF
+                    gerarPDF(false);
+                    break;
+                case 1:
+                    // Gerar e Compartilhar
+                    gerarPDF(true);
+                    break;
+            }
+        });
+        builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
+    private void gerarPDF(boolean compartilhar) {
+        // Mostrar progresso
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
+        progressDialog.setMessage("📄 Gerando PDF...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        // Gerar PDF em thread separada
+        new Thread(() -> {
+            try {
+                // Buscar dados atualizados
+                Chamado chamado = new Chamado();
+                chamado.setId(chamadoId);
+                chamado.setTitulo(txtTituloDetalhe.getText().toString());
+                chamado.setDescricao(txtDescricaoDetalhe.getText().toString());
+                chamado.setCategoria(txtCategoriaDetalhe.getText().toString());
+                chamado.setPrioridade(txtPrioridadeDetalhe.getText().toString());
+                chamado.setStatus(txtStatusDetalhe.getText().toString());
+
+                // Gerar PDF
+                File pdfFile = PDFHelper.gerarPDFChamado(
+                        this,
+                        chamado,
+                        listaComentarios,
+                        listaAnexos
+                );
+
+                // Atualizar UI na thread principal
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+
+                    if (pdfFile != null) {
+                        if (compartilhar) {
+                            PDFHelper.compartilharPDF(this, pdfFile);
+                        } else {
+                            mostrarDialogoSucessoPDF(pdfFile);
+                        }
+                    } else {
+                        Toast.makeText(this, "❌ Erro ao gerar PDF",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Erro ao gerar PDF: ", e);
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(this, "Erro: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    private void mostrarDialogoSucessoPDF(File pdfFile) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("✅ PDF Gerado!")
+                .setMessage("Relatório salvo em:\n" + pdfFile.getName())
+                .setPositiveButton("📂 Abrir", (dialog, which) -> {
+                    PDFHelper.abrirPDF(this, pdfFile);
+                })
+                .setNeutralButton("📤 Compartilhar", (dialog, which) -> {
+                    PDFHelper.compartilharPDF(this, pdfFile);
+                })
+                .setNegativeButton("OK", null)
+                .show();
+    }
+
+    private void carregarTags() {
+        if (chamadoId > 0) {
+            try {
+                Log.d(TAG, "=== CARREGANDO TAGS ===");
+                listaTagsChamado = tagDAO.buscarTagsDoChamado(chamadoId);
+
+                if (listaTagsChamado == null) {
+                    listaTagsChamado = new ArrayList<>();
+                }
+
+                Log.d(TAG, "Total de tags: " + listaTagsChamado.size());
+
+                // Configurar adapter
+                if (tagAdapter == null) {
+                    tagAdapter = new TagAdapter(listaTagsChamado, this,
+                            new TagAdapter.OnTagClickListener() {
+                                @Override
+                                public void onTagClick(Tag tag) {
+                                    // Opcional: mostrar info da tag
+                                    Toast.makeText(DetalheChamadoActivity.this,
+                                            tag.getNome(), Toast.LENGTH_SHORT).show();
+                                }
+
+                                @Override
+                                public void onTagRemoveClick(Tag tag) {
+                                    confirmarRemoverTag(tag);
+                                }
+                            }, true); // true = mostrar botão remover
+                    recyclerViewTags.setAdapter(tagAdapter);
+                } else {
+                    tagAdapter.atualizarLista(listaTagsChamado);
+                }
+
+                // Mostrar/ocultar RecyclerView
+                if (listaTagsChamado.isEmpty()) {
+                    recyclerViewTags.setVisibility(View.GONE);
+                    tvAdicionarTag.setText("+ Adicionar Tags");
+                } else {
+                    recyclerViewTags.setVisibility(View.VISIBLE);
+                    tvAdicionarTag.setText("+ Adicionar");
+                }
+
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Erro ao carregar tags: ", e);
+            }
+        }
+    }
+
+    private void mostrarDialogoAdicionarTag() {
+        try {
+            // Buscar todas as tags disponíveis
+            List<Tag> todasTags = tagDAO.buscarTodasTags();
+
+            if (todasTags.isEmpty()) {
+                Toast.makeText(this, "⚠️ Nenhuma tag disponível", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Filtrar tags que já estão no chamado
+            List<Tag> tagsDisponiveis = new ArrayList<>();
+            for (Tag tag : todasTags) {
+                boolean jaAdicionada = false;
+                for (Tag tagChamado : listaTagsChamado) {
+                    if (tag.getId() == tagChamado.getId()) {
+                        jaAdicionada = true;
+                        break;
+                    }
+                }
+                if (!jaAdicionada) {
+                    tagsDisponiveis.add(tag);
+                }
+            }
+
+            if (tagsDisponiveis.isEmpty()) {
+                Toast.makeText(this, "✅ Todas as tags já foram adicionadas",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Criar array de nomes para o diálogo
+            String[] nomesTags = new String[tagsDisponiveis.size()];
+            for (int i = 0; i < tagsDisponiveis.size(); i++) {
+                Tag tag = tagsDisponiveis.get(i);
+                nomesTags[i] = tag.getEmoji() + " " + tag.getNome();
+            }
+
+            // Mostrar diálogo
+            new AlertDialog.Builder(this)
+                    .setTitle("🏷️ Adicionar Tag")
+                    .setItems(nomesTags, (dialog, which) -> {
+                        Tag tagSelecionada = tagsDisponiveis.get(which);
+                        adicionarTag(tagSelecionada);
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao mostrar diálogo de tags: ", e);
+            Toast.makeText(this, "Erro ao carregar tags", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void adicionarTag(Tag tag) {
+        try {
+            boolean sucesso = tagDAO.adicionarTagAoChamado(chamadoId, tag.getId());
+
+            if (sucesso) {
+                Log.d(TAG, "✅ Tag adicionada: " + tag.getNome());
+                Toast.makeText(this, "✅ Tag '" + tag.getNome() + "' adicionada!",
+                        Toast.LENGTH_SHORT).show();
+                carregarTags();
+            } else {
+                Toast.makeText(this, "❌ Erro ao adicionar tag", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao adicionar tag: ", e);
+            Toast.makeText(this, "Erro ao adicionar tag", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void confirmarRemoverTag(Tag tag) {
+        new AlertDialog.Builder(this)
+                .setTitle("Remover Tag")
+                .setMessage("Deseja remover a tag '" + tag.getNome() + "'?")
+                .setPositiveButton("Sim", (dialog, which) -> removerTag(tag))
+                .setNegativeButton("Não", null)
+                .show();
+    }
+
+    private void removerTag(Tag tag) {
+        try {
+            boolean sucesso = tagDAO.removerTagDoChamado(chamadoId, tag.getId());
+
+            if (sucesso) {
+                Log.d(TAG, "✅ Tag removida: " + tag.getNome());
+                Toast.makeText(this, "✅ Tag removida", Toast.LENGTH_SHORT).show();
+                carregarTags();
+            } else {
+                Toast.makeText(this, "❌ Erro ao remover tag", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao remover tag: ", e);
+            Toast.makeText(this, "Erro ao remover tag", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     // ========== LIFECYCLE METHODS ==========
 
     @Override
     protected void onResume() {
         super.onResume();
+        carregarTags();
         Log.d(TAG, "Activity retomada");
 
         // Recarregar comentários quando voltar

@@ -4,6 +4,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -18,6 +19,8 @@ import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.database.DatabaseHelper;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;
+import com.example.helpdeskapp.utils.PDFHelper;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +36,7 @@ public class AdminPanelActivity extends AppCompatActivity {
     // Lista
     private RecyclerView rvTodosChamados;
     private TextView tvContadorResultados;
+    private Button btnGerarRelatorio;
 
     private SessionManager sessionManager;
     private DatabaseHelper dbHelper;
@@ -79,6 +83,7 @@ public class AdminPanelActivity extends AppCompatActivity {
         btnFiltroAbertos = findViewById(R.id.btnFiltroAbertos);
         btnFiltroAndamento = findViewById(R.id.btnFiltroAndamento);
         btnFiltroFechados = findViewById(R.id.btnFiltroFechados);
+        btnGerarRelatorio = findViewById(R.id.btnGerarRelatorio);
 
         // Lista
         rvTodosChamados = findViewById(R.id.rvTodosChamados);
@@ -98,6 +103,7 @@ public class AdminPanelActivity extends AppCompatActivity {
         btnFiltroAbertos.setOnClickListener(v -> aplicarFiltro("ABERTO"));
         btnFiltroAndamento.setOnClickListener(v -> aplicarFiltro("EM ANDAMENTO"));
         btnFiltroFechados.setOnClickListener(v -> aplicarFiltro("FECHADO"));
+        btnGerarRelatorio.setOnClickListener(v -> mostrarOpcoesRelatorio());
     }
 
     private void carregarDados() {
@@ -355,15 +361,128 @@ public class AdminPanelActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        finish();
-        return true;
+    // ========== NOVO: FUNCIONALIDADES DE PDF ==========
+
+    private void mostrarOpcoesRelatorio() {
+        String[] opcoes = {
+                "📄 Relatório de Todos os Chamados",
+                "📊 Relatório de Chamados Abertos",
+                "✅ Relatório de Chamados Resolvidos",
+                "⏳ Relatório de Chamados em Andamento",
+                "❌ Cancelar"
+        };
+
+        new AlertDialog.Builder(this)
+                .setTitle("Gerar Relatório")
+                .setItems(opcoes, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            gerarRelatorioPorFiltro("Todos", null);
+                            break;
+                        case 1:
+                            gerarRelatorioPorFiltro("Abertos", "Aberto");
+                            break;
+                        case 2:
+                            gerarRelatorioPorFiltro("Resolvidos", "Resolvido");
+                            break;
+                        case 3:
+                            gerarRelatorioPorFiltro("Em Andamento", "Em Andamento");
+                            break;
+                    }
+                })
+                .show();
+    }
+
+    private void gerarRelatorioPorFiltro(String tipoRelatorio, String filtroStatus) {
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("📄 Gerando relatório...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        new Thread(() -> {
+            try {
+                // Filtrar chamados
+                List<Chamado> chamadosFiltradosPDF;
+
+                if (filtroStatus == null) {
+                    chamadosFiltrados = todosChamados;
+                } else {
+                    chamadosFiltrados = new ArrayList<>();
+                    for (Chamado chamado : todosChamados) {
+                        if (chamado.getStatus().equalsIgnoreCase(filtroStatus) ||
+                                chamado.getStatus().toLowerCase().contains(filtroStatus.toLowerCase())) {
+                            chamadosFiltrados.add(chamado);
+                        }
+                    }
+                }
+
+                // Verificar se há chamados
+                if (chamadosFiltrados.isEmpty()) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(this,
+                                "⚠️ Nenhum chamado encontrado para este filtro",
+                                Toast.LENGTH_SHORT).show();
+                    });
+                    return;
+                }
+
+                // Gerar PDF
+                String titulo = "RELATÓRIO DE CHAMADOS - " + tipoRelatorio.toUpperCase();
+                File pdfFile = PDFHelper.gerarRelatorioGeral(
+                        this,
+                        chamadosFiltrados,
+                        titulo
+                );
+
+                // Atualizar UI
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+
+                    if (pdfFile != null) {
+                        mostrarDialogoSucessoRelatorio(pdfFile, chamadosFiltrados.size());
+                    } else {
+                        Toast.makeText(this, "❌ Erro ao gerar relatório",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Erro ao gerar relatório: ", e);
+                runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(this, "Erro: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    private void mostrarDialogoSucessoRelatorio(File pdfFile, int totalChamados) {
+        new AlertDialog.Builder(this)
+                .setTitle("✅ Relatório Gerado!")
+                .setMessage("Relatório criado com sucesso!\n\n" +
+                        "📊 Total de chamados: " + totalChamados + "\n" +
+                        "📁 Arquivo: " + pdfFile.getName())
+                .setPositiveButton("📂 Abrir", (dialog, which) -> {
+                    PDFHelper.abrirPDF(this, pdfFile);
+                })
+                .setNeutralButton("📤 Compartilhar", (dialog, which) -> {
+                    PDFHelper.compartilharPDF(this, pdfFile);
+                })
+                .setNegativeButton("OK", null)
+                .show();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         carregarDados();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 }

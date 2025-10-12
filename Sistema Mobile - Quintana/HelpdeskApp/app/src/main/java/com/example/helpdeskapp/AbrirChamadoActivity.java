@@ -15,6 +15,7 @@ import android.util.Log;
 import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;
+import com.example.helpdeskapp.NotificationHelper; // ADICIONADO
 
 public class AbrirChamadoActivity extends AppCompatActivity {
     private static final String TAG = "AbrirChamado";
@@ -22,7 +23,7 @@ public class AbrirChamadoActivity extends AppCompatActivity {
     private EditText etTitulo, etDescricao;
     private Spinner spinnerCategoria;
     private RadioGroup rgPrioridade;
-    private Button btnSalvar, btnCancelar; // CORRIGIDO: era btnEnviarChamado
+    private Button btnSalvar, btnCancelar;
     private SessionManager sessionManager;
     private ChamadoDAO chamadoDAO;
 
@@ -51,7 +52,7 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         etDescricao = findViewById(R.id.etDescricao);
         spinnerCategoria = findViewById(R.id.spinnerCategoria);
         rgPrioridade = findViewById(R.id.rgPrioridade);
-        btnSalvar = findViewById(R.id.btnSalvar); // CORRIGIDO
+        btnSalvar = findViewById(R.id.btnSalvar);
         btnCancelar = findViewById(R.id.btnCancelar);
 
         Log.d(TAG, "Componentes inicializados");
@@ -77,7 +78,7 @@ public class AbrirChamadoActivity extends AppCompatActivity {
     }
 
     private void configurarEventos() {
-        btnSalvar.setOnClickListener(new View.OnClickListener() { // CORRIGIDO
+        btnSalvar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 enviarChamado();
@@ -183,6 +184,19 @@ public class AbrirChamadoActivity extends AppCompatActivity {
                     Log.d(TAG, "Título verificado: " + chamadoVerificacao.getTitulo());
                 } else {
                     Log.w(TAG, "⚠️ Atenção: Chamado não encontrado na verificação");
+                }
+
+                // Enviar notificação
+                try {
+                    NotificationHelper notificationHelper = new NotificationHelper(this);
+                    notificationHelper.enviarNotificacaoNovoChamado(
+                            novoChamado.getTitulo(),
+                            novoChamado.getPrioridade()
+                    );
+                    Log.d(TAG, "✅ Notificação enviada com sucesso");
+                } catch (Exception e) {
+                    Log.e(TAG, "⚠️ Erro ao enviar notificação (não crítico): ", e);
+                    // Não interrompe o fluxo, apenas loga o erro
                 }
 
                 Toast.makeText(this,

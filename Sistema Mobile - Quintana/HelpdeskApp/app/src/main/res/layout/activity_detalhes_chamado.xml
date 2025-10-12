@@ -202,6 +202,153 @@
 
         </androidx.cardview.widget.CardView>
 
+        <!-- NOVA SEÇÃO: Tags -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:background="@color/primary_light"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="🏷️ Tags"
+                        android:textColor="@color/text_dark"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvAdicionarTag"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+ Adicionar Tags"
+                        android:textSize="14sp"
+                        android:textColor="@color/primary"
+                        android:textStyle="bold"
+                        android:background="?attr/selectableItemBackground"
+                        android:padding="8dp" />
+
+                </LinearLayout>
+
+                <!-- RecyclerView de Tags (Horizontal) -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewTags"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:padding="12dp"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    tools:itemCount="3"
+                    tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:orientation="horizontal"
+                    tools:listitem="@layout/item_tag" />
+
+                <!-- Mensagem quando não há tags -->
+                <TextView
+                    android:id="@+id/tvSemTags"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Nenhuma tag adicionada"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:textAlignment="center"
+                    android:padding="16dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- NOVA SEÇÃO: Anexos -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Header de Anexos -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:background="@color/primary_light"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📎 Anexos"
+                        android:textColor="@color/text_dark"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvContadorAnexos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="3 anexos"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_secondary"
+                        android:background="@drawable/contador_background"
+                        android:padding="6dp"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+
+                <!-- RecyclerView de Anexos (Horizontal) -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewAnexos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:padding="8dp"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    tools:itemCount="3"
+                    tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:orientation="horizontal"
+                    tools:listitem="@layout/item_anexo" />
+
+                <!-- Botão Anexar Foto -->
+                <Button
+                    android:id="@+id/btnAnexarFoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📷 ANEXAR FOTO"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/primary"
+                    android:layout_margin="12dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <!-- Seção de Comentários -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -271,6 +418,20 @@
 
         </androidx.cardview.widget.CardView>
 
+        <!-- Botão Gerar PDF -->
+        <Button
+            android:id="@+id/btnGerarPDF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="📄 GERAR RELATÓRIO PDF"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="#E91E63"
+            android:paddingVertical="16dp" />
+
+        <!-- Botão Avaliar -->
         <Button
             android:id="@+id/btnAvaliarChamado"
             android:layout_width="match_parent"

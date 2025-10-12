@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:layout_margin="4dp"
+    android:gravity="center_vertical"
+    android:background="@drawable/tag_background">
+
+    <TextView
+        android:id="@+id/tvNomeTag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🏷️ Tag"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp" />
+
+    <ImageButton
+        android:id="@+id/btnRemoverTag"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Remover tag"
+        android:visibility="gone"
+        android:layout_marginStart="4dp" />
+
+</LinearLayout>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Diretório de arquivos externos -->
+    <external-files-path
+        name="external_files"
+        path="." />
+
+    <!-- Diretório de fotos -->
+    <external-files-path
+        name="external_images"
+        path="Pictures/HelpdeskAnexos/" />
+
+    <!-- Diretório de PDFs -->
+    <external-files-path
+        name="pdf_files"
+        path="Documents/HelpdeskRelatorios/" />
+
+    <!-- Cache externo -->
+    <external-cache-path
+        name="external_cache"
+        path="." />
+
+    <!-- Arquivos internos -->
+    <files-path
+        name="internal_files"
+        path="." />
+</paths>

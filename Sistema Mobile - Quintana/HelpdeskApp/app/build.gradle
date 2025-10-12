@@ -48,6 +48,13 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
+    // Biblioteca para gerar PDF
+    implementation 'com.itextpdf:itext7-core:7.2.5'
+
+    // Para Activity Result APIs (câmera e galeria)
+    implementation 'androidx.activity:activity:1.8.0'
+    implementation 'androidx.fragment:fragment:1.6.2'
+
 }
 
 

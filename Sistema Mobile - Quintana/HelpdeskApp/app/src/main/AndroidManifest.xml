@@ -2,7 +2,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissões -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- Feature de câmera (opcional) -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -15,7 +29,18 @@
         android:theme="@style/Theme.HelpdeskApp"
         tools:targetApi="31">
 
-        <!-- ÚNICA TELA DE ENTRADA - LoginActivity -->
+        <!-- FileProvider (IMPORTANTE) -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- Activities -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -25,7 +50,6 @@
             </intent-filter>
         </activity>
 
-        <!-- TELAS INTERNAS (sem LAUNCHER) -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
@@ -46,21 +70,31 @@
             android:parentActivityName=".MeusChamadosActivity" />
 
         <activity
-            android:name=".AvaliarChamadoActivity"
-            android:exported="false"
-            android:parentActivityName=".DetalheChamadoActivity" />
-
-        <activity
             android:name=".BuscarChamadoActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="stateVisible|adjustResize" />
 
-        <!-- Painel Administrativo -->
         <activity
             android:name=".AdminPanelActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".AvaliarChamadoActivity"
+            android:exported="false"
+            android:parentActivityName=".DetalheChamadoActivity" />
+
+        <activity
+            android:name=".DashboardActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".GerenciarTagsActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
     </application>
+
 </manifest>

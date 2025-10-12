@@ -38,7 +38,11 @@
             android:textStyle="bold"
             android:textColor="@color/primary"
             android:layout_marginBottom="4dp"
-            android:letterSpacing="0.05" />
+            android:letterSpacing="0.05"
+            android:shadowColor="#33000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="2"/>
 
         <!-- Subtítulo -->
         <TextView
