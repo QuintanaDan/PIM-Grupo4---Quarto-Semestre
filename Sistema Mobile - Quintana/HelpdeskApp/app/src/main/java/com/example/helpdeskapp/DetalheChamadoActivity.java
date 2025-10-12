@@ -41,6 +41,8 @@ import com.example.helpdeskapp.NotificationHelper;
 import com.example.helpdeskapp.utils.PDFHelper;
 import com.example.helpdeskapp.dao.TagDAO;
 import com.example.helpdeskapp.models.Tag;
+import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.utils.ThemeManager;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -105,6 +107,7 @@ public class DetalheChamadoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new ThemeManager(this).applyTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalhes_chamado);
 
@@ -371,6 +374,21 @@ public class DetalheChamadoActivity extends AppCompatActivity {
                 carregarAnexos();
             } else {
                 Toast.makeText(this, "❌ Erro ao salvar anexo", Toast.LENGTH_SHORT).show();
+            }
+
+            if (resultado > 0) {
+                Log.d(TAG, "✅ Anexo salvo com sucesso: " + resultado);
+
+                // NOVO: Registrar na auditoria
+                AuditoriaHelper.registrarAnexo(
+                        this,
+                        sessionManager.getUserId(),
+                        chamadoId,
+                        arquivo.getName()
+                );
+
+                Toast.makeText(this, "✅ Foto anexada com sucesso!", Toast.LENGTH_SHORT).show();
+                carregarAnexos();
             }
 
         } catch (Exception e) {
@@ -685,6 +703,35 @@ public class DetalheChamadoActivity extends AppCompatActivity {
 
             if (resultado > 0) {
                 Log.d(TAG, "✅ Comentário inserido com sucesso! ID: " + resultado);
+
+                if (resultado > 0) {
+                    Log.d(TAG, "✅ Comentário inserido com sucesso! ID: " + resultado);
+
+                    etNovoComentario.setText("");
+
+                    // NOVO: Registrar na auditoria
+                    AuditoriaHelper.registrarComentario(
+                            this,
+                            sessionManager.getUserId(),
+                            chamadoId
+                    );
+
+                    // Enviar notificação
+                    NotificationHelper notificationHelper = new NotificationHelper(this);
+                    notificationHelper.enviarNotificacaoNovoComentario(
+                            txtTituloDetalhe.getText().toString(),
+                            sessionManager.getUserName()
+                    );
+
+                    carregarComentarios();
+
+                    if (listaComentarios.size() > 0) {
+                        recyclerViewComentarios.smoothScrollToPosition(listaComentarios.size() - 1);
+                    }
+
+                    Toast.makeText(this, "✅ Comentário adicionado!", Toast.LENGTH_SHORT).show();
+                }
+
 
                 // Limpar campo
                 etNovoComentario.setText("");

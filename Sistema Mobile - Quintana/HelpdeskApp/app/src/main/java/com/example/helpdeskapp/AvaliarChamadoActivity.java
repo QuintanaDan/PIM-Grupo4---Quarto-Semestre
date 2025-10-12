@@ -10,6 +10,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.example.helpdeskapp.dao.AvaliacaoDAO;
 import com.example.helpdeskapp.models.Avaliacao;
+import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.utils.SessionManager;
+import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.utils.ThemeManager;
 
 public class AvaliarChamadoActivity extends AppCompatActivity {
     private static final String TAG = "AvaliarChamado";
@@ -22,11 +26,16 @@ public class AvaliarChamadoActivity extends AppCompatActivity {
     private long chamadoId;
     private String chamadoTitulo;
     private AvaliacaoDAO avaliacaoDAO;
+    private SessionManager sessionManager;
+    private int notaSelecionada = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new ThemeManager(this).applyTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_avaliar_chamado);
+
+        sessionManager = new SessionManager(this);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("⭐ Avaliar Atendimento");
@@ -103,6 +112,8 @@ public class AvaliarChamadoActivity extends AppCompatActivity {
     }
 
     private void enviarAvaliacao() {
+        // Validar avaliação
+        notaSelecionada = (int) ratingBar.getRating();
         float rating = ratingBar.getRating();
 
         if (rating == 0) {

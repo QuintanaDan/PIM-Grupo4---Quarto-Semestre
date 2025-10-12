@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.example.helpdeskapp.dao.AvaliacaoDAO;
 import com.example.helpdeskapp.database.DatabaseHelper;
 import com.example.helpdeskapp.utils.SessionManager;
+import com.example.helpdeskapp.utils.ThemeManager;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +48,9 @@ public class DashboardActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new ThemeManager(this).applyTheme();
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_dashboard);
 
         // Verificar se é admin
         sessionManager = new SessionManager(this);

@@ -17,6 +17,7 @@ import com.example.helpdeskapp.adapters.ChamadoAdapter;
 import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;
+import com.example.helpdeskapp.utils.ThemeManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class BuscarChamadoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new ThemeManager(this).applyTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_buscar_chamado);
 

@@ -11,7 +11,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Database info
     private static final String DATABASE_NAME = "helpdesk.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     // CONSTANTES GERAIS
     public static final String COLUMN_ID = "_id";
@@ -177,6 +177,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     "UNIQUE(" + CT_CHAMADO_ID + "," + CT_TAG_ID + ")" +
                     ");";
 
+    // TABELA DE AUDITORIA
+    private static final String TABLE_AUDITORIA = "auditoria";
+    private static final String AUDIT_ID = "id";
+    private static final String AUDIT_USUARIO_ID = "usuario_id";
+    private static final String AUDIT_ACAO = "acao";
+    private static final String AUDIT_ENTIDADE = "entidade";
+    private static final String AUDIT_ENTIDADE_ID = "entidade_id";
+    private static final String AUDIT_DESCRICAO = "descricao";
+    private static final String AUDIT_IP = "ip";
+    private static final String AUDIT_DISPOSITIVO = "dispositivo";
+    private static final String AUDIT_DATA = "data_acao";
+
+    // SQL CRIAR TABELA AUDITORIA
+    private static final String CREATE_TABLE_AUDITORIA =
+            "CREATE TABLE " + TABLE_AUDITORIA + " (" +
+                    AUDIT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    AUDIT_USUARIO_ID + " INTEGER NOT NULL," +
+                    AUDIT_ACAO + " TEXT NOT NULL," +
+                    AUDIT_ENTIDADE + " TEXT NOT NULL," +
+                    AUDIT_ENTIDADE_ID + " INTEGER," +
+                    AUDIT_DESCRICAO + " TEXT," +
+                    AUDIT_IP + " TEXT," +
+                    AUDIT_DISPOSITIVO + " TEXT," +
+                    AUDIT_DATA + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                    "FOREIGN KEY(" + AUDIT_USUARIO_ID + ") REFERENCES " +
+                    TABLE_USUARIOS + "(" + COLUMN_USER_ID + ")" +
+                    ");";
+
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -213,6 +241,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.d(TAG, "✅ Tabela chamado_tags criada com sucesso!");
 
             inserirTagsPadrao(db);
+
+            Log.d(TAG, "Criando tabela auditoria: " + CREATE_TABLE_AUDITORIA);
+            db.execSQL(CREATE_TABLE_AUDITORIA);
+            Log.d(TAG, "✅ Tabela auditoria criada com sucesso!");
 
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao criar tabelas: ", e);
@@ -266,6 +298,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 inserirTagsPadrao(db);
             } catch (Exception e) {
                 Log.e(TAG, "❌ Erro ao criar tabelas de tags: ", e);
+            }
+        }
+
+        if (oldVersion < 7) {
+            try {
+                Log.d(TAG, "Criando tabela auditoria: " + CREATE_TABLE_AUDITORIA);
+                db.execSQL(CREATE_TABLE_AUDITORIA);
+                Log.d(TAG, "✅ Tabela auditoria adicionada com sucesso!");
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Erro ao criar tabela auditoria: ", e);
             }
         }
     }
@@ -373,6 +415,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static String getCtChamadoId() { return CT_CHAMADO_ID; }
     public static String getCtTagId() { return CT_TAG_ID; }
     public static String getCtCreatedAt() { return CT_CREATED_AT; }
+    public static String getTableAuditoria() { return TABLE_AUDITORIA; }
+    public static String getAuditId() { return AUDIT_ID; }
+    public static String getAuditUsuarioId() { return AUDIT_USUARIO_ID; }
+    public static String getAuditAcao() { return AUDIT_ACAO; }
+    public static String getAuditEntidade() { return AUDIT_ENTIDADE; }
+    public static String getAuditEntidadeId() { return AUDIT_ENTIDADE_ID; }
+    public static String getAuditDescricao() { return AUDIT_DESCRICAO; }
+    public static String getAuditIp() { return AUDIT_IP; }
+    public static String getAuditDispositivo() { return AUDIT_DISPOSITIVO; }
+    public static String getAuditData() { return AUDIT_DATA; }
 
     /**
      * Conta o número de chamados com um status específico.

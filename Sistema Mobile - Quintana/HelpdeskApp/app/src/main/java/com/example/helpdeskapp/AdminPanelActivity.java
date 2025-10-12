@@ -20,6 +20,8 @@ import com.example.helpdeskapp.database.DatabaseHelper;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;
 import com.example.helpdeskapp.utils.PDFHelper;
+import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.utils.ThemeManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +49,9 @@ public class AdminPanelActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new ThemeManager(this).applyTheme();
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_admin_panel);
 
         // Verificar se é admin
         sessionManager = new SessionManager(this);
@@ -349,19 +353,29 @@ public class AdminPanelActivity extends AppCompatActivity {
 
     private void alterarStatus(Chamado chamado, String novoStatus) {
         ChamadoDAO chamadoDAO = new ChamadoDAO(this);
+        String statusAntigo = chamado.getStatus();
         boolean sucesso = chamadoDAO.atualizarStatus(chamado.getId(), novoStatus);
 
         if (sucesso) {
+            // Registrar na auditoria
+            AuditoriaHelper.registrarAlteracaoStatus(
+                    this,
+                    sessionManager.getUserId(),
+                    chamado.getId(),
+                    statusAntigo,
+                    novoStatus
+            );
+
             Toast.makeText(this, "✅ Status alterado para: " + novoStatus,
                     Toast.LENGTH_SHORT).show();
-            carregarDados(); // Recarregar dados
+            carregarDados();
         } else {
             Toast.makeText(this, "❌ Erro ao alterar status",
                     Toast.LENGTH_SHORT).show();
         }
     }
 
-    // ========== NOVO: FUNCIONALIDADES DE PDF ==========
+// ========== NOVO: FUNCIONALIDADES DE PDF ==========
 
     private void mostrarOpcoesRelatorio() {
         String[] opcoes = {
@@ -402,22 +416,22 @@ public class AdminPanelActivity extends AppCompatActivity {
         new Thread(() -> {
             try {
                 // Filtrar chamados
-                List<Chamado> chamadosFiltradosPDF;
+                List<Chamado> chamadosParaRelatorio;
 
                 if (filtroStatus == null) {
-                    chamadosFiltrados = todosChamados;
+                    chamadosParaRelatorio = todosChamados;
                 } else {
-                    chamadosFiltrados = new ArrayList<>();
+                    chamadosParaRelatorio = new ArrayList<>();
                     for (Chamado chamado : todosChamados) {
                         if (chamado.getStatus().equalsIgnoreCase(filtroStatus) ||
                                 chamado.getStatus().toLowerCase().contains(filtroStatus.toLowerCase())) {
-                            chamadosFiltrados.add(chamado);
+                            chamadosParaRelatorio.add(chamado);
                         }
                     }
                 }
 
                 // Verificar se há chamados
-                if (chamadosFiltrados.isEmpty()) {
+                if (chamadosParaRelatorio.isEmpty()) {
                     runOnUiThread(() -> {
                         progressDialog.dismiss();
                         Toast.makeText(this,
@@ -431,7 +445,7 @@ public class AdminPanelActivity extends AppCompatActivity {
                 String titulo = "RELATÓRIO DE CHAMADOS - " + tipoRelatorio.toUpperCase();
                 File pdfFile = PDFHelper.gerarRelatorioGeral(
                         this,
-                        chamadosFiltrados,
+                        chamadosParaRelatorio,
                         titulo
                 );
 
@@ -440,7 +454,7 @@ public class AdminPanelActivity extends AppCompatActivity {
                     progressDialog.dismiss();
 
                     if (pdfFile != null) {
-                        mostrarDialogoSucessoRelatorio(pdfFile, chamadosFiltrados.size());
+                        mostrarDialogoSucessoRelatorio(pdfFile, chamadosParaRelatorio.size());
                     } else {
                         Toast.makeText(this, "❌ Erro ao gerar relatório",
                                 Toast.LENGTH_SHORT).show();

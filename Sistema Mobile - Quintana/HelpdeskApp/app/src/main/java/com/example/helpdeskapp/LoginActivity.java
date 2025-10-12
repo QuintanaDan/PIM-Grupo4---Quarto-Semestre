@@ -11,6 +11,8 @@ import android.widget.Toast;
 import com.example.helpdeskapp.dao.UsuarioDAO;
 import com.example.helpdeskapp.models.Usuario;
 import com.example.helpdeskapp.utils.SessionManager;
+import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.utils.ThemeManager;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -21,7 +23,9 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new ThemeManager(this).applyTheme();
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
 
         // Verificar se já está logado
         sessionManager = new SessionManager(this);
@@ -110,6 +114,13 @@ public class LoginActivity extends AppCompatActivity {
                     usuario.getEmail(),
                     usuario.getNome(),
                     usuario.getTipo()
+            );
+
+            // CORRIGIDO: Trocar 'user' por 'usuario'
+            AuditoriaHelper.registrarLogin(
+                    this,
+                    usuario.getId(),  // ERA: user.getId()
+                    usuario.getNome() // ERA: user.getNome()
             );
 
             Toast.makeText(this, "✅ Login realizado com sucesso!", Toast.LENGTH_SHORT).show();

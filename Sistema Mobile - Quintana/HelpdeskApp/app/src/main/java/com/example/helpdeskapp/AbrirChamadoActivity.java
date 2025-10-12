@@ -15,7 +15,9 @@ import android.util.Log;
 import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;
-import com.example.helpdeskapp.NotificationHelper; // ADICIONADO
+import com.example.helpdeskapp.NotificationHelper;
+import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.utils.ThemeManager;
 
 public class AbrirChamadoActivity extends AppCompatActivity {
     private static final String TAG = "AbrirChamado";
@@ -29,6 +31,7 @@ public class AbrirChamadoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new ThemeManager(this).applyTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_abrir_chamado);
 
@@ -170,6 +173,13 @@ public class AbrirChamadoActivity extends AppCompatActivity {
 
                 // Atualizar o ID do chamado para gerar protocolo correto
                 novoChamado.setId(resultado);
+
+                AuditoriaHelper.registrarCriacaoChamado(
+                        this,
+                        sessionManager.getUserId(),
+                        resultado,
+                        novoChamado.getTitulo()
+                );
 
                 // Log de debug adicional
                 Log.d(TAG, "=== DEBUG INFO APÓS INSERÇÃO ===");

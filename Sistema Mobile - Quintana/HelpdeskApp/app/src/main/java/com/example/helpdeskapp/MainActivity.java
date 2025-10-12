@@ -11,7 +11,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
 import com.example.helpdeskapp.utils.SessionManager;
-import com.example.helpdeskapp.database.DatabaseHelper; // <-- ADICIONADO: Import do DatabaseHelper
+import com.example.helpdeskapp.database.DatabaseHelper;
+import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.utils.ThemeManager;
 import android.net.Uri;
 import android.content.Context;
 
@@ -27,11 +29,19 @@ public class MainActivity extends AppCompatActivity {
 
     // ========== MANAGERS ==========
     private SessionManager sessionManager;
-    private DatabaseHelper dbHelper; // <-- ADICIONADO: Referência ao DatabaseHelper
+    private DatabaseHelper dbHelper; //
+    private ThemeManager themeManager;
+    private int currentActivityTheme;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        themeManager = new ThemeManager(this);
+        themeManager.applyTheme();
+        currentActivityTheme = themeManager.getCurrentTheme();
         super.onCreate(savedInstanceState);
+
+        // ========== CONFIGURAR LAYOUT ==========
+        setContentView(R.layout.activity_main);
 
         // ========== VERIFICAR SESSÃO ==========
         sessionManager = new SessionManager(this);
@@ -40,9 +50,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // ========== CONFIGURAR LAYOUT ==========
-        setContentView(R.layout.activity_main);
-
         // ========== INICIALIZAR COMPONENTES ==========
         inicializarComponentes();
         configurarInformacoesUsuario();
@@ -50,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         configurarEventos();
         configurarCardDashboard();
         configurarCardGerenciarTags();
+        configurarCardHistorico();
+        configurarCardPersonalizarTema();
 
         // ========== ATUALIZAR DADOS DINÂMICOS ==========
         updateStatusCards(); // <-- ADICIONADO: Chamada para atualizar os cards
@@ -58,6 +67,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (themeManager.getCurrentTheme() != currentActivityTheme) {
+            recreate();
+            return;
+        }
         // Garante que os dados sejam atualizados sempre que o usuário voltar para esta tela
         updateStatusCards(); // <-- ADICIONADO: Chamada no onResume
     }
@@ -148,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configurarEventos() {
+
         // ========== CARD ABRIR CHAMADO ==========
         cardAbrirChamado.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AbrirChamadoActivity.class);
@@ -175,8 +190,54 @@ public class MainActivity extends AppCompatActivity {
         // ========== CARD DIVERSIDADE ==========
         cardDiversidade.setOnClickListener(v -> abrirSiteDiversidade());
 
+
+
         // ========== BOTÃO LOGOUT ==========
-        btnLogout.setOnClickListener(v -> mostrarConfirmacaoLogout());
+        btnLogout.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Sair")
+                    .setMessage("Deseja realmente sair?")
+                    .setPositiveButton("Sim", (dialog, which) -> {
+                        // Registrar logout na auditoria
+                        AuditoriaHelper.registrarLogout(
+                                this,
+                                sessionManager.getUserId(),
+                                sessionManager.getUserName()
+                        );
+
+                        sessionManager.logout();
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    })
+                    .setNegativeButton("Não", null)
+                    .show();
+        });
+
+    }
+
+    private void configurarCardHistorico() {
+        if (sessionManager.isAdmin()) {
+            CardView cardHistorico = findViewById(R.id.cardHistorico);
+            if (cardHistorico != null) {
+                cardHistorico.setVisibility(View.VISIBLE);
+                cardHistorico.setOnClickListener(v -> {
+                    Intent intent = new Intent(MainActivity.this, HistoricoAuditoriaActivity.class);
+                    startActivity(intent);
+                });
+            }
+        }
+    }
+
+    private void configurarCardPersonalizarTema() {
+        CardView cardPersonalizarTema = findViewById(R.id.cardPersonalizarTema);
+        if (cardPersonalizarTema != null) {
+            cardPersonalizarTema.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, PersonalizarTemaActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void abrirSiteDiversidade() {

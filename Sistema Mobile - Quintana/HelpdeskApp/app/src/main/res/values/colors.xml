@@ -61,4 +61,46 @@
     <color name="colorPrimary">@color/primary</color>
     <color name="colorPrimaryDark">@color/primary_dark</color>
     <color name="colorAccent">@color/accent</color>
+
+    <!-- ========== TEMA AMANHECER (Light) ========== -->
+    <color name="amanhecer_primary">#2196F3</color>
+    <color name="amanhecer_primary_dark">#1976D2</color>
+    <color name="amanhecer_accent">#FF4081</color>
+    <color name="amanhecer_background">#F5F5F5</color>
+    <color name="amanhecer_surface">#FFFFFF</color>
+    <color name="amanhecer_text">#212121</color>
+    <color name="amanhecer_text_secondary">#757575</color>
+
+    <!-- ========== TEMA ANOITECER (Dark) ========== -->
+    <color name="anoitecer_primary">#BB86FC</color>
+    <color name="anoitecer_primary_dark">#9965F4</color>
+    <color name="anoitecer_accent">#03DAC6</color>
+    <color name="anoitecer_background">#121212</color>
+    <color name="anoitecer_surface">#1E1E1E</color>
+    <color name="anoitecer_text">#FFFFFF</color>
+    <color name="anoitecer_text_secondary">#B0B0B0</color>
+
+    <!-- ========== TEMA ANCESTRAL (Afrocêntrico) ========== -->
+    <color name="ancestral_primary">#DAA520</color>          <!-- Dourado -->
+    <color name="ancestral_primary_dark">#B8860B</color>     <!-- Dourado Escuro -->
+    <color name="ancestral_accent">#DC143C</color>           <!-- Vermelho Carmesim -->
+    <color name="ancestral_background">#2C1810</color>       <!-- Marrom Chocolate Escuro -->
+    <color name="ancestral_surface">#3E2723</color>          <!-- Marrom Café -->
+    <color name="ancestral_text">#FFF8DC</color>             <!-- Cornsilk (Dourado Claro) -->
+    <color name="ancestral_text_secondary">#D4AF37</color>   <!-- Ouro Velho -->
+
+    <!-- Cores de destaque Ancestral -->
+    <color name="ancestral_green">#2E8B57</color>            <!-- Verde Mar -->
+    <color name="ancestral_orange">#FF8C00</color>           <!-- Laranja Escuro -->
+    <color name="ancestral_red">#8B0000</color>              <!-- Vermelho Escuro -->
+    <color name="ancestral_gold">#FFD700</color>             <!-- Ouro -->
+
+    <!-- ========== CORES COMUNS ========== -->
+    <color name="transparent">#00000000</color>
+
+    <!-- Status -->
+    <color name="success">#4CAF50</color>
+    <color name="warning">#FF9800</color>
+    <color name="error">#F44336</color>
+    <color name="info">#2196F3</color>
 </resources>

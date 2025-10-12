@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <!-- Ícone da Ação -->
+        <TextView
+            android:id="@+id/tvIconeAcao"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="📋"
+            android:textSize="24sp"
+            android:gravity="center"
+            android:background="@drawable/circle_light_theme" />
+
+        <!-- Informações da Ação -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <!-- Ação -->
+            <TextView
+                android:id="@+id/tvAcao"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CRIOU"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                tools:text="CRIOU" />
+
+            <!-- Usuário -->
+            <TextView
+                android:id="@+id/tvUsuario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="João Silva"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="2dp"
+                tools:text="João Silva" />
+
+            <!-- Descrição -->
+            <TextView
+                android:id="@+id/tvDescricao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Criou um novo chamado"
+                android:textSize="12sp"
+                android:textColor="@color/text_dark"
+                android:layout_marginTop="4dp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                tools:text="Criou um novo chamado sobre impressora" />
+
+            <!-- Linha: Entidade e Data -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/tvEntidade"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Chamado #123"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary"
+                    tools:text="Chamado #123" />
+
+                <TextView
+                    android:id="@+id/tvData"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10/10/2024 14:30"
+                    android:textSize="11sp"
+                    android:textColor="@color/text_secondary"
+                    tools:text="10/10/2024 14:30" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

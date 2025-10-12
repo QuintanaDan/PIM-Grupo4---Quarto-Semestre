@@ -17,6 +17,8 @@ import com.example.helpdeskapp.adapters.TagAdapter;
 import com.example.helpdeskapp.dao.TagDAO;
 import com.example.helpdeskapp.models.Tag;
 import com.example.helpdeskapp.utils.SessionManager;
+import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.utils.ThemeManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +42,7 @@ public class GerenciarTagsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new ThemeManager(this).applyTheme();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gerenciar_tags);
 
@@ -154,6 +157,21 @@ public class GerenciarTagsActivity extends AppCompatActivity {
                 carregarTags();
             } else {
                 Toast.makeText(this, "❌ Erro ao criar tag", Toast.LENGTH_SHORT).show();
+            }
+
+            if (resultado > 0) {
+                Log.d(TAG, "✅ Tag criada: " + nome);
+
+                // NOVO: Registrar na auditoria
+                AuditoriaHelper.registrarCriacaoTag(
+                        this,
+                        sessionManager.getUserId(),
+                        nome
+                );
+
+                Toast.makeText(this, "✅ Tag '" + nome + "' criada!",
+                        Toast.LENGTH_SHORT).show();
+                carregarTags();
             }
 
         } catch (Exception e) {
