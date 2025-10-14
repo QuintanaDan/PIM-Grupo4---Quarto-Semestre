@@ -2,7 +2,6 @@ package com.example.helpdeskapp;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -37,10 +36,8 @@ import com.example.helpdeskapp.models.Comentario;
 import com.example.helpdeskapp.models.Tag;
 import com.example.helpdeskapp.utils.FileHelper;
 import com.example.helpdeskapp.utils.SessionManager;
-import com.example.helpdeskapp.NotificationHelper;
+import com.example.helpdeskapp.utils.NotificationHelper;
 import com.example.helpdeskapp.utils.PDFHelper;
-import com.example.helpdeskapp.dao.TagDAO;
-import com.example.helpdeskapp.models.Tag;
 import com.example.helpdeskapp.utils.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
 
@@ -50,6 +47,8 @@ import java.util.List;
 
 public class DetalheChamadoActivity extends AppCompatActivity {
     private static final String TAG = "DetalheChamadoActivity";
+
+    private Chamado chamado;
 
     private Button btnGerarPDF;
 
@@ -670,96 +669,48 @@ public class DetalheChamadoActivity extends AppCompatActivity {
     private void enviarComentario() {
         String textoComentario = etNovoComentario.getText().toString().trim();
 
-        // Validar campo
         if (textoComentario.isEmpty()) {
-            etNovoComentario.setError("Digite um comentário");
-            etNovoComentario.requestFocus();
+            Toast.makeText(this, "⚠️ Digite um comentário", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Validar ID do chamado
-        if (chamadoId <= 0) {
-            Toast.makeText(this, "Erro: ID do chamado inválido", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "❌ ID do chamado inválido: " + chamadoId);
-            return;
-        }
+        Comentario comentario = new Comentario();
+        comentario.setChamadoId(chamadoId);
+        comentario.setUsuarioId(sessionManager.getUserId());
+        comentario.setTexto(textoComentario);
 
-        try {
-            Log.d(TAG, "=== ENVIANDO COMENTÁRIO ===");
-            Log.d(TAG, "Chamado ID: " + chamadoId);
-            Log.d(TAG, "Usuário ID: " + sessionManager.getUserId());
-            Log.d(TAG, "Texto: " + textoComentario);
+        long resultado = comentarioDAO.inserirComentario(comentario);
 
-            // Criar novo comentário
-            Comentario novoComentario = new Comentario();
-            novoComentario.setChamadoId(chamadoId);
-            novoComentario.setUsuarioId(sessionManager.getUserId());
-            novoComentario.setTexto(textoComentario);
-            novoComentario.setTipo("user");
-            novoComentario.setNomeUsuario(sessionManager.getUserName());
+        if (resultado > 0) {
+            Log.d(TAG, "✅ Comentário inserido com sucesso! ID: " + resultado);
 
-            // Salvar no banco
-            long resultado = comentarioDAO.inserirComentario(novoComentario);
+            etNovoComentario.setText("");
 
-            if (resultado > 0) {
-                Log.d(TAG, "✅ Comentário inserido com sucesso! ID: " + resultado);
+            // Registrar auditoria
+            AuditoriaHelper.registrarComentario(
+                    this,
+                    sessionManager.getUserId(),
+                    chamadoId
+            );
 
-                if (resultado > 0) {
-                    Log.d(TAG, "✅ Comentário inserido com sucesso! ID: " + resultado);
+            // CORRIGIDO: Enviar notificação ao dono do chamado
+            NotificationHelper notificationHelper = new NotificationHelper(this);
 
-                    etNovoComentario.setText("");
-
-                    // NOVO: Registrar na auditoria
-                    AuditoriaHelper.registrarComentario(
-                            this,
-                            sessionManager.getUserId(),
-                            chamadoId
-                    );
-
-                    // Enviar notificação
-                    NotificationHelper notificationHelper = new NotificationHelper(this);
-                    notificationHelper.enviarNotificacaoNovoComentario(
-                            txtTituloDetalhe.getText().toString(),
-                            sessionManager.getUserName()
-                    );
-
-                    carregarComentarios();
-
-                    if (listaComentarios.size() > 0) {
-                        recyclerViewComentarios.smoothScrollToPosition(listaComentarios.size() - 1);
-                    }
-
-                    Toast.makeText(this, "✅ Comentário adicionado!", Toast.LENGTH_SHORT).show();
-                }
-
-
-                // Limpar campo
-                etNovoComentario.setText("");
-
-                // NOVO: Enviar notificação
-                NotificationHelper notificationHelper = new NotificationHelper(this);
+            // Verificar se chamado não é null
+            if (chamado != null && chamado.getClienteId() != sessionManager.getUserId()) {
                 notificationHelper.enviarNotificacaoNovoComentario(
-                        txtTituloDetalhe.getText().toString(),
-                        sessionManager.getUserName()
+                        chamado.getClienteId(),         // userId do dono
+                        chamadoId,                       // chamadoId
+                        chamado.getTitulo(),            // titulo do chamado
+                        sessionManager.getUserName()    // nome do autor do comentário
                 );
-
-                // Recarregar comentários
-                carregarComentarios();
-
-                // Scroll para o último comentário
-                if (listaComentarios.size() > 0) {
-                    recyclerViewComentarios.smoothScrollToPosition(listaComentarios.size() - 1);
-                }
-
-                Toast.makeText(this, "✅ Comentário adicionado!", Toast.LENGTH_SHORT).show();
-            } else {
-                Log.e(TAG, "❌ Falha ao inserir comentário. Resultado: " + resultado);
-                Toast.makeText(this, "❌ Erro ao adicionar comentário", Toast.LENGTH_SHORT).show();
             }
 
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Erro crítico ao enviar comentário: ", e);
-            Toast.makeText(this, "Erro: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            carregarComentarios();
+
+            Toast.makeText(this, "✅ Comentário adicionado!", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "❌ Erro ao adicionar comentário", Toast.LENGTH_SHORT).show();
         }
     }
 

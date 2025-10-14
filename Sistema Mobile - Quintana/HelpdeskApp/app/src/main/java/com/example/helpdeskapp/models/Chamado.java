@@ -15,7 +15,14 @@ public class Chamado implements Serializable {
     private Date dataCriacao;
     private String resposta;
     private String usuario;
-    private String numero; // ADICIONADO
+    private String numero;
+
+    // =========================================================
+    // ⬇️ NOVOS CAMPOS ADICIONADOS PARA RESOLVER OS ERROS ⬇️
+    // =========================================================
+    private String createdAt;
+    private String updatedAt;
+    // =========================================================
 
     public Chamado() {
         this.dataCriacao = new Date();
@@ -33,6 +40,8 @@ public class Chamado implements Serializable {
     }
 
     // Getters e Setters
+    // ... (Mantive seus métodos existentes) ...
+
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
@@ -60,7 +69,6 @@ public class Chamado implements Serializable {
     public String getUsuario() { return usuario; }
     public void setUsuario(String usuario) { this.usuario = usuario; }
 
-    // MÉTODO ADICIONADO: getNumero
     public String getNumero() {
         if (numero != null && !numero.isEmpty()) {
             return numero;
@@ -68,7 +76,6 @@ public class Chamado implements Serializable {
         return getProtocoloFormatado();
     }
 
-    // MÉTODO ADICIONADO: setNumero
     public void setNumero(String numero) {
         this.numero = numero;
     }
@@ -87,6 +94,30 @@ public class Chamado implements Serializable {
     public void setClienteId(long clienteId) {
         this.usuario = String.valueOf(clienteId);
     }
+
+    // =========================================================
+    // ⬇️ MÉTODOS CORRIGIDOS PARA O ERRO "cannot find symbol" ⬇️
+    // =========================================================
+
+    // Resolvem os erros de setCreatedAt/setUpdatedAt no ChamadoDAO.java
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    // Resolvem os erros de getCreatedAt/getUpdatedAt no LembreteHelper.java
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    // =========================================================
 
     public String getProtocoloFormatado() {
         if (numero != null && !numero.isEmpty()) {
@@ -108,7 +139,6 @@ public class Chamado implements Serializable {
         return sdf.format(dataCriacao);
     }
 
-    // MÉTODO ADICIONADO: getDataAberturaFormatada
     public String getDataAberturaFormatada() {
         return getDataCriacaoFormatada();
     }
@@ -244,6 +274,11 @@ public class Chamado implements Serializable {
         clone.setResposta(this.resposta);
         clone.setUsuario(this.usuario);
         clone.setNumero(this.numero);
+
+        // MÉTODOS DE CLONE DOS NOVOS CAMPOS
+        clone.setCreatedAt(this.createdAt);
+        clone.setUpdatedAt(this.updatedAt);
+
         return clone;
     }
 }

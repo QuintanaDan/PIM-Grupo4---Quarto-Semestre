@@ -15,9 +15,10 @@ import android.util.Log;
 import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;
-import com.example.helpdeskapp.NotificationHelper;
+import com.example.helpdeskapp.utils.NotificationHelper;
 import com.example.helpdeskapp.utils.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
+import com.example.helpdeskapp.R;
 
 public class AbrirChamadoActivity extends AppCompatActivity {
     private static final String TAG = "AbrirChamado";
@@ -114,7 +115,6 @@ public class AbrirChamadoActivity extends AppCompatActivity {
             Log.d(TAG, "Dados coletados:");
             Log.d(TAG, "  - Título: '" + titulo + "'");
             Log.d(TAG, "  - Descrição: '" + descricao + "'");
-            Log.d(TAG, "  - Categoria posição: " + categoriaPosition);
             Log.d(TAG, "  - Categoria: '" + categoria + "'");
             Log.d(TAG, "  - Prioridade: " + prioridadeSelecionada);
 
@@ -134,27 +134,9 @@ public class AbrirChamadoActivity extends AppCompatActivity {
             Log.d(TAG, "Cliente ID obtido: " + clienteId);
 
             // Criar o chamado
-            Log.d(TAG, "Criando objeto Chamado...");
             Chamado novoChamado = new Chamado(titulo, descricao, clienteId);
-
-            if (novoChamado == null) {
-                Log.e(TAG, "❌ ERRO: Falha ao criar objeto Chamado");
-                Toast.makeText(this, "Erro interno ao criar chamado", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Configurar dados adicionais do chamado
             novoChamado.setPrioridade(prioridadeSelecionada);
             novoChamado.setCategoria(categoria);
-
-            Log.d(TAG, "Objeto Chamado criado:");
-            Log.d(TAG, "  - Protocolo: " + novoChamado.getProtocoloFormatado());
-            Log.d(TAG, "  - Título: " + novoChamado.getTitulo());
-            Log.d(TAG, "  - Descrição: " + novoChamado.getDescricao());
-            Log.d(TAG, "  - Categoria: " + novoChamado.getCategoria());
-            Log.d(TAG, "  - Prioridade: " + novoChamado.getPrioridade());
-            Log.d(TAG, "  - Cliente ID: " + novoChamado.getClienteId());
-            Log.d(TAG, "  - Status: " + novoChamado.getStatus());
 
             // Verificar DAO
             if (chamadoDAO == null) {
@@ -164,16 +146,15 @@ public class AbrirChamadoActivity extends AppCompatActivity {
             }
 
             // Salvar no banco
-            Log.d(TAG, "Salvando chamado no banco...");
             long resultado = chamadoDAO.abrirChamado(novoChamado);
-            Log.d(TAG, "Resultado da operação: " + resultado);
 
             if (resultado > 0) {
                 Log.d(TAG, "✅ SUCESSO! Chamado salvo com ID: " + resultado);
 
-                // Atualizar o ID do chamado para gerar protocolo correto
                 novoChamado.setId(resultado);
+                novoChamado.setNumero(novoChamado.getProtocoloFormatado());
 
+                // Registrar auditoria
                 AuditoriaHelper.registrarCriacaoChamado(
                         this,
                         sessionManager.getUserId(),
@@ -181,54 +162,30 @@ public class AbrirChamadoActivity extends AppCompatActivity {
                         novoChamado.getTitulo()
                 );
 
-                // Log de debug adicional
-                Log.d(TAG, "=== DEBUG INFO APÓS INSERÇÃO ===");
-                Log.d(TAG, "ID retornado: " + resultado);
-                Log.d(TAG, "Protocolo final: " + novoChamado.getProtocoloFormatado());
-                Log.d(TAG, "Data de criação: " + novoChamado.getDataCriacaoFormatada());
-
-                // Verificar se o chamado foi realmente inserido
-                Chamado chamadoVerificacao = chamadoDAO.buscarChamadoPorId(resultado);
-                if (chamadoVerificacao != null) {
-                    Log.d(TAG, "✅ Verificação: Chamado encontrado no banco");
-                    Log.d(TAG, "Título verificado: " + chamadoVerificacao.getTitulo());
-                } else {
-                    Log.w(TAG, "⚠️ Atenção: Chamado não encontrado na verificação");
-                }
-
-                // Enviar notificação
-                try {
-                    NotificationHelper notificationHelper = new NotificationHelper(this);
-                    notificationHelper.enviarNotificacaoNovoChamado(
-                            novoChamado.getTitulo(),
-                            novoChamado.getPrioridade()
-                    );
-                    Log.d(TAG, "✅ Notificação enviada com sucesso");
-                } catch (Exception e) {
-                    Log.e(TAG, "⚠️ Erro ao enviar notificação (não crítico): ", e);
-                    // Não interrompe o fluxo, apenas loga o erro
-                }
+                // ✅ CORRETO: Notificar administradores
+                NotificationHelper notificationHelper = new NotificationHelper(this);
+                notificationHelper.notificarAdministradores(
+                        resultado,                       // chamadoId
+                        novoChamado.getTitulo(),        // titulo
+                        novoChamado.getPrioridade(),    // prioridade
+                        sessionManager.getUserName()    // nomeCliente
+                );
 
                 Toast.makeText(this,
                         "✅ Chamado " + novoChamado.getProtocoloFormatado() + " aberto com sucesso!",
                         Toast.LENGTH_LONG).show();
 
-                // Fechar a activity após sucesso
                 finish();
-
             } else {
-                Log.e(TAG, "❌ FALHA! Erro ao salvar no banco (resultado: " + resultado + ")");
-                Toast.makeText(this, "❌ Erro ao abrir chamado. Tente novamente.",
+                Log.e(TAG, "❌ ERRO ao salvar chamado");
+                Toast.makeText(this, "❌ Erro ao criar chamado. Tente novamente.",
                         Toast.LENGTH_SHORT).show();
             }
-
         } catch (Exception e) {
-            Log.e(TAG, "❌ ERRO CRÍTICO ao enviar chamado: ", e);
-            Toast.makeText(this, "❌ Erro crítico: " + e.getMessage(),
-                    Toast.LENGTH_LONG).show();
+            Log.e(TAG, "❌ ERRO: Erro ao enviar chamado", e);
+            Toast.makeText(this, "❌ Erro ao enviar chamado. Tente novamente.",
+                    Toast.LENGTH_SHORT).show();
         }
-
-        Log.d(TAG, "=== FIM DO ENVIO DE CHAMADO ===");
     }
 
     private boolean validarFormulario(String titulo, String descricao, int categoriaPosition) {

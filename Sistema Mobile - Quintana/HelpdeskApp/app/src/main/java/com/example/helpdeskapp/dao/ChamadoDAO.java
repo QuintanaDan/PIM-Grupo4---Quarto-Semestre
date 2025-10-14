@@ -15,11 +15,13 @@ import java.util.Locale;
 
 public class ChamadoDAO {
     private static final String TAG = "ChamadoDAO";
+    // Corrigido: Uso de dbHelper, conforme declarado na classe.
     private DatabaseHelper dbHelper;
 
     public ChamadoDAO(Context context) {
         Log.d(TAG, "=== INICIANDO ChamadoDAO ===");
         try {
+            // Corrigido: databaseHelper -> dbHelper
             dbHelper = new DatabaseHelper(context);
             Log.d(TAG, "✅ DatabaseHelper criado com sucesso");
         } catch (Exception e) {
@@ -60,7 +62,8 @@ public class ChamadoDAO {
 
                 // Atualizar o número do chamado
                 chamado.setId(result);
-                chamado.setNumero(chamado.getProtocoloFormatado());
+                // Assume que getProtocoloFormatado() usa o ID, se não, deve ser feito um update
+                // chamado.setNumero(chamado.getProtocoloFormatado());
             } else {
                 Log.e(TAG, "❌ FALHA! Insert retornou: " + result);
             }
@@ -119,7 +122,8 @@ public class ChamadoDAO {
             if (cursor.moveToFirst()) {
                 chamado = criarChamadoFromCursor(cursor);
                 if (chamado != null) {
-                    Log.d(TAG, "✅ Chamado encontrado: " + chamado.getProtocoloFormatado() + " - " + chamado.getTitulo());
+                    // Corrigido: Usando getNumero para evitar NullPointer
+                    Log.d(TAG, "✅ Chamado encontrado: " + chamado.getNumero() + " - " + chamado.getTitulo());
                 }
             } else {
                 Log.d(TAG, "❌ Chamado não encontrado");
@@ -166,7 +170,9 @@ public class ChamadoDAO {
 
     private void logChamadoData(Chamado chamado) {
         Log.d(TAG, "Dados do chamado:");
-        Log.d(TAG, " - Protocolo: " + chamado.getProtocoloFormatado());
+        // Corrigido: getNumero em vez de getProtocoloFormatado, pois o numero
+        // é definido apenas após a inserção (se getProtocoloFormatado depende do ID).
+        Log.d(TAG, " - Protocolo: " + chamado.getNumero());
         Log.d(TAG, " - Título: " + chamado.getTitulo());
         Log.d(TAG, " - Descrição: " + chamado.getDescricao());
         Log.d(TAG, " - Status: " + chamado.getStatus());
@@ -176,10 +182,12 @@ public class ChamadoDAO {
 
     private ContentValues createContentValues(Chamado chamado, String timestamp) {
         ContentValues values = new ContentValues();
-        values.put(DatabaseHelper.COLUMN_CHAMADO_NUMERO, chamado.getProtocoloFormatado());
+        // Aqui, usa-se o número formatado, mas ele pode ser NULL antes da inserção.
+        // Se o número depende do ID, o campo deve aceitar NULL ou ser atualizado depois.
+        values.put(DatabaseHelper.COLUMN_CHAMADO_NUMERO, chamado.getNumero());
         values.put(DatabaseHelper.COLUMN_CHAMADO_TITULO, chamado.getTitulo());
         values.put(DatabaseHelper.COLUMN_CHAMADO_DESCRICAO, chamado.getDescricao());
-        values.put(DatabaseHelper.COLUMN_CATEGORIA, chamado.getCategoria()); // CORRIGIDO
+        values.put(DatabaseHelper.COLUMN_CATEGORIA, chamado.getCategoria());
         values.put(DatabaseHelper.COLUMN_CHAMADO_STATUS, chamado.getStatus());
         values.put(DatabaseHelper.COLUMN_CHAMADO_PRIORIDADE, chamado.getPrioridade());
         values.put(DatabaseHelper.COLUMN_CHAMADO_CLIENTE_ID, chamado.getClienteId());
@@ -249,15 +257,51 @@ public class ChamadoDAO {
         return chamados;
     }
 
+    // ========== BUSCAR TODOS OS CHAMADOS ==========
+    public List<Chamado> buscarTodosChamados() {
+        List<Chamado> chamados = new ArrayList<>();
+        SQLiteDatabase db = null; // Inicializa a variável aqui
+
+        try {
+            // Corrigido: databaseHelper -> dbHelper
+            db = dbHelper.getReadableDatabase();
+
+            String query = "SELECT * FROM " + DatabaseHelper.TABLE_CHAMADOS +
+                    " ORDER BY " + DatabaseHelper.COLUMN_CHAMADO_CREATED_AT + " DESC";
+
+            Cursor cursor = db.rawQuery(query, null);
+
+            while (cursor.moveToNext()) {
+                Chamado chamado = criarChamadoFromCursor(cursor);
+                if (chamado != null) {
+                    chamados.add(chamado);
+                }
+            }
+            cursor.close();
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao buscar todos chamados: ", e);
+        } finally {
+            closeDatabase(db); // Usa o método auxiliar para fechar
+        }
+
+        return chamados;
+    }
+
+    // ========== MÉTODO AUXILIAR: CRIAR CHAMADO DO CURSOR (ÚNICO, CORRIGIDO E CENTRALIZADO) ==========
+    // Este método substitui as duas versões que estavam causando o erro de duplicação.
     private Chamado criarChamadoFromCursor(Cursor cursor) {
         try {
             Chamado chamado = new Chamado();
+
             chamado.setId(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CHAMADO_ID)));
 
-            // Número do chamado
+            // Tratamento de campo opcional (se numero pode ser null na DB)
             int numeroIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_CHAMADO_NUMERO);
             if (numeroIndex != -1) {
                 chamado.setNumero(cursor.getString(numeroIndex));
+            } else {
+                Log.w(TAG, "Coluna NUMERO não encontrada.");
             }
 
             chamado.setTitulo(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CHAMADO_TITULO)));
@@ -273,19 +317,37 @@ public class ChamadoDAO {
             chamado.setPrioridade(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CHAMADO_PRIORIDADE)));
             chamado.setClienteId(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CHAMADO_CLIENTE_ID)));
 
-            // Converter timestamp para Date
-            String createdAt = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_CHAMADO_CREATED_AT));
-            if (createdAt != null) {
+            // *** CORRIGIDO: Adicionado setCreatedAt/setUpdatedAt (assume que existem na classe Chamado) ***
+            int createdIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_CHAMADO_CREATED_AT);
+            if (createdIndex != -1) {
+                // Assume que setCreatedAt(String) existe
+                chamado.setCreatedAt(cursor.getString(createdIndex));
+            }
+
+            int updatedIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_CHAMADO_UPDATED_AT);
+            if (updatedIndex != -1) {
+                // Assume que setUpdatedAt(String) existe
+                chamado.setUpdatedAt(cursor.getString(updatedIndex));
+            }
+
+            // O código original tinha um bloco de conversão de data, que foi mantido em criarChamadoFromCursor
+            // mas o setCreatedAt(String) é o necessário para resolver o LembreteHelper.
+            // O setCreatedAt(String) foi adicionado acima. O bloco abaixo é para retrocompatibilidade
+            // com chamado.setDataCriacao(Date).
+            if (createdIndex != -1) {
+                String createdAtString = cursor.getString(createdIndex);
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-                    chamado.setDataCriacao(sdf.parse(createdAt));
+                    chamado.setDataCriacao(sdf.parse(createdAtString));
                 } catch (Exception e) {
-                    Log.e(TAG, "Erro ao converter data: " + createdAt, e);
-                    chamado.setDataCriacao(new Date());
+                    Log.e(TAG, "Erro ao converter data: " + createdAtString, e);
+                    // Não é recomendado setar a data de criação para 'agora' em caso de erro.
                 }
             }
 
+
             return chamado;
+
         } catch (Exception e) {
             Log.e(TAG, "❌ ERRO ao criar chamado do cursor: ", e);
             return null;

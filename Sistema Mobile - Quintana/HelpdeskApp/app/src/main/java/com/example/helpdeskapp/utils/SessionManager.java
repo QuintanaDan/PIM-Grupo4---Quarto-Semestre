@@ -29,6 +29,12 @@ public class SessionManager {
         editor.putString(KEY_USER_NAME, name);
         editor.putInt(KEY_USER_TYPE, userType);
         editor.commit();
+
+        // DEBUG
+        android.util.Log.d("SessionManager", "✅ Sessão criada:");
+        android.util.Log.d("SessionManager", "   UserID: " + userId);
+        android.util.Log.d("SessionManager", "   Nome: " + name);
+        android.util.Log.d("SessionManager", "   Tipo: " + userType + " (" + (userType == 1 ? "ADMIN" : "CLIENTE") + ")");
     }
 
     public boolean isLoggedIn() {
@@ -48,26 +54,34 @@ public class SessionManager {
     }
 
     public int getUserType() {
-        return pref.getInt(KEY_USER_TYPE, 1); // 1 = cliente por padrão
+        int tipo = pref.getInt(KEY_USER_TYPE, 0); // ✅ 0 = Cliente por padrão
+        android.util.Log.d("SessionManager", "🔍 getUserType() retornou: " + tipo);
+        return tipo;
     }
 
-    // NOVO: Método para fazer logout
     public void logout() {
-        editor.clear(); // Remove todos os dados salvos
+        editor.clear();
         editor.commit();
+        android.util.Log.d("SessionManager", "✅ Logout realizado");
     }
 
-    // NOVO: Método para verificar se é admin
+    // ✅ CORRIGIDO: Admin = 1
     public boolean isAdmin() {
-        return getUserType() == 0; // 0 = admin
+        int tipo = getUserType();
+        boolean admin = (tipo == 1);
+        android.util.Log.d("SessionManager", "🔍 isAdmin() - Tipo: " + tipo + ", isAdmin: " + admin);
+        return admin;
     }
 
-    // NOVO: Método para obter texto do tipo de usuário
+    // ✅ CORRIGIDO: Cliente = 0
+    public boolean isCliente() {
+        return getUserType() == 0;
+    }
+
     public String getUserTypeText() {
         return isAdmin() ? "Administrador" : "Cliente";
     }
 
-    // Método de Salvar a Sessão
     public void salvarSessao(Usuario usuario) {
         createLoginSession(
                 usuario.getId(),
@@ -76,5 +90,4 @@ public class SessionManager {
                 usuario.getTipo()
         );
     }
-
 }

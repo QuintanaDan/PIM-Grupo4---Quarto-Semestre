@@ -103,4 +103,10 @@
     <color name="warning">#FF9800</color>
     <color name="error">#F44336</color>
     <color name="info">#2196F3</color>
+
+    <color name="notificacao_nao_lida">#E3F2FD</color> <!-- Azul claro para light theme -->
+
+    <!-- Cores para a Main Activity -->
+    <color name="border_color">#E0E0E0</color>
+
 </resources>

@@ -22,6 +22,7 @@ import com.example.helpdeskapp.utils.SessionManager;
 import com.example.helpdeskapp.utils.PDFHelper;
 import com.example.helpdeskapp.utils.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
+import com.example.helpdeskapp.utils.NotificationHelper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -357,12 +358,21 @@ public class AdminPanelActivity extends AppCompatActivity {
         boolean sucesso = chamadoDAO.atualizarStatus(chamado.getId(), novoStatus);
 
         if (sucesso) {
-            // Registrar na auditoria
+            // Registrar auditoria
             AuditoriaHelper.registrarAlteracaoStatus(
                     this,
                     sessionManager.getUserId(),
                     chamado.getId(),
                     statusAntigo,
+                    novoStatus
+            );
+
+            // ATUALIZADO: Notificar cliente sobre mudança de status
+            NotificationHelper notificationHelper = new NotificationHelper(this);
+            notificationHelper.enviarNotificacaoMudancaStatus(
+                    chamado.getClienteId(),
+                    chamado.getId(),
+                    chamado.getTitulo(),
                     novoStatus
             );
 

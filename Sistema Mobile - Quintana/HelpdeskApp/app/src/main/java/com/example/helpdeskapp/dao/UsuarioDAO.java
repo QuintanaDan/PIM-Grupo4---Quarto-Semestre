@@ -4,15 +4,21 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import com.example.helpdeskapp.database.DatabaseHelper;
 import com.example.helpdeskapp.models.Usuario;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UsuarioDAO {
-    private SQLiteDatabase database;
+    private static final String TAG = "UsuarioDAO";
     private DatabaseHelper dbHelper;
+    private SQLiteDatabase database;
+    private Context context;
 
     public UsuarioDAO(Context context) {
-        dbHelper = new DatabaseHelper(context);
+        this.context = context;
+        this.dbHelper = new DatabaseHelper(context);
     }
 
     public void open() {
@@ -35,7 +41,6 @@ public class UsuarioDAO {
         return database.insert(DatabaseHelper.TABLE_USUARIOS, null, values);
     }
 
-    // NOVO: Método para verificar login
     public Usuario verificarLogin(String email, String senha) {
         String[] columns = {
                 DatabaseHelper.COLUMN_USER_ID,
@@ -72,7 +77,6 @@ public class UsuarioDAO {
         return usuario;
     }
 
-    // NOVO: Método para contar usuários
     public int contarUsuarios() {
         String countQuery = "SELECT COUNT(*) FROM " + DatabaseHelper.TABLE_USUARIOS;
         Cursor cursor = database.rawQuery(countQuery, null);
@@ -86,7 +90,6 @@ public class UsuarioDAO {
         return count;
     }
 
-    // NOVO: Método para buscar usuário por ID
     public Usuario buscarPorId(long id) {
         String[] columns = {
                 DatabaseHelper.COLUMN_USER_ID,
@@ -120,5 +123,41 @@ public class UsuarioDAO {
         }
 
         return usuario;
+    }
+
+    // ========== BUSCAR TODOS OS ADMINISTRADORES ==========
+    public List<Usuario> buscarTodosAdministradores() {
+        List<Usuario> admins = new ArrayList<>();
+        SQLiteDatabase db = null;
+
+        try {
+            db = dbHelper.getReadableDatabase();
+
+            String query = "SELECT * FROM " + DatabaseHelper.TABLE_USUARIOS +
+                    " WHERE " + DatabaseHelper.COLUMN_USER_TIPO + " = 1";
+
+            Cursor cursor = db.rawQuery(query, null);
+
+            while (cursor.moveToNext()) {
+                Usuario usuario = new Usuario();
+                usuario.setId(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_USER_ID)));
+                usuario.setNome(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_USER_NOME)));
+                usuario.setEmail(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_USER_EMAIL)));
+                usuario.setTipo(cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_USER_TIPO)));
+                admins.add(usuario);
+            }
+            cursor.close();
+
+            Log.d(TAG, "✅ Total de administradores: " + admins.size());
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao buscar administradores: ", e);
+        } finally {
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
+        }
+
+        return admins;
     }
 }

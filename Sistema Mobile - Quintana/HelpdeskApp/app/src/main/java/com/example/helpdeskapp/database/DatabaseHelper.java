@@ -11,7 +11,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Database info
     private static final String DATABASE_NAME = "helpdesk.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     // CONSTANTES GERAIS
     public static final String COLUMN_ID = "_id";
@@ -59,12 +59,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String USUARIO_ID = COLUMN_USER_ID;
 
     // TABELA AVALIACOES
-    private static final String TABLE_AVALIACOES = "avaliacoes";
-    private static final String AVALIACAO_ID = "id";
-    private static final String AVALIACAO_CHAMADO_ID = "chamado_id";
-    private static final String AVALIACAO_NOTA = "nota";
-    private static final String AVALIACAO_COMENTARIO = "comentario";
-    private static final String AVALIACAO_DATA = "data_avaliacao";
+    public static final String TABLE_AVALIACOES = "avaliacoes";
+    public static final String COLUMN_AVALIACAO_ID = "id";
+    public static final String COLUMN_AVALIACAO_CHAMADO_ID = "chamado_id";
+    public static final String COLUMN_AVALIACAO_USUARIO_ID = "usuario_id";
+    public static final String COLUMN_AVALIACAO_NOTA = "nota";
+    public static final String COLUMN_AVALIACAO_COMENTARIO = "comentario";
+    public static final String COLUMN_AVALIACAO_CREATED_AT = "created_at";
 
     // TABELA DE ANEXOS
     private static final String TABLE_ANEXOS = "anexos";
@@ -129,16 +130,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + ")";
 
     // SQL CRIAR TABELA AVALIACOES
-    private static final String CREATE_TABLE_AVALIACOES =
-            "CREATE TABLE " + TABLE_AVALIACOES + " (" +
-                    AVALIACAO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    AVALIACAO_CHAMADO_ID + " INTEGER NOT NULL," +
-                    AVALIACAO_NOTA + " INTEGER NOT NULL," +
-                    AVALIACAO_COMENTARIO + " TEXT," +
-                    AVALIACAO_DATA + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
-                    "FOREIGN KEY(" + AVALIACAO_CHAMADO_ID + ") REFERENCES " +
-                    TABLE_CHAMADOS + "(" + COLUMN_CHAMADO_ID + ")" +
-                    ");";
+    private static final String CREATE_TABLE_AVALIACOES = "CREATE TABLE " + TABLE_AVALIACOES + " (" +
+            COLUMN_AVALIACAO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +  // ✅ CORRETO
+            COLUMN_AVALIACAO_CHAMADO_ID + " INTEGER NOT NULL," +
+            COLUMN_AVALIACAO_USUARIO_ID + " INTEGER NOT NULL," +
+            COLUMN_AVALIACAO_NOTA + " INTEGER NOT NULL," +
+            COLUMN_AVALIACAO_COMENTARIO + " TEXT," +
+            COLUMN_AVALIACAO_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+            "FOREIGN KEY(" + COLUMN_AVALIACAO_CHAMADO_ID + ") REFERENCES " +
+            TABLE_CHAMADOS + "(" + COLUMN_CHAMADO_ID + ")," +
+            "FOREIGN KEY(" + COLUMN_AVALIACAO_USUARIO_ID + ") REFERENCES " +
+            TABLE_USUARIOS + "(" + COLUMN_USER_ID + ")" +
+            ");";
 
     // SQL CRIAR TABELA ANEXOS
     private static final String CREATE_TABLE_ANEXOS =
@@ -205,6 +208,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     TABLE_USUARIOS + "(" + COLUMN_USER_ID + ")" +
                     ");";
 
+    // Tabela: Notificações
+    public static final String TABLE_NOTIFICACOES = "notificacoes";
+    public static final String COLUMN_NOTIF_ID = "id";
+    public static final String COLUMN_NOTIF_USUARIO_ID = "usuario_id";
+    public static final String COLUMN_NOTIF_TIPO = "tipo";
+    public static final String COLUMN_NOTIF_TITULO = "titulo";
+    public static final String COLUMN_NOTIF_MENSAGEM = "mensagem";
+    public static final String COLUMN_NOTIF_CHAMADO_ID = "chamado_id";
+    public static final String COLUMN_NOTIF_LIDA = "lida";
+    public static final String COLUMN_NOTIF_CREATED_AT = "created_at";
+
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -249,6 +263,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao criar tabelas: ", e);
         }
+
+        String CREATE_TABLE_NOTIFICACOES = "CREATE TABLE " + TABLE_NOTIFICACOES + " (" +
+                COLUMN_NOTIF_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                COLUMN_NOTIF_USUARIO_ID + " INTEGER NOT NULL," +
+                COLUMN_NOTIF_TIPO + " TEXT NOT NULL," +
+                COLUMN_NOTIF_TITULO + " TEXT NOT NULL," +
+                COLUMN_NOTIF_MENSAGEM + " TEXT," +
+                COLUMN_NOTIF_CHAMADO_ID + " INTEGER," +
+                COLUMN_NOTIF_LIDA + " INTEGER DEFAULT 0," +
+                COLUMN_NOTIF_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                "FOREIGN KEY(" + COLUMN_NOTIF_USUARIO_ID + ") REFERENCES " +
+                TABLE_USUARIOS + "(" + COLUMN_USER_ID + ")," +
+                "FOREIGN KEY(" + COLUMN_NOTIF_CHAMADO_ID + ") REFERENCES " +
+                TABLE_CHAMADOS + "(" + COLUMN_CHAMADO_ID + ")" +
+                ");";
+
+        db.execSQL(CREATE_TABLE_NOTIFICACOES);
     }
 
     @Override
@@ -309,6 +340,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } catch (Exception e) {
                 Log.e(TAG, "❌ Erro ao criar tabela auditoria: ", e);
             }
+        }
+
+        if (oldVersion < 8) {
+            // Criar tabela de notificações
+            String CREATE_TABLE_NOTIFICACOES = "CREATE TABLE " + TABLE_NOTIFICACOES + " (" +
+                    COLUMN_NOTIF_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    COLUMN_NOTIF_USUARIO_ID + " INTEGER NOT NULL," +
+                    COLUMN_NOTIF_TIPO + " TEXT NOT NULL," +
+                    COLUMN_NOTIF_TITULO + " TEXT NOT NULL," +
+                    COLUMN_NOTIF_MENSAGEM + " TEXT," +
+                    COLUMN_NOTIF_CHAMADO_ID + " INTEGER," +
+                    COLUMN_NOTIF_LIDA + " INTEGER DEFAULT 0," +
+                    COLUMN_NOTIF_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                    "FOREIGN KEY(" + COLUMN_NOTIF_USUARIO_ID + ") REFERENCES " +
+                    TABLE_USUARIOS + "(" + COLUMN_USER_ID + ")," +
+                    "FOREIGN KEY(" + COLUMN_NOTIF_CHAMADO_ID + ") REFERENCES " +
+                    TABLE_CHAMADOS + "(" + COLUMN_CHAMADO_ID + ")" +
+                    ");";
+            db.execSQL(CREATE_TABLE_NOTIFICACOES);
         }
     }
 
@@ -389,11 +439,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static String getComentarioTipo() { return COMENTARIO_TIPO; }
 
     public static String getTableAvaliacoes() { return TABLE_AVALIACOES; }
-    public static String getAvaliacaoId() { return AVALIACAO_ID; }
-    public static String getAvaliacaoChamadoId() { return AVALIACAO_CHAMADO_ID; }
-    public static String getAvaliacaoNota() { return AVALIACAO_NOTA; }
-    public static String getAvaliacaoComentario() { return AVALIACAO_COMENTARIO; }
-    public static String getAvaliacaoData() { return AVALIACAO_DATA; }
+    public static String getAvaliacaoId() { return COLUMN_AVALIACAO_ID; }  // ✅ CORRETO
+    public static String getAvaliacaoChamadoId() { return COLUMN_AVALIACAO_CHAMADO_ID; }
+    public static String getAvaliacaoUsuarioId() { return COLUMN_AVALIACAO_USUARIO_ID; }
+    public static String getAvaliacaoNota() { return COLUMN_AVALIACAO_NOTA; }
+    public static String getAvaliacaoComentario() { return COLUMN_AVALIACAO_COMENTARIO; }
+    public static String getAvaliacaoCreatedAt() { return COLUMN_AVALIACAO_CREATED_AT; }
 
     public static String getTableAnexos() { return TABLE_ANEXOS; }
     public static String getAnexoId() { return ANEXO_ID; }

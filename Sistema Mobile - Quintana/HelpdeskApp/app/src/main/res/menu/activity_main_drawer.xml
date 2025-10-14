@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_abrir_chamado"
+            android:icon="@drawable/ic_add_circle"
+            android:title="Abrir Chamado" />
+        <item
+            android:id="@+id/nav_meus_chamados"
+            android:icon="@drawable/ic_list"
+            android:title="Meus Chamados" />
+        <item
+            android:id="@+id/nav_buscar_chamado"
+            android:icon="@drawable/ic_search"
+            android:title="Buscar Chamado" />
+        <item
+            android:id="@+id/nav_todos_chamados"
+            android:icon="@drawable/ic_dashboard"
+            android:title="Todos Chamados"
+            android:visible="false" /> </group>
+
+    <item android:title="Administração">
+        <menu>
+            <item
+                android:id="@+id/nav_dashboard"
+                android:icon="@drawable/ic_dashboard"
+                android:title="Dashboard"
+                android:visible="false" />
+            <item
+                android:id="@+id/nav_gerenciar_tags"
+                android:icon="@drawable/ic_tag"
+                android:title="Gerenciar Tags"
+                android:visible="false" />
+            <item
+                android:id="@+id/nav_historico"
+                android:icon="@drawable/ic_history"
+                android:title="Histórico de Auditoria"
+                android:visible="false" />
+        </menu>
+    </item>
+
+    <item android:title="Configurações e Ajuda">
+        <menu>
+            <item
+                android:id="@+id/nav_diversidade"
+                android:icon="@drawable/ic_diversity_two"
+                android:title="Consciência e Diversidade" /> <item
+            android:id="@+id/nav_personalizar_tema"
+            android:icon="@drawable/ic_palette"
+            android:title="Personalizar Tema" />
+            <item
+                android:id="@+id/nav_mover"
+                android:icon="@drawable/ic_diversity"
+                android:title="Conheça a MOVER" />
+        </menu>
+    </item>
+
+    <item android:title="">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_logout"
+                android:title="Sair da Conta" />
+        </menu>
+    </item>
+</menu>

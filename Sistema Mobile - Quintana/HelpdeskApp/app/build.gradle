@@ -55,6 +55,9 @@ dependencies {
     implementation 'androidx.activity:activity:1.8.0'
     implementation 'androidx.fragment:fragment:1.6.2'
 
+    // MPAndroidChart - Biblioteca de Gráficos
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
 }
 
 

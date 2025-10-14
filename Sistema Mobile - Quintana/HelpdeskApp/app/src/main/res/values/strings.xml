@@ -2,10 +2,24 @@
     <string name="app_name">HelpdeskApp</string>
     <string name="logo_desc">Logotipo do Helpdesk</string>
 
-    <!-- Adicionar estas strings -->
+    <string name="navigation_drawer_open">Abrir menu de navegação</string>
+    <string name="navigation_drawer_close">Fechar menu de navegação</string>
     <string name="abrir_chamado">Abrir Chamado</string>
     <string name="meus_chamados">Meus Chamados</string>
     <string name="buscar_chamado">Buscar Chamado</string>
     <string name="todos_chamados">Todos Chamados</string>
     <string name="logout">Sair</string>
+    <!-- Frases de Consciência Racial -->
+    <string-array name="frases_consciencia">
+        <item>🖤 A diversidade fortalece a tecnologia!</item>
+        <item>✊🏿 Representatividade importa!</item>
+        <item>🌍 Juntos pela inclusão racial!</item>
+        <item>💡 Inovação nasce da diversidade!</item>
+        <item>👑 Ancestralidade e tecnologia unidas!</item>
+        <item>🎯 Cada voz negra transforma o futuro!</item>
+        <item>🚀 A tech é mais forte quando é diversa!</item>
+        <item>✨ Sua presença aqui importa!</item>
+        <item>🔥 Juntos construímos um futuro mais justo!</item>
+        <item>💪🏿 Orgulho e resistência na tecnologia!</item>
+    </string-array>
 </resources>

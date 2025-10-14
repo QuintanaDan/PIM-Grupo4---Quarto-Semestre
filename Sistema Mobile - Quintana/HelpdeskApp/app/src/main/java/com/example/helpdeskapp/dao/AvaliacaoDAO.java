@@ -64,7 +64,7 @@ public class AvaliacaoDAO {
                 avaliacao.setChamadoId(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.getAvaliacaoChamadoId())));
                 avaliacao.setNota(cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.getAvaliacaoNota())));
                 avaliacao.setComentario(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.getAvaliacaoComentario())));
-                avaliacao.setDataAvaliacao(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.getAvaliacaoData())));
+                avaliacao.setDataAvaliacao(cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.getAvaliacaoCreatedAt())));
 
                 Log.d(TAG, "✅ Avaliação encontrada: " + avaliacao.getNota() + " estrelas");
             } else {
