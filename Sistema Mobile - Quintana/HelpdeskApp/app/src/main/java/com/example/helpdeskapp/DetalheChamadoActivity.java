@@ -38,7 +38,7 @@ import com.example.helpdeskapp.utils.FileHelper;
 import com.example.helpdeskapp.utils.SessionManager;
 import com.example.helpdeskapp.utils.NotificationHelper;
 import com.example.helpdeskapp.utils.PDFHelper;
-import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.helpers.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
 
 import java.io.File;
@@ -674,45 +674,81 @@ public class DetalheChamadoActivity extends AppCompatActivity {
             return;
         }
 
+        if (sessionManager == null) {
+            Log.e(TAG, "SessionManager está nulo ao tentar enviar comentário.");
+            Toast.makeText(this, "Erro interno (sessão). Reinicie o app.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Proteção caso id do chamado esteja inválido
+        if (chamadoId <= 0) {
+            Log.e(TAG, "ID do chamado inválido: " + chamadoId);
+            Toast.makeText(this, "Erro: chamado inválido.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Desabilitar botão enquanto processa
+        btnEnviarComentario.setEnabled(false);
+
         Comentario comentario = new Comentario();
         comentario.setChamadoId(chamadoId);
-        comentario.setUsuarioId(sessionManager.getUserId());
+        comentario.setUsuarioId(sessionManager.getUserId()); // pode ser zero se não logado
         comentario.setTexto(textoComentario);
 
-        long resultado = comentarioDAO.inserirComentario(comentario);
-
-        if (resultado > 0) {
-            Log.d(TAG, "✅ Comentário inserido com sucesso! ID: " + resultado);
-
-            etNovoComentario.setText("");
-
-            // Registrar auditoria
-            AuditoriaHelper.registrarComentario(
-                    this,
-                    sessionManager.getUserId(),
-                    chamadoId
-            );
-
-            // CORRIGIDO: Enviar notificação ao dono do chamado
-            NotificationHelper notificationHelper = new NotificationHelper(this);
-
-            // Verificar se chamado não é null
-            if (chamado != null && chamado.getClienteId() != sessionManager.getUserId()) {
-                notificationHelper.enviarNotificacaoNovoComentario(
-                        chamado.getClienteId(),         // userId do dono
-                        chamadoId,                       // chamadoId
-                        chamado.getTitulo(),            // titulo do chamado
-                        sessionManager.getUserName()    // nome do autor do comentário
-                );
+        // Operação de DB em background
+        new Thread(() -> {
+            long resultado = -1;
+            try {
+                resultado = comentarioDAO.inserirComentario(comentario);
+            } catch (Exception e) {
+                Log.e(TAG, "Erro inserindo comentário em background", e);
             }
 
-            carregarComentarios();
+            long finalResultado = resultado;
+            runOnUiThread(() -> {
+                btnEnviarComentario.setEnabled(true);
+                if (finalResultado > 0) {
+                    Log.d(TAG, "✅ Comentário inserido com sucesso! ID: " + finalResultado);
+                    etNovoComentario.setText("");
 
-            Toast.makeText(this, "✅ Comentário adicionado!", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "❌ Erro ao adicionar comentário", Toast.LENGTH_SHORT).show();
-        }
+                    // Registrar auditoria (se houver)
+                    try {
+                        AuditoriaHelper.registrarComentario(
+                                this,
+                                sessionManager.getUserId(),
+                                chamadoId
+                        );
+                    } catch (Exception e) {
+                        Log.w(TAG, "Falha ao registrar auditoria do comentário", e);
+                    }
+
+                    // Enviar notificação ao dono do chamado (se implementado)
+                    try {
+                        NotificationHelper notificationHelper = new NotificationHelper(this);
+                        if (chamado != null && chamado.getClienteId() != sessionManager.getUserId()) {
+                            notificationHelper.enviarNotificacaoNovoComentario(
+                                    chamado.getClienteId(),
+                                    chamadoId,
+                                    chamado.getTitulo(),
+                                    sessionManager.getUserName()
+                            );
+                        }
+                    } catch (Exception e) {
+                        Log.w(TAG, "Erro ao enviar notificação de novo comentário", e);
+                    }
+
+                    // Recarrega lista de comentários
+                    carregarComentarios();
+
+                    Toast.makeText(this, "✅ Comentário adicionado!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e(TAG, "❌ Falha ao inserir comentário. resultado=" + finalResultado);
+                    Toast.makeText(this, "❌ Erro ao adicionar comentário. Tente novamente.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }).start();
     }
+
 
     // ========== MÉTODOS DE AVALIAÇÃO ==========
 

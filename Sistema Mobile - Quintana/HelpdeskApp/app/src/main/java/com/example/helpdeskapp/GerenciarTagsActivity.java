@@ -17,7 +17,7 @@ import com.example.helpdeskapp.adapters.TagAdapter;
 import com.example.helpdeskapp.dao.TagDAO;
 import com.example.helpdeskapp.models.Tag;
 import com.example.helpdeskapp.utils.SessionManager;
-import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.helpers.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
 import java.util.ArrayList;
 import java.util.List;

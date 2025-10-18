@@ -10,9 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.example.helpdeskapp.dao.AvaliacaoDAO;
 import com.example.helpdeskapp.models.Avaliacao;
-import com.example.helpdeskapp.utils.AuditoriaHelper;
 import com.example.helpdeskapp.utils.SessionManager;
-import com.example.helpdeskapp.utils.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
 
 public class AvaliarChamadoActivity extends AppCompatActivity {

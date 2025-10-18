@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log; // ✅ ADICIONAR ESTE IMPORT
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,26 +24,27 @@ import android.widget.Toast;
 
 import com.example.helpdeskapp.utils.SessionManager;
 import com.example.helpdeskapp.database.DatabaseHelper;
-import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.helpers.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
-import com.example.helpdeskapp.R;
 import com.example.helpdeskapp.adapters.ChamadoRecenteAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.helpdeskapp.adapters.ChamadoRecenteAdapter;
+
 import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.models.Chamado;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.example.helpdeskapp.helpers.SyncHelper;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final String TAG = "MainActivity"; // ✅ ADICIONAR TAG
 
     // ========== COMPONENTES DA INTERFACE ==========
     private TextView tvBemVindo, tvTipoUsuario;
     private TextView tvChamadosAbertos, tvChamadosProgresso;
-    private TextView tvBadgeNotificacoes; // Declarado
-    private ImageButton btnNotifications; // Declarado
+    private TextView tvBadgeNotificacoes;
+    private ImageButton btnNotifications;
 
     // Componentes do Menu Lateral
     private DrawerLayout drawer;
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private SessionManager sessionManager;
     private DatabaseHelper dbHelper;
     private ThemeManager themeManager;
-    private NotificacaoDAO notificacaoDAO; // Declarado
+    private NotificacaoDAO notificacaoDAO;
 
     private int currentActivityTheme;
     private RecyclerView recyclerViewChamadosRecentes;
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // ========== CONFIGURAR LAYOUT ==========
         setContentView(R.layout.activity_main);
 
-        // ✅ CORREÇÃO APLICADA: Inicializa o DAO antes de ser usado
+        // ✅ Inicializa o DAO antes de ser usado
         notificacaoDAO = new NotificacaoDAO(this);
 
         // 2. CONFIGURAÇÃO DO TOOLBAR/DRAWER
@@ -114,26 +116,57 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // ========== ATUALIZAR DADOS DINÂMICOS ==========
         updateStatusCards();
         carregarChamadosRecentes();
-
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Recria a Activity se o tema mudou
+
+        // Verificar mudança de tema
         if (themeManager.getCurrentTheme() != currentActivityTheme) {
             recreate();
             return;
         }
-        // Atualiza dados na volta para a Activity
+
+        // Sincronizar com API
+        sincronizarDados();
+
+        // Atualizar dados na tela
         updateStatusCards();
         atualizarBadgeNotificacoes();
         carregarChamadosRecentes();
     }
 
+    // ✅ MÉTODO CORRIGIDO
+    private void sincronizarDados() {
+        if (sessionManager.getToken() != null) {
+            Log.d(TAG, "🔄 Sincronizando dados com API...");
+
+            SyncHelper.sincronizarChamados(this, new SyncHelper.SyncCallback() {
+                @Override
+                public void onSuccess(String message) {
+                    Log.d(TAG, "✅ " + message);
+
+                    // Atualizar UI na thread principal
+                    runOnUiThread(() -> {
+                        updateStatusCards();
+                        carregarChamadosRecentes();
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+                    Log.w(TAG, "⚠️ " + error);
+                    // Continuar com dados locais
+                }
+            });
+        } else {
+            Log.d(TAG, "💾 Modo offline - usando dados locais");
+        }
+    }
+
     private void configurarBotaoNotificacoes() {
-        // Inicialização de componentes do botão de notificação (feito apenas uma vez)
+        // Inicialização de componentes do botão de notificação
         btnNotifications = findViewById(R.id.btnNotifications);
         tvBadgeNotificacoes = findViewById(R.id.tvBadgeNotificacoes);
 
@@ -147,9 +180,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void atualizarBadgeNotificacoes() {
-        // ✅ O notificacaoDAO não é mais null aqui.
         long usuarioId = sessionManager.getUserId();
+
+        notificacaoDAO.open();
         int naoLidas = notificacaoDAO.contarNaoLidas(usuarioId);
+        notificacaoDAO.close();
 
         if (naoLidas > 0) {
             tvBadgeNotificacoes.setVisibility(View.VISIBLE);
@@ -191,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_diversidade) {
             startActivity(new Intent(MainActivity.this, DiversidadeActivity.class));
         } else if (id == R.id.nav_mover) {
-            abrirSiteDiversidade(); // Mantido como link externo/modal
+            abrirSiteDiversidade();
         } else if (id == R.id.nav_logout) {
             mostrarConfirmacaoLogout();
         }
@@ -202,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void redirecionarParaLogin() {
         Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
@@ -216,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         recyclerViewChamadosRecentes = findViewById(R.id.recyclerViewChamadosRecentes);
         tvMensagemVazio = findViewById(R.id.tvMensagemVazio);
 
-        // Inicializa o DatabaseHelper aqui
+        // Inicializa o DatabaseHelper
         dbHelper = new DatabaseHelper(this);
         chamadoDAO = new ChamadoDAO(this);
         chamadosRecentes = new ArrayList<>();
@@ -234,7 +270,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateStatusCards() {
-        // Verifica se o dbHelper foi inicializado corretamente antes de usar
         if (dbHelper == null) return;
 
         int abertos = dbHelper.countChamadosByStatus("Aberto");
@@ -244,24 +279,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tvChamadosProgresso.setText(String.valueOf(emAndamento));
     }
 
-
     private void configurarInformacoesUsuario() {
         String nomeUsuario = sessionManager.getUserName();
         int tipoUsuario = sessionManager.getUserType();
 
-        // DEBUG: Verificar tipo
-        android.util.Log.d("MainActivity", "👤 Usuário: " + nomeUsuario);
-        android.util.Log.d("MainActivity", "🔑 Tipo: " + tipoUsuario + " (" +
+        Log.d(TAG, "👤 Usuário: " + nomeUsuario);
+        Log.d(TAG, "🔑 Tipo: " + tipoUsuario + " (" +
                 (tipoUsuario == 1 ? "ADMIN" : "CLIENTE") + ")");
 
-        // AQUI INICIA A LÓGICA DA MENSAGEM DE CONSCIÊNCIA RACIAL
-
-        // 1. Array de frases para sorteio
-        // É essencial que você tenha o array de strings em res/values/strings.xml:
-        // <string-array name="frases_consciencia">...</string-array>
+        // Array de frases para consciência racial
         String[] frasesConsciencia = getResources().getStringArray(R.array.frases_consciencia);
 
-        // 2. Sortear uma frase
+        // Sortear uma frase
         String fraseSorteada = frasesConsciencia[(int) (Math.random() * frasesConsciencia.length)];
 
         String textoBemVindo;
@@ -365,11 +394,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void configurarChamadosRecentes() {
         if (recyclerViewChamadosRecentes == null) {
-            android.util.Log.e("MainActivity", "❌ RecyclerView é null!");
+            Log.e(TAG, "❌ RecyclerView é null!");
             return;
         }
 
-        android.util.Log.d("MainActivity", "✅ Configurando RecyclerView...");
+        Log.d(TAG, "✅ Configurando RecyclerView...");
         recyclerViewChamadosRecentes.setLayoutManager(new LinearLayoutManager(this));
         chamadoRecenteAdapter = new ChamadoRecenteAdapter(this, chamadosRecentes);
         recyclerViewChamadosRecentes.setAdapter(chamadoRecenteAdapter);
@@ -377,14 +406,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void carregarChamadosRecentes() {
         if (recyclerViewChamadosRecentes == null || tvMensagemVazio == null) {
-            android.util.Log.e("MainActivity", "❌ Componentes não inicializados!");
+            Log.e(TAG, "❌ Componentes não inicializados!");
             return;
         }
 
         if (chamadoDAO == null) {
-            android.util.Log.e("MainActivity", "❌ ChamadoDAO é null!");
+            Log.e(TAG, "❌ ChamadoDAO é null!");
             return;
         }
+
+        chamadoDAO.open();
 
         long usuarioId = sessionManager.getUserId();
 
@@ -395,6 +426,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             todosChamados = chamadoDAO.listarChamadosPorCliente(usuarioId);
         }
+
+        chamadoDAO.close();
 
         if (todosChamados.isEmpty()) {
             recyclerViewChamadosRecentes.setVisibility(View.GONE);
@@ -409,5 +442,4 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             chamadoRecenteAdapter.updateList(chamadosRecentes);
         }
     }
-
 }

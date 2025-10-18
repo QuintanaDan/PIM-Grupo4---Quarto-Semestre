@@ -210,29 +210,40 @@ public class DashboardActivity extends AppCompatActivity {
 
     // ========== GRÁFICO DE BARRAS (Prioridades) ==========
     private void configurarGraficoBarras() {
+        if (stats == null) {
+            Log.w("DashboardActivity", "Stats nulo — pulando configurarGraficoBarras()");
+            return;
+        }
+
+        // Valores (y) como float — x são índices
         List<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(0f, stats.getPrioridadeAlta()));
-        entries.add(new BarEntry(1f, stats.getPrioridadeMedia()));
-        entries.add(new BarEntry(2f, stats.getPrioridadeBaixa()));
+        entries.add(new BarEntry(0f, (float) stats.getPrioridadeAlta()));
+        entries.add(new BarEntry(1f, (float) stats.getPrioridadeMedia()));
+        entries.add(new BarEntry(2f, (float) stats.getPrioridadeBaixa()));
 
         BarDataSet dataSet = new BarDataSet(entries, "Prioridade");
-
-        // Cores
+        // Cores personalizadas
         List<Integer> colors = new ArrayList<>();
-        colors.add(Color.parseColor("#F44336")); // Vermelho - Alta
-        colors.add(Color.parseColor("#FF9800")); // Laranja - Média
-        colors.add(Color.parseColor("#4CAF50")); // Verde - Baixa
+        colors.add(Color.parseColor("#F44336")); // Alta
+        colors.add(Color.parseColor("#FF9800")); // Média
+        colors.add(Color.parseColor("#4CAF50")); // Baixa
         dataSet.setColors(colors);
-
         dataSet.setValueTextSize(12f);
+        dataSet.setValueTextColor(Color.BLACK); // melhor contraste
+
+        // Remove desenho de valores se quiser menos poluição:
+        // dataSet.setDrawValues(false);
 
         BarData data = new BarData(dataSet);
-        data.setBarWidth(0.5f);
+        // Ajuste de largura - tenta não ocupar 100% do espaço
+        data.setBarWidth(0.6f);
 
         barChartPrioridade.setData(data);
 
-        // Configurações
-        barChartPrioridade.getDescription().setEnabled(false);
+        // Desliga descrição e eixo direito
+        if (barChartPrioridade.getDescription() != null) {
+            barChartPrioridade.getDescription().setEnabled(false);
+        }
         barChartPrioridade.setFitBars(true);
         barChartPrioridade.getAxisRight().setEnabled(false);
 
@@ -240,15 +251,22 @@ public class DashboardActivity extends AppCompatActivity {
         XAxis xAxis = barChartPrioridade.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
+        xAxis.setLabelCount(3, true); // forçar 3 labels
         xAxis.setDrawGridLines(false);
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(
-                new String[]{"Alta", "Média", "Baixa"}
-        ));
+        xAxis.setCenterAxisLabels(false);
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(new String[]{"Alta", "Média", "Baixa"}));
 
-        // Legenda
-        barChartPrioridade.getLegend().setEnabled(false);
+        // Eixo Y
+        barChartPrioridade.getAxisLeft().setGranularity(1f);
+        barChartPrioridade.getAxisLeft().setDrawGridLines(true);
 
-        barChartPrioridade.animateY(1000);
+        // Legend
+        if (barChartPrioridade.getLegend() != null) {
+            barChartPrioridade.getLegend().setEnabled(false);
+        }
+
+        // Animação e redraw
+        barChartPrioridade.animateY(800);
         barChartPrioridade.invalidate();
     }
 

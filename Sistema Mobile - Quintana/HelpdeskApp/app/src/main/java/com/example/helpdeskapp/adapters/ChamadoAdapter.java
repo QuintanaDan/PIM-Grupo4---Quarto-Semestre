@@ -153,7 +153,7 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ChamadoV
             tvPrioridade = itemView.findViewById(R.id.tvPrioridadeChamado);
             tvData = itemView.findViewById(R.id.tvDataChamado);
 
-            // OPCIONAL: RecyclerView de tags (só se existir no layout)
+            //  RecyclerView de tags
             try {
                 recyclerViewTags = itemView.findViewById(R.id.rvTagsChamado);
             } catch (Exception e) {

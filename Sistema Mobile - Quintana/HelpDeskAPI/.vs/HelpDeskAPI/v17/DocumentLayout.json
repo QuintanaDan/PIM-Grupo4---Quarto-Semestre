@@ -1,0 +1,361 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\models\\usuario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\models\\usuario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\models\\tag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\models\\tag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\models\\notificacao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\models\\notificacao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\models\\comentario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\models\\comentario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\models\\chamadotag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\models\\chamadotag.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\models\\chamado.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\models\\chamado.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\models\\auditoria.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\models\\auditoria.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\dtos\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\dtos\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\dtos\\comentariodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\dtos\\comentariodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\dtos\\chamadodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\dtos\\chamadodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\controllers\\comentarioscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\controllers\\comentarioscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\controllers\\chamadoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\controllers\\chamadoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\helpdeskapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\helpdeskapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\helpdeskapi.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\helpdeskapi.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|c:\\pim-grupo4---quarto-semestre\\sistema mobile - quintana\\helpdeskapi\\helpdeskapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{0E680B19-4E74-46CE-ADBD-602C72C4B6F7}|HelpDeskAPI\\HelpDeskAPI.csproj|solutionrelative:helpdeskapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\appsettings.Development.json",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\appsettings.Development.json",
+              "RelativeToolTip": "HelpDeskAPI\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-18T14:33:47.39Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Properties\\launchSettings.json",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Properties\\launchSettings.json",
+              "RelativeToolTip": "HelpDeskAPI\\Properties\\launchSettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-18T12:04:35.056Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ChamadosController.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ChamadosController.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Controllers\\ChamadosController.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ChamadosController.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Controllers\\ChamadosController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:41:33.984Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAFAAAAAAAAAAAAAwwBoAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:41:09.655Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Data\\AppDbContext.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Data\\AppDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:38:01.074Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Program.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Program.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Program.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:38:39.192Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Auditoria.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Auditoria.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Models\\Auditoria.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Auditoria.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Models\\Auditoria.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAowB0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T10:02:20.322Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "ComentariosController.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ComentariosController.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Controllers\\ComentariosController.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ComentariosController.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Controllers\\ComentariosController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:41:56.754Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ComentarioDto.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\DTOs\\ComentarioDto.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\DTOs\\ComentarioDto.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\DTOs\\ComentarioDto.cs",
+              "RelativeToolTip": "HelpDeskAPI\\DTOs\\ComentarioDto.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAwwBkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:40:21.678Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ChamadoDto.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\DTOs\\ChamadoDto.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\DTOs\\ChamadoDto.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\DTOs\\ChamadoDto.cs",
+              "RelativeToolTip": "HelpDeskAPI\\DTOs\\ChamadoDto.cs",
+              "ViewState": "AgIAADIAAAAAAAAAAAA5wDoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:40:02.458Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "LoginDto.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\DTOs\\LoginDto.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\DTOs\\LoginDto.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\DTOs\\LoginDto.cs",
+              "RelativeToolTip": "HelpDeskAPI\\DTOs\\LoginDto.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAQwBYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:39:44.121Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "ChamadoTag.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\ChamadoTag.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Models\\ChamadoTag.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\ChamadoTag.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Models\\ChamadoTag.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:37:34.249Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Tag.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Tag.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Models\\Tag.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Tag.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Models\\Tag.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:37:16.455Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Notificacao.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Notificacao.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Models\\Notificacao.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Notificacao.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Models\\Notificacao.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAA9wCcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:36:57.951Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Chamado.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Chamado.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Models\\Chamado.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Chamado.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Models\\Chamado.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAAAcwDAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:36:18.008Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Comentario.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Comentario.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Models\\Comentario.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Comentario.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Models\\Comentario.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAowB0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:36:37.994Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Usuario.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Usuario.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Models\\Usuario.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Usuario.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Models\\Usuario.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAwwCUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:35:57.416Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\appsettings.json",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\appsettings.json",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\appsettings.json",
+              "RelativeToolTip": "HelpDeskAPI\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-17T09:38:13.457Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "HelpDeskAPI.http",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\HelpDeskAPI.http",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\HelpDeskAPI.http",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\HelpDeskAPI.http",
+              "RelativeToolTip": "HelpDeskAPI\\HelpDeskAPI.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2025-10-17T09:46:33.331Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "HelpDeskAPI.csproj",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpdeskApi\\HelpDeskAPI\\HelpDeskAPI.csproj",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\HelpDeskAPI.csproj",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpdeskApi\\HelpDeskAPI\\HelpDeskAPI.csproj",
+              "RelativeToolTip": "HelpDeskAPI\\HelpDeskAPI.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-17T09:55:28.801Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

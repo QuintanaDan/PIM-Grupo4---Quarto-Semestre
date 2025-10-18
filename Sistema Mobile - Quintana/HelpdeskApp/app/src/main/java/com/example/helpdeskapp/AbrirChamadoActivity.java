@@ -16,16 +16,21 @@ import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.models.Chamado;
 import com.example.helpdeskapp.utils.SessionManager;
 import com.example.helpdeskapp.utils.NotificationHelper;
-import com.example.helpdeskapp.utils.AuditoriaHelper;
+import com.example.helpdeskapp.helpers.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
-import com.example.helpdeskapp.R;
+import com.example.helpdeskapp.api.ChamadoService;
+import com.example.helpdeskapp.api.RetrofitClient;
+import com.example.helpdeskapp.api.requests.ChamadoRequest;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AbrirChamadoActivity extends AppCompatActivity {
     private static final String TAG = "AbrirChamado";
 
     private EditText etTitulo, etDescricao;
     private Spinner spinnerCategoria;
-    private RadioGroup rgPrioridade;
+    private Spinner spinnerPrioridade;
     private Button btnSalvar, btnCancelar;
     private SessionManager sessionManager;
     private ChamadoDAO chamadoDAO;
@@ -43,7 +48,8 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         }
 
         inicializarComponentes();
-        configurarSpinner();
+        configurarSpinnerCategoria();
+        configurarSpinnerPrioridade();
         configurarEventos();
         sessionManager = new SessionManager(this);
         chamadoDAO = new ChamadoDAO(this);
@@ -55,14 +61,14 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         etTitulo = findViewById(R.id.etTitulo);
         etDescricao = findViewById(R.id.etDescricao);
         spinnerCategoria = findViewById(R.id.spinnerCategoria);
-        rgPrioridade = findViewById(R.id.rgPrioridade);
         btnSalvar = findViewById(R.id.btnSalvar);
         btnCancelar = findViewById(R.id.btnCancelar);
+        spinnerPrioridade = findViewById(R.id.spinnerPrioridade);
 
         Log.d(TAG, "Componentes inicializados");
     }
 
-    private void configurarSpinner() {
+    private void configurarSpinnerCategoria() {
         String[] categorias = {
                 "Selecione uma categoria",
                 "Hardware - Problemas com equipamentos",
@@ -73,13 +79,26 @@ public class AbrirChamadoActivity extends AppCompatActivity {
                 "Sistema - Problemas no sistema",
                 "Outros - Outros tipos de problemas"
         };
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, categorias);
         spinnerCategoria.setAdapter(adapter);
-
-        Log.d(TAG, "Spinner configurado com " + categorias.length + " categorias");
+        Log.d(TAG, "Spinner de Categoria configurado com " + categorias.length + " categorias");
     }
+
+    private void configurarSpinnerPrioridade() {
+        String[] prioridades = {
+                "Selecione a prioridade",
+                "🟢Baixa-Não afeta o trabalho",
+                "🟠Média-Afeta o trabalho",
+                "🔴Alta-Paralisação Parcial",
+                "🆘Crítica-Interrupção total do serviço"
+        };
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, prioridades);
+        spinnerPrioridade.setAdapter(adapter);
+        Log.d(TAG, "Spinner de Prioridade configurado com " + prioridades.length + " prioridades");
+    }
+
 
     private void configurarEventos() {
         btnSalvar.setOnClickListener(new View.OnClickListener() {
@@ -104,87 +123,174 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         Log.d(TAG, "=== INICIANDO ENVIO DE CHAMADO ===");
 
         try {
-            // Coletar dados do formulário
             String titulo = etTitulo.getText().toString().trim();
             String descricao = etDescricao.getText().toString().trim();
             int categoriaPosition = spinnerCategoria.getSelectedItemPosition();
             String categoria = categoriaPosition > 0 ?
                     spinnerCategoria.getSelectedItem().toString() : "";
-            String prioridadeSelecionada = obterPrioridadeSelecionada();
-
-            Log.d(TAG, "Dados coletados:");
-            Log.d(TAG, "  - Título: '" + titulo + "'");
-            Log.d(TAG, "  - Descrição: '" + descricao + "'");
-            Log.d(TAG, "  - Categoria: '" + categoria + "'");
-            Log.d(TAG, "  - Prioridade: " + prioridadeSelecionada);
+            String prioridade = spinnerPrioridade.getSelectedItem().toString();
 
             // Validações
             if (!validarFormulario(titulo, descricao, categoriaPosition)) {
-                Log.w(TAG, "❌ Validação do formulário falhou");
                 return;
             }
 
-            // Verificar sessão
             if (!validarSessao()) {
-                Log.e(TAG, "❌ Validação da sessão falhou");
                 return;
             }
 
             long clienteId = sessionManager.getUserId();
-            Log.d(TAG, "Cliente ID obtido: " + clienteId);
 
-            // Criar o chamado
-            Chamado novoChamado = new Chamado(titulo, descricao, clienteId);
-            novoChamado.setPrioridade(prioridadeSelecionada);
+            // Criar objeto Chamado
+            Chamado novoChamado = new Chamado();
+            novoChamado.setTitulo(titulo);
+            novoChamado.setDescricao(descricao);
+            novoChamado.setClienteId(clienteId);
+            novoChamado.setPrioridade(prioridade);
             novoChamado.setCategoria(categoria);
+            novoChamado.setStatus("Aberto");
 
-            // Verificar DAO
-            if (chamadoDAO == null) {
-                Log.e(TAG, "❌ ERRO: ChamadoDAO é null!");
-                Toast.makeText(this, "Erro: DAO não inicializado", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            // ✅ SALVAR NA API (SQL SERVER)
+            salvarNaAPI(novoChamado);
 
-            // Salvar no banco
-            long resultado = chamadoDAO.abrirChamado(novoChamado);
-
-            if (resultado > 0) {
-                Log.d(TAG, "✅ SUCESSO! Chamado salvo com ID: " + resultado);
-
-                novoChamado.setId(resultado);
-                novoChamado.setNumero(novoChamado.getProtocoloFormatado());
-
-                // Registrar auditoria
-                AuditoriaHelper.registrarCriacaoChamado(
-                        this,
-                        sessionManager.getUserId(),
-                        resultado,
-                        novoChamado.getTitulo()
-                );
-
-                // ✅ CORRETO: Notificar administradores
-                NotificationHelper notificationHelper = new NotificationHelper(this);
-                notificationHelper.notificarAdministradores(
-                        resultado,                       // chamadoId
-                        novoChamado.getTitulo(),        // titulo
-                        novoChamado.getPrioridade(),    // prioridade
-                        sessionManager.getUserName()    // nomeCliente
-                );
-
-                Toast.makeText(this,
-                        "✅ Chamado " + novoChamado.getProtocoloFormatado() + " aberto com sucesso!",
-                        Toast.LENGTH_LONG).show();
-
-                finish();
-            } else {
-                Log.e(TAG, "❌ ERRO ao salvar chamado");
-                Toast.makeText(this, "❌ Erro ao criar chamado. Tente novamente.",
-                        Toast.LENGTH_SHORT).show();
-            }
         } catch (Exception e) {
             Log.e(TAG, "❌ ERRO: Erro ao enviar chamado", e);
-            Toast.makeText(this, "❌ Erro ao enviar chamado. Tente novamente.",
+            Toast.makeText(this, "❌ Erro ao enviar chamado: " + e.getMessage(),
                     Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ✅ MÉTODO CORRIGIDO: Salvar na API
+    private void salvarNaAPI(final Chamado chamado) {
+        // Criar request
+        ChamadoRequest request = new ChamadoRequest();
+        request.setTitulo(chamado.getTitulo());
+        request.setDescricao(chamado.getDescricao());
+        request.setCategoria(chamado.getCategoria());
+        request.setPrioridade(chamado.getPrioridade());
+        request.setStatus(chamado.getStatus());
+        request.setUsuarioId(chamado.getClienteId());
+
+        // Chamar API
+        ChamadoService service = RetrofitClient.getRetrofit().create(ChamadoService.class);
+
+        service.criarChamado(request).enqueue(new Callback<Chamado>() {
+            @Override
+            public void onResponse(Call<Chamado> call, Response<Chamado> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Chamado chamadoCriado = response.body();
+
+                    Log.d(TAG, "✅ Chamado salvo na API com ID: " + chamadoCriado.getId());
+
+                    // Salvar localmente também (SQLite)
+                    salvarLocalmente(chamadoCriado);
+
+                    // Registrar auditoria
+                    try {
+                        AuditoriaHelper.registrarAcao(
+                                AbrirChamadoActivity.this,
+                                sessionManager.getUserId(),
+                                "Criar Chamado",
+                                "Chamado " + chamadoCriado.getNumero() + " criado: " + chamadoCriado.getTitulo(),
+                                chamadoCriado.getId(),
+                                "127.0.0.1"
+                        );
+                    } catch (Exception e) {
+                        Log.e(TAG, "Erro ao registrar auditoria", e);
+                    }
+
+                    // Notificar administradores
+                    try {
+                        NotificationHelper notificationHelper = new NotificationHelper(AbrirChamadoActivity.this);
+                        notificationHelper.notificarAdministradores(
+                                chamadoCriado.getId(),
+                                chamadoCriado.getTitulo(),
+                                chamadoCriado.getPrioridade(),
+                                sessionManager.getUserName()
+                        );
+                    } catch (Exception e) {
+                        Log.e(TAG, "Erro ao notificar", e);
+                    }
+
+                    Toast.makeText(AbrirChamadoActivity.this,
+                            "✅ Chamado " + chamadoCriado.getNumero() + " criado com sucesso!",
+                            Toast.LENGTH_LONG).show();
+
+                    finish();
+                } else {
+                    Log.e(TAG, "❌ Erro na resposta da API: " + response.code());
+                    Toast.makeText(AbrirChamadoActivity.this,
+                            "❌ Erro ao criar chamado: " + response.message(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Chamado> call, Throwable t) {
+                Log.e(TAG, "❌ Falha ao conectar na API: " + t.getMessage(), t);
+
+                // Log detalhado da URL tentada
+                if (call != null && call.request() != null) {
+                    Log.e(TAG, "URL tentada: " + call.request().url());
+                }
+
+                Toast.makeText(AbrirChamadoActivity.this,
+                        "⚠️ Sem conexão. Salvando localmente...",
+                        Toast.LENGTH_LONG).show();
+
+                // ✅ CORRIGIDO: Usar 'chamado' que é o parâmetro do método
+                salvarApenasLocalmente(chamado);
+            }
+        });
+    }
+
+    // Salvar localmente após sucesso na API
+    private void salvarLocalmente(Chamado chamado) {
+        try {
+            chamadoDAO.open();
+            chamadoDAO.inserir(chamado);
+            chamadoDAO.close();
+            Log.d(TAG, "✅ Chamado salvo localmente também");
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao salvar localmente", e);
+        }
+    }
+
+    // Salvar apenas localmente (fallback)
+    private void salvarApenasLocalmente(Chamado chamado) {
+        try {
+            ChamadoDAO dao = new ChamadoDAO(this);
+            dao.open();
+            long id = dao.inserir(chamado);
+            dao.close();
+
+            if (id > 0) {
+                Log.d(TAG, "✅ Chamado salvo localmente com ID: " + id);
+
+                runOnUiThread(() -> {
+                    Toast.makeText(this,
+                            "✅ Chamado " + chamado.getNumero() + " salvo localmente!",
+                            Toast.LENGTH_LONG).show();
+
+                    // ✅ FECHAR ACTIVITY E VOLTAR
+                    finish();
+                });
+            } else {
+                Log.e(TAG, "❌ Erro ao salvar localmente: ID inválido");
+                runOnUiThread(() -> {
+                    Toast.makeText(this,
+                            "❌ Erro ao salvar localmente",
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Exceção ao salvar localmente: " + e.getMessage(), e);
+            runOnUiThread(() -> {
+                Toast.makeText(this,
+                        "❌ Erro: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            });
         }
     }
 
@@ -253,23 +359,6 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         return true;
     }
 
-    private String obterPrioridadeSelecionada() {
-        int selectedId = rgPrioridade.getCheckedRadioButtonId();
-
-        if (selectedId == R.id.rbBaixa) {
-            return "Baixa";
-        } else if (selectedId == R.id.rbMedia) {
-            return "Média";
-        } else if (selectedId == R.id.rbAlta) {
-            return "Alta";
-        } else if (selectedId == R.id.rbCritica) {
-            return "Crítica";
-        }
-
-        // Se nenhuma prioridade foi selecionada, selecionar Média como padrão
-        Log.d(TAG, "Nenhuma prioridade selecionada, usando 'Média' como padrão");
-        return "Média";
-    }
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -281,6 +370,9 @@ public class AbrirChamadoActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (chamadoDAO != null) {
+            chamadoDAO.close();
+        }
         Log.d(TAG, "Activity destruída");
     }
 

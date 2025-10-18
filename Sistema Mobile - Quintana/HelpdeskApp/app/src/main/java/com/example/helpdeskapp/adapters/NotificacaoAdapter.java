@@ -122,10 +122,10 @@ public class NotificacaoAdapter extends RecyclerView.Adapter<NotificacaoAdapter.
     }
 
     private String getTempoDecorrido(String createdAt) {
-        // Implementação simplificada - você pode melhorar
+
         try {
-            // Parse da data e cálculo do tempo
-            return "Agora"; // Placeholder
+
+            return "Agora";
         } catch (Exception e) {
             return "";
         }

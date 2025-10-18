@@ -1,0 +1,24 @@
+package com.example.helpdeskapp.api;
+
+import com.example.helpdeskapp.api.requests.ChamadoRequest;
+import com.example.helpdeskapp.models.Chamado;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+
+public interface ChamadoService {
+
+    @GET("api/Chamados")
+    Call<List<Chamado>> listarChamados();
+
+    @POST("api/Chamados")
+    Call<Chamado> criarChamado(@Body ChamadoRequest request);
+
+    @GET("api/Chamados/{id}")
+    Call<Chamado> buscarChamado(@Path("id") long id);
+}

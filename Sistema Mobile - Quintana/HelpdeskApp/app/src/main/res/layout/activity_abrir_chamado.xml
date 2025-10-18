@@ -9,7 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
         <!-- Header -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -17,7 +16,6 @@
             android:background="@drawable/gradient_primary"
             android:orientation="vertical"
             android:padding="24dp">
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -26,7 +24,6 @@
                 android:textStyle="bold"
                 android:textColor="@color/white"
                 android:gravity="center" />
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -36,16 +33,13 @@
                 android:gravity="center"
                 android:layout_marginTop="4dp"
                 android:alpha="0.9" />
-
         </LinearLayout>
-
         <!-- Formulário -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-
             <!-- Card principal -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -58,130 +52,82 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="20dp">
-
                     <!-- Título -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
                         android:text="Título"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
                         android:textColor="@color/text_dark"
-                        android:layout_marginBottom="4dp" />
+                        android:textSize="16sp" />
 
                     <EditText
                         android:id="@+id/etTitulo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Título do problema"
-                        android:maxLines="2"
-                        android:inputType="textCapSentences"
-                        android:padding="12dp"
                         android:background="@drawable/edit_text_background"
-                        android:layout_marginBottom="16dp" />
-
+                        android:hint="Título do problema"
+                        android:inputType="textCapSentences"
+                        android:padding="12dp" />
                     <!-- Descrição -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
                         android:text="Descrição"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
                         android:textColor="@color/text_dark"
-                        android:layout_marginBottom="4dp" />
+                        android:textSize="16sp" />
 
                     <EditText
                         android:id="@+id/etDescricao"
                         android:layout_width="match_parent"
                         android:layout_height="120dp"
-                        android:hint="Descreva o problema detalhadamente"
-                        android:gravity="top|start"
-                        android:inputType="textMultiLine|textCapSentences"
-                        android:maxLines="6"
-                        android:padding="12dp"
                         android:background="@drawable/edit_text_background"
-                        android:layout_marginBottom="16dp" />
-
+                        android:gravity="top"
+                        android:hint="Descreva o problema detalhadamente"
+                        android:inputType="textMultiLine"
+                        android:padding="12dp" />
                     <!-- Categoria -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
                         android:text="Categoria"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
                         android:textColor="@color/text_dark"
-                        android:layout_marginBottom="4dp" />
+                        android:textSize="16sp" />
 
                     <Spinner
                         android:id="@+id/spinnerCategoria"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_marginBottom="16dp"
-                        android:background="@drawable/spinner_background" />
-
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edit_text_background"
+                        android:minHeight="48dp" />
                     <!-- Prioridade -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
                         android:text="Prioridade"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
                         android:textColor="@color/text_dark"
-                        android:layout_marginBottom="8dp" />
+                        android:textSize="16sp" />
 
-                    <RadioGroup
-                        android:id="@+id/rgPrioridade"
+                    <Spinner
+                        android:id="@+id/spinnerPrioridade"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
-
-                        <RadioButton
-                            android:id="@+id/rbBaixa"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="🟢 Baixa"
-                            android:textSize="12sp" />
-
-                        <RadioButton
-                            android:id="@+id/rbMedia"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="🟡 Média"
-                            android:textSize="12sp"
-                            android:checked="true" />
-
-                        <RadioButton
-                            android:id="@+id/rbAlta"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="🔴 Alta"
-                            android:textSize="12sp" />
-
-                        <RadioButton
-                            android:id="@+id/rbCritica"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="🆘Crítica"
-                            android:textSize="12sp" />
-
-                    </RadioGroup>
-
+                        android:background="@drawable/edit_text_background"
+                        android:minHeight="48dp" />
                 </LinearLayout>
-
             </androidx.cardview.widget.CardView>
-
             <!-- Botões de ação -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginTop="16dp">
-
                 <Button
                     android:id="@+id/btnCancelar"
                     android:layout_width="0dp"
@@ -191,7 +137,6 @@
                     android:text="❌ CANCELAR"
                     android:textColor="@color/text_dark"
                     android:backgroundTint="@color/background_secondary" />
-
                 <Button
                     android:id="@+id/btnSalvar"
                     android:layout_width="0dp"
@@ -201,11 +146,8 @@
                     android:text="💾 SALVAR"
                     android:textColor="@color/white"
                     android:backgroundTint="@color/primary" />
-
             </LinearLayout>
-
         </LinearLayout>
-
     </LinearLayout>
 
 </ScrollView>
