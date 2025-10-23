@@ -445,6 +445,64 @@
             android:visibility="gone"
             android:backgroundTint="@color/notification_success" />
 
+        <!-- BOTÃO SUGESTÃO DE SOLUÇÃO IA -->
+        <Button
+            android:id="@+id/btnSugerirSolucaoIA"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🤖 Sugerir Solução com IA"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/colorPrimary"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:elevation="4dp" />
+
+        <!-- CARD RESPOSTA DA IA -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardRespostaIA"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🤖 Sugestão de Solução da IA"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="@color/colorPrimary"
+                    android:layout_marginBottom="8dp" />
+
+                <ProgressBar
+                    android:id="@+id/progressBarIA"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tvRespostaIA"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:lineSpacingExtra="4dp"
+                    android:textColor="@color/text_primary" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
         <!-- Botão Voltar -->
         <Button
             android:id="@+id/btnVoltar"

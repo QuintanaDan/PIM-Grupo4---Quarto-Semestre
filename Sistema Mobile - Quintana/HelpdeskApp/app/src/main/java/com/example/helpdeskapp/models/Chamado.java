@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Chamado implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private long id;
     private String numero;
@@ -14,6 +15,7 @@ public class Chamado implements Serializable {
     private String categoria;
     private String prioridade;
     private String status;
+    private long clienteId;
     private Date dataCriacao;
     private String resposta;
     private String usuario;

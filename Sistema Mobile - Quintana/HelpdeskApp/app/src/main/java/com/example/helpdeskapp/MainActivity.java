@@ -14,7 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log; // ✅ ADICIONAR ESTE IMPORT
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +27,7 @@ import com.example.helpdeskapp.database.DatabaseHelper;
 import com.example.helpdeskapp.helpers.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
 import com.example.helpdeskapp.adapters.ChamadoRecenteAdapter;
+import com.example.helpdeskapp.api.RetrofitClient;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,7 +39,7 @@ import com.example.helpdeskapp.helpers.SyncHelper;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final String TAG = "MainActivity"; // ✅ ADICIONAR TAG
+    private static final String TAG = "MainActivity";
 
     // ========== COMPONENTES DA INTERFACE ==========
     private TextView tvBemVindo, tvTipoUsuario;
@@ -56,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DatabaseHelper dbHelper;
     private ThemeManager themeManager;
     private NotificacaoDAO notificacaoDAO;
-
     private int currentActivityTheme;
     private RecyclerView recyclerViewChamadosRecentes;
     private TextView tvMensagemVazio;
@@ -66,19 +66,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Lógica do Tema
         themeManager = new ThemeManager(this);
         themeManager.applyTheme();
         currentActivityTheme = themeManager.getCurrentTheme();
         super.onCreate(savedInstanceState);
 
-        // ========== CONFIGURAR LAYOUT ==========
+        RetrofitClient.init(this);
+
         setContentView(R.layout.activity_main);
 
-        // ✅ Inicializa o DAO antes de ser usado
         notificacaoDAO = new NotificacaoDAO(this);
 
-        // 2. CONFIGURAÇÃO DO TOOLBAR/DRAWER
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -88,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
 
-        // Configurar o ícone do hambúrguer e o listener do menu
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar,
                 R.string.navigation_drawer_open,
@@ -98,22 +95,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView.setNavigationItemSelectedListener(this);
 
-        // ========== VERIFICAR SESSÃO ==========
         sessionManager = new SessionManager(this);
         if (!sessionManager.isLoggedIn()) {
             redirecionarParaLogin();
             return;
         }
 
-        // ========== INICIALIZAR COMPONENTES ==========
         inicializarComponentes();
         configurarInformacoesUsuario();
-        configurarVisibilidadeMenu();
+        configurarMenuPorTipo(); // ✅ CHAMAR AQUI TAMBÉM
         configurarBotaoNotificacoes();
         configurarAcoesRapidas();
         configurarChamadosRecentes();
 
-        // ========== ATUALIZAR DADOS DINÂMICOS ==========
         updateStatusCards();
         carregarChamadosRecentes();
     }
@@ -121,6 +115,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+
+        // ✅ RECONFIGURAR MENU TODA VEZ QUE VOLTAR
+        configurarMenuPorTipo();
 
         // Verificar mudança de tema
         if (themeManager.getCurrentTheme() != currentActivityTheme) {
@@ -137,7 +134,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         carregarChamadosRecentes();
     }
 
-    // ✅ MÉTODO CORRIGIDO
+    // ✅ MÉTODO MOVIDO PARA FORA DO onResume()
+    private void configurarMenuPorTipo() {
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        if (navigationView == null) {
+            Log.e(TAG, "❌ NavigationView é null!");
+            return;
+        }
+
+        Menu menu = navigationView.getMenu();
+        boolean isAdmin = sessionManager.isAdmin();
+
+        Log.d(TAG, "🔐 Configurando menu para: " + (isAdmin ? "ADMIN" : "CLIENTE"));
+
+        // ✅ USAR APENAS OS IDs QUE EXISTEM NO SEU MENU XML
+
+        // Itens exclusivos de Admin (baseado no seu onNavigationItemSelected)
+        MenuItem todosChamados = menu.findItem(R.id.nav_todos_chamados);
+        MenuItem dashboard = menu.findItem(R.id.nav_dashboard);
+        MenuItem gerenciarTags = menu.findItem(R.id.nav_gerenciar_tags);
+        MenuItem historico = menu.findItem(R.id.nav_historico);
+
+        // Esconder/mostrar baseado no tipo
+        if (todosChamados != null) {
+            todosChamados.setVisible(isAdmin);
+            Log.d(TAG, "   nav_todos_chamados: " + (isAdmin ? "VISÍVEL" : "OCULTO"));
+        }
+
+        if (dashboard != null) {
+            dashboard.setVisible(isAdmin);
+            Log.d(TAG, "   nav_dashboard: " + (isAdmin ? "VISÍVEL" : "OCULTO"));
+        }
+
+        if (gerenciarTags != null) {
+            gerenciarTags.setVisible(isAdmin);
+            Log.d(TAG, "   nav_gerenciar_tags: " + (isAdmin ? "VISÍVEL" : "OCULTO"));
+        }
+
+        if (historico != null) {
+            historico.setVisible(isAdmin);
+            Log.d(TAG, "   nav_historico: " + (isAdmin ? "VISÍVEL" : "OCULTO"));
+        }
+
+        Log.d(TAG, "✅ Menu configurado com sucesso!");
+    }
+
     private void sincronizarDados() {
         if (sessionManager.getToken() != null) {
             Log.d(TAG, "🔄 Sincronizando dados com API...");
@@ -146,8 +187,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onSuccess(String message) {
                     Log.d(TAG, "✅ " + message);
-
-                    // Atualizar UI na thread principal
                     runOnUiThread(() -> {
                         updateStatusCards();
                         carregarChamadosRecentes();
@@ -157,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onError(String error) {
                     Log.w(TAG, "⚠️ " + error);
-                    // Continuar com dados locais
                 }
             });
         } else {
@@ -166,7 +204,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void configurarBotaoNotificacoes() {
-        // Inicialização de componentes do botão de notificação
         btnNotifications = findViewById(R.id.btnNotifications);
         tvBadgeNotificacoes = findViewById(R.id.tvBadgeNotificacoes);
 
@@ -175,7 +212,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(intent);
         });
 
-        // Chama a atualização para carregar o estado inicial
         atualizarBadgeNotificacoes();
     }
 
@@ -245,28 +281,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void inicializarComponentes() {
         tvBemVindo = findViewById(R.id.tvBemVindo);
         tvTipoUsuario = findViewById(R.id.tvTipoUsuario);
-
         tvChamadosAbertos = findViewById(R.id.tvChamadosAbertos);
         tvChamadosProgresso = findViewById(R.id.tvChamadosProgresso);
-
         recyclerViewChamadosRecentes = findViewById(R.id.recyclerViewChamadosRecentes);
         tvMensagemVazio = findViewById(R.id.tvMensagemVazio);
 
-        // Inicializa o DatabaseHelper
         dbHelper = new DatabaseHelper(this);
         chamadoDAO = new ChamadoDAO(this);
         chamadosRecentes = new ArrayList<>();
-    }
-
-    private void configurarVisibilidadeMenu() {
-        boolean isAdmin = sessionManager.isAdmin();
-        Menu menu = navigationView.getMenu();
-
-        // Itens de Administração
-        menu.findItem(R.id.nav_todos_chamados).setVisible(isAdmin);
-        menu.findItem(R.id.nav_dashboard).setVisible(isAdmin);
-        menu.findItem(R.id.nav_gerenciar_tags).setVisible(isAdmin);
-        menu.findItem(R.id.nav_historico).setVisible(isAdmin);
     }
 
     private void updateStatusCards() {
@@ -287,14 +309,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Log.d(TAG, "🔑 Tipo: " + tipoUsuario + " (" +
                 (tipoUsuario == 1 ? "ADMIN" : "CLIENTE") + ")");
 
-        // Array de frases para consciência racial
         String[] frasesConsciencia = getResources().getStringArray(R.array.frases_consciencia);
-
-        // Sortear uma frase
         String fraseSorteada = frasesConsciencia[(int) (Math.random() * frasesConsciencia.length)];
 
         String textoBemVindo;
-
         if (nomeUsuario != null && !nomeUsuario.isEmpty()) {
             textoBemVindo = "Olá, " + nomeUsuario + "! " + fraseSorteada;
         } else {
@@ -381,12 +399,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void configurarAcoesRapidas() {
-        // Card: Abrir Chamado
         findViewById(R.id.cardAbrirChamadoRapido).setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, AbrirChamadoActivity.class));
         });
 
-        // Card: Meus Chamados
         findViewById(R.id.cardMeusChamadosRapido).setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, MeusChamadosActivity.class));
         });
@@ -398,7 +414,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return;
         }
 
-        Log.d(TAG, "✅ Configurando RecyclerView...");
         recyclerViewChamadosRecentes.setLayoutManager(new LinearLayoutManager(this));
         chamadoRecenteAdapter = new ChamadoRecenteAdapter(this, chamadosRecentes);
         recyclerViewChamadosRecentes.setAdapter(chamadoRecenteAdapter);
@@ -406,12 +421,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void carregarChamadosRecentes() {
         if (recyclerViewChamadosRecentes == null || tvMensagemVazio == null) {
-            Log.e(TAG, "❌ Componentes não inicializados!");
             return;
         }
 
         if (chamadoDAO == null) {
-            Log.e(TAG, "❌ ChamadoDAO é null!");
             return;
         }
 
@@ -419,7 +432,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         long usuarioId = sessionManager.getUserId();
 
-        // Buscar chamados do usuário (ou todos se for admin)
         List<Chamado> todosChamados;
         if (sessionManager.isAdmin()) {
             todosChamados = chamadoDAO.buscarTodosChamados();
@@ -436,7 +448,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             recyclerViewChamadosRecentes.setVisibility(View.VISIBLE);
             tvMensagemVazio.setVisibility(View.GONE);
 
-            // Pegar os 5 mais recentes
             int limite = Math.min(5, todosChamados.size());
             chamadosRecentes = todosChamados.subList(0, limite);
             chamadoRecenteAdapter.updateList(chamadosRecentes);

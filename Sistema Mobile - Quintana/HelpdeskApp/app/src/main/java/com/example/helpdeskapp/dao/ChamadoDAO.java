@@ -40,59 +40,131 @@ public class ChamadoDAO {
         }
     }
 
-    // Inserir chamado
+    /**
+     * ✅ INSERIR CHAMADO NORMAL (gera número único)
+     * Usado ao criar chamado manualmente
+     */
     public long inserir(Chamado chamado) throws SQLException {
         ContentValues values = new ContentValues();
 
-        // ✅ SEMPRE GERAR NÚMERO ÚNICO
+        // ✅ GERAR NÚMERO ÚNICO
         String numeroUnico = gerarNumeroUnico();
         chamado.setNumero(numeroUnico);
 
-        values.put("numero", numeroUnico);
-        values.put("titulo", chamado.getTitulo());
-        values.put("descricao", chamado.getDescricao());
-        values.put("cliente_id", chamado.getClienteId());
-        values.put("categoria", chamado.getCategoria());
-        values.put("prioridade", chamado.getPrioridade());
-        values.put("status", chamado.getStatus());
-        values.put("created_at", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
-        values.put("updated_at", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date()));
+        values.put(DatabaseHelper.COLUMN_CHAMADO_NUMERO, numeroUnico);
+        values.put(DatabaseHelper.COLUMN_CHAMADO_TITULO, chamado.getTitulo());
+        values.put(DatabaseHelper.COLUMN_CHAMADO_DESCRICAO, chamado.getDescricao());
+        values.put(DatabaseHelper.COLUMN_CHAMADO_CLIENTE_ID, chamado.getClienteId());
+        values.put(DatabaseHelper.COLUMN_CATEGORIA, chamado.getCategoria());
+        values.put(DatabaseHelper.COLUMN_CHAMADO_PRIORIDADE, chamado.getPrioridade());
+        values.put(DatabaseHelper.COLUMN_CHAMADO_STATUS, chamado.getStatus());
+        values.put(DatabaseHelper.COLUMN_CHAMADO_CREATED_AT, dateFormat.format(new Date()));
+        values.put(DatabaseHelper.COLUMN_CHAMADO_UPDATED_AT, dateFormat.format(new Date()));
 
-        return database.insert("chamados", null, values);
+        long id = database.insert(DatabaseHelper.TABLE_CHAMADOS, null, values);
+
+        Log.d(TAG, "✅ Chamado inserido com ID: " + id + " e Número: " + numeroUnico);
+
+        return id;
     }
 
-    // ✅ GERAR NÚMERO VERDADEIRAMENTE ÚNICO
+    /**
+     * ✅ INSERIR COM ID ESPECÍFICO (para sincronização com API)
+     * Usado quando vem da API e precisa manter o ID
+     */
+    public long inserirComId(Chamado chamado) {
+        ContentValues values = new ContentValues();
+
+        // ✅ USAR O ID DA API
+        if (chamado.getId() > 0) {
+            values.put(DatabaseHelper.COLUMN_CHAMADO_ID, chamado.getId());
+            Log.d(TAG, "📥 Inserindo com ID da API: " + chamado.getId());
+        }
+
+        // Número/protocolo
+        if (chamado.getNumero() == null || chamado.getNumero().isEmpty()) {
+            chamado.setNumero(gerarProtocolo());
+        }
+        values.put(DatabaseHelper.COLUMN_CHAMADO_NUMERO, chamado.getNumero());
+
+        values.put(DatabaseHelper.COLUMN_CHAMADO_TITULO, chamado.getTitulo());
+        values.put(DatabaseHelper.COLUMN_CHAMADO_DESCRICAO, chamado.getDescricao());
+        values.put(DatabaseHelper.COLUMN_CHAMADO_CLIENTE_ID, chamado.getClienteId());
+        values.put(DatabaseHelper.COLUMN_CATEGORIA, chamado.getCategoria());
+        values.put(DatabaseHelper.COLUMN_CHAMADO_PRIORIDADE, chamado.getPrioridade());
+        values.put(DatabaseHelper.COLUMN_CHAMADO_STATUS, chamado.getStatus());
+
+        // Manter datas da API se existirem
+        if (chamado.getCreatedAt() != null && !chamado.getCreatedAt().isEmpty()) {
+            values.put(DatabaseHelper.COLUMN_CHAMADO_CREATED_AT, chamado.getCreatedAt());
+        } else {
+            values.put(DatabaseHelper.COLUMN_CHAMADO_CREATED_AT, dateFormat.format(new Date()));
+        }
+
+        if (chamado.getUpdatedAt() != null && !chamado.getUpdatedAt().isEmpty()) {
+            values.put(DatabaseHelper.COLUMN_CHAMADO_UPDATED_AT, chamado.getUpdatedAt());
+        } else {
+            values.put(DatabaseHelper.COLUMN_CHAMADO_UPDATED_AT, dateFormat.format(new Date()));
+        }
+
+        // ✅ REPLACE: Se ID já existe, substitui (evita duplicação)
+        long resultado = database.insertWithOnConflict(
+                DatabaseHelper.TABLE_CHAMADOS,
+                null,
+                values,
+                SQLiteDatabase.CONFLICT_REPLACE
+        );
+
+        if (resultado > 0) {
+            Log.d(TAG, "✅ Chamado inserido/atualizado com sucesso: ID=" + chamado.getId());
+        } else {
+            Log.e(TAG, "❌ Erro ao inserir chamado com ID: " + chamado.getId());
+        }
+
+        return resultado;
+    }
+
+    /**
+     * ✅ GERAR NÚMERO ÚNICO
+     */
     private String gerarNumeroUnico() {
-        // Usar timestamp + número aleatório para garantir unicidade
         long timestamp = System.currentTimeMillis();
         int random = new Random().nextInt(1000);
         String numero = String.format("CH%d%03d", timestamp % 1000000, random);
 
-        // Verificar se já existe (improvável, mas por segurança)
-        Cursor cursor = database.rawQuery("SELECT COUNT(*) FROM chamados WHERE numero = ?", new String[]{numero});
+        // Verificar se já existe
+        Cursor cursor = database.rawQuery(
+                "SELECT COUNT(*) FROM " + DatabaseHelper.TABLE_CHAMADOS +
+                        " WHERE " + DatabaseHelper.COLUMN_CHAMADO_NUMERO + " = ?",
+                new String[]{numero}
+        );
+
         cursor.moveToFirst();
         int count = cursor.getInt(0);
         cursor.close();
 
-        // Se existir (muito improvável), tentar novamente
         if (count > 0) {
-            return gerarNumeroUnico(); // Recursão
+            return gerarNumeroUnico(); // Tentar novamente
         }
 
         return numero;
     }
 
-    // ✅ ADICIONAR ESTE MÉTODO PARA GERAR PROTOCOLO
+    /**
+     * ✅ GERAR PROTOCOLO
+     */
     private String gerarProtocolo() {
-        // Formato: CH + timestamp de 6 dígitos
         long timestamp = System.currentTimeMillis();
         int numeroProtocolo = (int)(timestamp % 1000000);
         return String.format("CH%06d", numeroProtocolo);
     }
 
-    // Atualizar chamado
+    /**
+     * ✅ ATUALIZAR CHAMADO
+     */
     public int atualizar(Chamado chamado) {
         ContentValues values = new ContentValues();
+
         values.put(DatabaseHelper.COLUMN_CHAMADO_TITULO, chamado.getTitulo());
         values.put(DatabaseHelper.COLUMN_CHAMADO_DESCRICAO, chamado.getDescricao());
         values.put(DatabaseHelper.COLUMN_CATEGORIA, chamado.getCategoria());
@@ -100,15 +172,25 @@ public class ChamadoDAO {
         values.put(DatabaseHelper.COLUMN_CHAMADO_STATUS, chamado.getStatus());
         values.put(DatabaseHelper.COLUMN_CHAMADO_UPDATED_AT, dateFormat.format(new Date()));
 
-        return database.update(
+        int rows = database.update(
                 DatabaseHelper.TABLE_CHAMADOS,
                 values,
                 DatabaseHelper.COLUMN_CHAMADO_ID + " = ?",
                 new String[]{String.valueOf(chamado.getId())}
         );
+
+        if (rows > 0) {
+            Log.d(TAG, "✅ Chamado atualizado: ID=" + chamado.getId());
+        } else {
+            Log.w(TAG, "⚠️ Nenhum chamado atualizado com ID: " + chamado.getId());
+        }
+
+        return rows;
     }
 
-    // Buscar por número/protocolo
+    /**
+     * ✅ BUSCAR POR PROTOCOLO/NÚMERO
+     */
     public Chamado buscarPorProtocolo(String numero) {
         Cursor cursor = database.query(
                 DatabaseHelper.TABLE_CHAMADOS,
@@ -127,26 +209,36 @@ public class ChamadoDAO {
         return chamado;
     }
 
-    // Buscar por ID
+    /**
+     * ✅ BUSCAR POR ID
+     */
     public Chamado buscarPorId(long id) {
-        Cursor cursor = database.query(
-                DatabaseHelper.TABLE_CHAMADOS,
-                null,
-                DatabaseHelper.COLUMN_CHAMADO_ID + " = ?",
-                new String[]{String.valueOf(id)},
-                null, null, null
-        );
-
         Chamado chamado = null;
-        if (cursor != null && cursor.moveToFirst()) {
-            chamado = cursorToChamado(cursor);
-            cursor.close();
+
+        try {
+            Cursor cursor = database.query(
+                    DatabaseHelper.TABLE_CHAMADOS,
+                    null,
+                    DatabaseHelper.COLUMN_CHAMADO_ID + " = ?",
+                    new String[]{String.valueOf(id)},
+                    null, null, null
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                chamado = cursorToChamado(cursor);
+                cursor.close();
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Erro ao buscar chamado por ID: " + id, e);
         }
 
         return chamado;
     }
 
-    // Listar chamados por cliente
+    /**
+     * ✅ LISTAR CHAMADOS POR CLIENTE
+     */
     public List<Chamado> listarChamadosPorCliente(long clienteId) {
         List<Chamado> chamados = new ArrayList<>();
 
@@ -169,7 +261,9 @@ public class ChamadoDAO {
         return chamados;
     }
 
-    // Buscar todos os chamados
+    /**
+     * ✅ BUSCAR TODOS OS CHAMADOS
+     */
     public List<Chamado> buscarTodosChamados() {
         List<Chamado> chamados = new ArrayList<>();
 
@@ -189,7 +283,9 @@ public class ChamadoDAO {
         return chamados;
     }
 
-    // Converter cursor para Chamado
+    /**
+     * ✅ CONVERTER CURSOR PARA CHAMADO
+     */
     private Chamado cursorToChamado(Cursor cursor) {
         Chamado chamado = new Chamado();
 

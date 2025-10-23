@@ -21,6 +21,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.cardview.widget.CardView;
+import android.widget.ProgressBar;
 
 import com.example.helpdeskapp.adapters.AnexoAdapter;
 import com.example.helpdeskapp.adapters.ComentarioAdapter;
@@ -40,10 +42,22 @@ import com.example.helpdeskapp.utils.NotificationHelper;
 import com.example.helpdeskapp.utils.PDFHelper;
 import com.example.helpdeskapp.helpers.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
+import com.example.helpdeskapp.api.GroqClient;
+import com.example.helpdeskapp.api.GroqService;
+import com.example.helpdeskapp.models.groq.GroqRequest;
+import com.example.helpdeskapp.models.groq.GroqResponse;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class DetalheChamadoActivity extends AppCompatActivity {
     private static final String TAG = "DetalheChamadoActivity";
@@ -104,6 +118,12 @@ public class DetalheChamadoActivity extends AppCompatActivity {
     private TagDAO tagDAO;
     private List<Tag> listaTagsChamado;
 
+    //Componentes Assistente IA
+    private Button btnSugerirSolucaoIA;
+    private CardView cardRespostaIA;
+    private TextView tvRespostaIA;
+    private ProgressBar progressBarIA;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         new ThemeManager(this).applyTheme();
@@ -113,16 +133,23 @@ public class DetalheChamadoActivity extends AppCompatActivity {
         // Inicializar DAOs e Session
         comentarioDAO = new ComentarioDAO(this);
         avaliacaoDAO = new AvaliacaoDAO(this);
-        anexoDAO = new AnexoDAO(this); // NOVO
+        anexoDAO = new AnexoDAO(this);
         sessionManager = new SessionManager(this);
         listaComentarios = new ArrayList<>();
-        listaAnexos = new ArrayList<>(); // NOVO
+        listaAnexos = new ArrayList<>();
 
         // NOVO: Inicializar launchers
         inicializarLaunchers();
 
         // Inicializar componentes
         inicializarViews();
+
+        btnSugerirSolucaoIA = findViewById(R.id.btnSugerirSolucaoIA);
+        cardRespostaIA = findViewById(R.id.cardRespostaIA);
+        tvRespostaIA = findViewById(R.id.tvRespostaIA);
+        progressBarIA = findViewById(R.id.progressBarIA);
+
+        btnSugerirSolucaoIA.setOnClickListener(v -> buscarSugestaoIA());
 
         // Receber dados do Intent
         receberDadosChamado();
@@ -503,132 +530,185 @@ public class DetalheChamadoActivity extends AppCompatActivity {
     }
 
     private void receberDadosChamado() {
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            // Tentar receber como objeto Chamado primeiro
-            Chamado chamado = (Chamado) extras.getSerializable("chamado");
+        Log.d(TAG, "=== RECEBENDO DADOS DO CHAMADO ===");
 
-            if (chamado != null) {
-                // Recebeu objeto completo
-                preencherCamposChamado(chamado);
-                chamadoId = chamado.getId();
+        Intent intent = getIntent();
 
-                // Verificar se pode avaliar
-                verificarSePodeAvaliar(chamado);
-
-                Log.d(TAG, "Chamado recebido como objeto: ID=" + chamadoId);
-            } else {
-                // Receber campos individuais
-                preencherCamposIndividuais(extras);
-                chamadoId = extras.getLong("chamado_id", -1);
-
-                // Verificar status para mostrar botão avaliar
-                String status = extras.getString("chamado_status", "");
-                mostrarBotaoAvaliar(status);
-
-                Log.d(TAG, "Chamado recebido por campos: ID=" + chamadoId);
-            }
-
-            // Validar ID do chamado
-            if (chamadoId <= 0) {
-                Log.e(TAG, "❌ ID do chamado inválido: " + chamadoId);
-                Toast.makeText(this, "Erro: ID do chamado inválido", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Log.e(TAG, "❌ Nenhum dado recebido no Intent");
-            Toast.makeText(this, "Erro ao carregar detalhes do chamado", Toast.LENGTH_SHORT).show();
-            finish();
+        // Tentar receber o objeto Chamado serializable
+        if (intent.hasExtra("chamado")) {
+            chamado = (Chamado) intent.getSerializableExtra("chamado");
+            Log.d(TAG, "✅ Chamado recebido via Serializable");
         }
+
+        // Se não recebeu o objeto, criar a partir dos extras individuais
+        if (chamado == null) {
+            Log.d(TAG, "⚠️ Objeto Chamado null, tentando criar a partir dos extras...");
+            chamado = new Chamado();
+
+            if (intent.hasExtra("chamado_id")) {
+                chamado.setId(intent.getLongExtra("chamado_id", 0));
+            }
+            if (intent.hasExtra("chamado_protocolo")) {
+                chamado.setNumero(intent.getStringExtra("chamado_protocolo"));
+            }
+            if (intent.hasExtra("chamado_titulo")) {
+                chamado.setTitulo(intent.getStringExtra("chamado_titulo"));
+            }
+            if (intent.hasExtra("chamado_descricao")) {
+                chamado.setDescricao(intent.getStringExtra("chamado_descricao"));
+            }
+            if (intent.hasExtra("chamado_categoria")) {
+                chamado.setCategoria(intent.getStringExtra("chamado_categoria"));
+            }
+            if (intent.hasExtra("chamado_prioridade")) {
+                chamado.setPrioridade(intent.getStringExtra("chamado_prioridade"));
+            }
+            if (intent.hasExtra("chamado_status")) {
+                chamado.setStatus(intent.getStringExtra("chamado_status"));
+            }
+            // ✅ CORRETO:
+            // ✅ CORRETO (converter String para Date):
+            if (intent.hasExtra("chamado_data")) {
+                String dataStr = intent.getStringExtra("chamado_data");
+
+                if (dataStr != null && !dataStr.isEmpty()) {
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                        Date data = sdf.parse(dataStr);
+                        chamado.setDataCriacao(data);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Erro ao converter data: " + dataStr, e);
+                        // Se falhar, usar data atual
+                        chamado.setDataCriacao(new Date());
+                    }
+                }
+            }
+            if (intent.hasExtra("chamado_resposta")) {
+                chamado.setResposta(intent.getStringExtra("chamado_resposta"));
+            }
+
+            Log.d(TAG, "✅ Chamado criado a partir dos extras");
+        }
+
+        // Verificar se chamado foi carregado
+        if (chamado == null) {
+            Log.e(TAG, "❌ ERRO: Chamado continua null após todas tentativas");
+            Toast.makeText(this, "Erro ao carregar dados do chamado", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // Log dos dados recebidos
+        Log.d(TAG, "📊 Dados do chamado carregados:");
+        Log.d(TAG, "   ID: " + chamado.getId());
+        Log.d(TAG, "   Número: " + (chamado.getNumero() != null ? chamado.getNumero() : "null"));
+        Log.d(TAG, "   Título: " + (chamado.getTitulo() != null ? chamado.getTitulo() : "null"));
+        Log.d(TAG, "   Descrição: " + (chamado.getDescricao() != null ? chamado.getDescricao().substring(0, Math.min(50, chamado.getDescricao().length())) + "..." : "null"));
+        Log.d(TAG, "   Categoria: " + (chamado.getCategoria() != null ? chamado.getCategoria() : "null"));
+        Log.d(TAG, "   Prioridade: " + (chamado.getPrioridade() != null ? chamado.getPrioridade() : "null"));
+        Log.d(TAG, "   Status: " + (chamado.getStatus() != null ? chamado.getStatus() : "null"));
+
+        // Exibir dados na tela
+        exibirDadosNaTela();
     }
 
-    private void preencherCamposChamado(Chamado chamado) {
+    private void exibirDadosNaTela() {
+        Log.d(TAG, "Exibindo dados na tela");
+
         try {
+            // Usar os nomes corretos das variáveis que você já tem
+
             // Título
-            if (chamado.getTitulo() != null && !chamado.getTitulo().isEmpty()) {
+            if (txtTituloDetalhe != null && chamado.getTitulo() != null) {
                 txtTituloDetalhe.setText(chamado.getTitulo());
-            } else {
-                txtTituloDetalhe.setText("Título não disponível");
             }
 
             // Descrição
-            if (chamado.getDescricao() != null && !chamado.getDescricao().isEmpty()) {
+            if (txtDescricaoDetalhe != null && chamado.getDescricao() != null) {
                 txtDescricaoDetalhe.setText(chamado.getDescricao());
-            } else {
-                txtDescricaoDetalhe.setText("Descrição não disponível");
             }
 
             // Categoria
-            if (chamado.getCategoria() != null && !chamado.getCategoria().isEmpty()) {
+            if (txtCategoriaDetalhe != null && chamado.getCategoria() != null) {
                 txtCategoriaDetalhe.setText(chamado.getCategoria());
-            } else {
-                txtCategoriaDetalhe.setText("Não especificada");
             }
 
             // Prioridade
-            if (chamado.getPrioridade() != null && !chamado.getPrioridade().isEmpty()) {
+            if (txtPrioridadeDetalhe != null && chamado.getPrioridade() != null) {
                 txtPrioridadeDetalhe.setText(chamado.getPrioridade());
-            } else {
-                txtPrioridadeDetalhe.setText("Não definida");
+
+                // Cor da prioridade (se as cores existirem)
+                try {
+                    if (chamado.getPrioridade().contains("Crítica") || chamado.getPrioridade().contains("crítica")) {
+                        txtPrioridadeDetalhe.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                    } else if (chamado.getPrioridade().contains("Alta") || chamado.getPrioridade().contains("alta")) {
+                        txtPrioridadeDetalhe.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
+                    } else if (chamado.getPrioridade().contains("Média") || chamado.getPrioridade().contains("média")) {
+                        txtPrioridadeDetalhe.setTextColor(getResources().getColor(android.R.color.holo_blue_dark));
+                    } else {
+                        txtPrioridadeDetalhe.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                    }
+                } catch (Exception e) {
+                    Log.w(TAG, "Cores de prioridade não definidas");
+                }
             }
 
             // Status
-            if (chamado.getStatus() != null && !chamado.getStatus().isEmpty()) {
+            if (txtStatusDetalhe != null && chamado.getStatus() != null) {
                 txtStatusDetalhe.setText(chamado.getStatus());
-            } else {
-                txtStatusDetalhe.setText("Status não disponível");
+
+                // Cor do status
+                try {
+                    String status = chamado.getStatus().toUpperCase();
+                    if (status.contains("ABERTO")) {
+                        txtStatusDetalhe.setTextColor(getResources().getColor(android.R.color.holo_blue_dark));
+                    } else if (status.contains("ANDAMENTO")) {
+                        txtStatusDetalhe.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
+                    } else if (status.contains("FECHADO") || status.contains("RESOLVIDO")) {
+                        txtStatusDetalhe.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                    }
+                } catch (Exception e) {
+                    Log.w(TAG, "Cores de status não definidas");
+                }
             }
 
             // Data
-            if (chamado.getDataCriacaoFormatada() != null) {
-                txtDataDetalhe.setText(chamado.getDataCriacaoFormatada());
-            } else {
-                txtDataDetalhe.setText("Data não disponível");
+            if (txtDataDetalhe != null) {
+                if (chamado.getDataCriacaoFormatada() != null) {
+                    // Usar método formatado se disponível
+                    txtDataDetalhe.setText(chamado.getDataCriacaoFormatada());
+                } else if (chamado.getDataCriacao() != null) {
+                    // Formatar Date para String
+                    try {
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                        String dataFormatada = sdf.format(chamado.getDataCriacao());
+                        txtDataDetalhe.setText(dataFormatada);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Erro ao formatar data", e);
+                        txtDataDetalhe.setText("Data inválida");
+                    }
+                } else {
+                    txtDataDetalhe.setText("Data não disponível");
+                }
             }
 
-            // Resposta
+            // Resposta (se houver)
             if (chamado.getResposta() != null && !chamado.getResposta().isEmpty()) {
-                txtRespostaDetalhe.setText(chamado.getResposta());
+                if (txtRespostaDetalhe != null) {
+                    txtRespostaDetalhe.setText(chamado.getResposta());
+                    txtRespostaDetalhe.setVisibility(View.VISIBLE);
+                }
             } else {
-                txtRespostaDetalhe.setText("Aguardando resposta...");
+                if (txtRespostaDetalhe != null) {
+                    txtRespostaDetalhe.setText("Aguardando resposta...");
+                    txtRespostaDetalhe.setVisibility(View.VISIBLE);
+                }
             }
 
-            Log.d(TAG, "✅ Campos preenchidos com sucesso");
+            Log.d(TAG, "✅ Dados exibidos na tela com sucesso");
 
         } catch (Exception e) {
-            Log.e(TAG, "❌ Erro ao preencher campos: ", e);
-            Toast.makeText(this, "Erro ao exibir informações", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void preencherCamposIndividuais(Bundle extras) {
-        try {
-            String titulo = extras.getString("chamado_titulo", "");
-            String descricao = extras.getString("chamado_descricao", "");
-            String categoria = extras.getString("chamado_categoria", "Não especificada");
-            String prioridade = extras.getString("chamado_prioridade", "");
-            String status = extras.getString("chamado_status", "");
-            String data = extras.getString("chamado_data", "");
-            String resposta = extras.getString("chamado_resposta", "");
-
-            // Preencher TextViews
-            txtTituloDetalhe.setText(!titulo.isEmpty() ? titulo : "Título não disponível");
-            txtDescricaoDetalhe.setText(!descricao.isEmpty() ? descricao : "Descrição não disponível");
-            txtCategoriaDetalhe.setText(categoria);
-            txtPrioridadeDetalhe.setText(!prioridade.isEmpty() ? prioridade : "Não definida");
-            txtStatusDetalhe.setText(!status.isEmpty() ? status : "Status não disponível");
-            txtDataDetalhe.setText(!data.isEmpty() ? data : "Data não disponível");
-
-            if (resposta != null && !resposta.isEmpty()) {
-                txtRespostaDetalhe.setText(resposta);
-            } else {
-                txtRespostaDetalhe.setText("Aguardando resposta...");
-            }
-
-            Log.d(TAG, "✅ Campos individuais preenchidos com sucesso");
-
-        } catch (Exception e) {
-            Log.e(TAG, "❌ Erro ao preencher campos individuais: ", e);
-            Toast.makeText(this, "Erro ao exibir informações", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "❌ Erro ao exibir dados na tela: ", e);
         }
     }
 
@@ -1093,6 +1173,120 @@ public class DetalheChamadoActivity extends AppCompatActivity {
             Log.e(TAG, "❌ Erro ao remover tag: ", e);
             Toast.makeText(this, "Erro ao remover tag", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // ========== FUNCIONALIDADE 2: SUGESTÃO DE SOLUÇÃO ==========
+
+    private void buscarSugestaoIA() {
+        Log.d(TAG, "🤖 Iniciando busca de sugestão com IA...");
+
+        // ✅ VERIFICAR SE CHAMADO NÃO É NULL
+        if (chamado == null) {
+            Log.e(TAG, "❌ ERRO: Chamado está null!");
+            Toast.makeText(this, "❌ Erro: Dados do chamado não carregados", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // ✅ VERIFICAR SE TEM TÍTULO
+        if (chamado.getTitulo() == null || chamado.getTitulo().trim().isEmpty()) {
+            Log.e(TAG, "❌ ERRO: Título do chamado está vazio!");
+            Toast.makeText(this, "❌ Erro: Título do chamado não encontrado", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // ✅ VERIFICAR SE TEM DESCRIÇÃO
+        if (chamado.getDescricao() == null || chamado.getDescricao().trim().isEmpty()) {
+            Log.w(TAG, "⚠️ AVISO: Descrição do chamado está vazia");
+            Toast.makeText(this, "⚠️ Aviso: Chamado sem descrição detalhada", Toast.LENGTH_SHORT).show();
+            // Continua mesmo sem descrição
+        }
+
+        Log.d(TAG, "✅ Validações passaram!");
+        Log.d(TAG, "   Título: " + chamado.getTitulo());
+        Log.d(TAG, "   Descrição: " + (chamado.getDescricao() != null ? chamado.getDescricao().substring(0, Math.min(50, chamado.getDescricao().length())) + "..." : "vazia"));
+
+        // Mostrar card e loading
+        cardRespostaIA.setVisibility(View.VISIBLE);
+        progressBarIA.setVisibility(View.VISIBLE);
+        tvRespostaIA.setVisibility(View.GONE);
+        btnSugerirSolucaoIA.setEnabled(false);
+
+        // Montar prompt
+        String prompt = construirPromptSolucao();
+
+        // Criar mensagens
+        List<GroqRequest.Message> messages = new ArrayList<>();
+        messages.add(new GroqRequest.Message("system",
+                "Você é um técnico de TI experiente especializado em suporte técnico. " +
+                        "Analise o problema descrito e forneça uma solução técnica clara, " +
+                        "objetiva e passo-a-passo. Responda em português brasileiro de forma profissional."));
+        messages.add(new GroqRequest.Message("user", prompt));
+
+        // Criar requisição
+        GroqRequest request = new GroqRequest(
+                "llama-3.3-70b-versatile",
+                messages,
+                0.7,
+                1500
+        );
+
+        // Chamar API
+        GroqService service = GroqClient.getRetrofit().create(GroqService.class);
+        service.createChatCompletion(request).enqueue(new Callback<GroqResponse>() {
+            @Override
+            public void onResponse(Call<GroqResponse> call, Response<GroqResponse> response) {
+                btnSugerirSolucaoIA.setEnabled(true);
+                progressBarIA.setVisibility(View.GONE);
+
+                if (response.isSuccessful() && response.body() != null) {
+                    GroqResponse groqResponse = response.body();
+                    if (groqResponse.getChoices() != null && !groqResponse.getChoices().isEmpty()) {
+                        String solucao = groqResponse.getChoices().get(0).getMessage().getContent();
+                        Log.d(TAG, "✅ Sugestão recebida: " + solucao);
+                        exibirSugestao(solucao);
+                    } else {
+                        exibirErro("Nenhuma sugestão foi gerada.");
+                    }
+                } else {
+                    Log.e(TAG, "❌ Erro na resposta: " + response.code());
+                    exibirErro("Erro ao obter sugestão: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GroqResponse> call, Throwable t) {
+                Log.e(TAG, "❌ Falha na chamada da API: ", t);
+                btnSugerirSolucaoIA.setEnabled(true);
+                progressBarIA.setVisibility(View.GONE);
+                exibirErro("Erro de conexão: " + t.getMessage());
+            }
+        });
+    }
+
+    private String construirPromptSolucao() {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("CHAMADO DE SUPORTE TÉCNICO:\n\n");
+        prompt.append("Protocolo: ").append(chamado.getNumero()).append("\n");
+        prompt.append("Categoria: ").append(chamado.getCategoria()).append("\n");
+        prompt.append("Prioridade: ").append(chamado.getPrioridade()).append("\n");
+        prompt.append("Título: ").append(chamado.getTitulo()).append("\n\n");
+        prompt.append("Descrição detalhada do problema:\n").append(chamado.getDescricao()).append("\n\n");
+        prompt.append("Por favor, forneça uma solução técnica detalhada e prática para resolver este problema. ");
+        prompt.append("Estruture a resposta em etapas numeradas quando apropriado.");
+
+        return prompt.toString();
+    }
+
+    private void exibirSugestao(String solucao) {
+        tvRespostaIA.setVisibility(View.VISIBLE);
+        tvRespostaIA.setText(solucao);
+        tvRespostaIA.setTextColor(getResources().getColor(R.color.text_primary));
+    }
+
+    private void exibirErro(String mensagem) {
+        tvRespostaIA.setVisibility(View.VISIBLE);
+        tvRespostaIA.setText("❌ " + mensagem);
+        tvRespostaIA.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
     }
 
     // ========== LIFECYCLE METHODS ==========

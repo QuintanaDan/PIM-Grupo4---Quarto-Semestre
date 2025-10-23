@@ -22,4 +22,12 @@ public class LoginResponse {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
+
+    public long getUserId() {
+        return id;
+    }
+
+    public String getUserName() {
+        return nome;
+    }
 }

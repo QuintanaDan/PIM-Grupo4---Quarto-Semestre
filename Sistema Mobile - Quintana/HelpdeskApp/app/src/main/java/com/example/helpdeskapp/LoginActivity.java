@@ -8,32 +8,35 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.helpdeskapp.api.RetrofitClient;
+import com.example.helpdeskapp.api.UsuarioService;
 import com.example.helpdeskapp.api.requests.LoginRequest;
 import com.example.helpdeskapp.api.responses.LoginResponse;
 import com.example.helpdeskapp.dao.UsuarioDAO;
 import com.example.helpdeskapp.helpers.AuditoriaHelper;
 import com.example.helpdeskapp.models.Usuario;
+import com.example.helpdeskapp.utils.NetworkHelper;
 import com.example.helpdeskapp.utils.SessionManager;
 import com.example.helpdeskapp.utils.ThemeManager;
-import com.example.helpdeskapp.api.ApiService;
-
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
 
     private EditText etEmail, etSenha;
     private Button btnLogin, btnTesteAdmin, btnTesteCliente;
+    private TextView tvModoOffline;
     private ProgressBar progressBar;
     private UsuarioDAO usuarioDAO;
     private SessionManager sessionManager;
+
+    private boolean forcarModoOffline = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         // Verificar se já está logado
         sessionManager = new SessionManager(this);
         if (sessionManager.isLoggedIn()) {
-            redirecionarParaMain();
+            irParaHome();
             return;
         }
 
@@ -55,20 +58,14 @@ public class LoginActivity extends AppCompatActivity {
         criarUsuariosIniciais();
     }
 
-    private void redirecionarParaMain() {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
     private void inicializarComponentes() {
         etEmail = findViewById(R.id.etEmail);
         etSenha = findViewById(R.id.etSenha);
         btnLogin = findViewById(R.id.btnLogin);
         btnTesteAdmin = findViewById(R.id.btnTesteAdmin);
         btnTesteCliente = findViewById(R.id.btnTestCliente);
+        tvModoOffline = findViewById(R.id.tvModoOffline);
 
-        // ✅ ADICIONAR PROGRESSBAR (se existir no layout)
         progressBar = findViewById(R.id.progressBar);
         if (progressBar != null) {
             progressBar.setVisibility(View.GONE);
@@ -89,163 +86,189 @@ public class LoginActivity extends AppCompatActivity {
             etSenha.setText("123456");
             realizarLogin();
         });
+
+        // ✅ BOTÃO MODO OFFLINE
+        if (tvModoOffline != null) {
+            tvModoOffline.setOnClickListener(v -> {
+                forcarModoOffline = !forcarModoOffline;
+
+                if (forcarModoOffline) {
+                    tvModoOffline.setText("✅ Modo Offline ATIVADO");
+                    tvModoOffline.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                    Toast.makeText(this, "📱 Modo Offline ativado", Toast.LENGTH_SHORT).show();
+                } else {
+                    tvModoOffline.setText("🔧 Modo Desenvolvedor: Forçar Offline");
+                    tvModoOffline.setTextColor(getResources().getColor(R.color.text_secondary));
+                    Toast.makeText(this, "🌐 Modo Online ativado", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private boolean validarCampos(String email, String senha) {
+        if (email.isEmpty()) {
+            etEmail.setError("Email obrigatório");
+            etEmail.requestFocus();
+            return false;
+        }
+
+        if (senha.isEmpty()) {
+            etSenha.setError("Senha obrigatória");
+            etSenha.requestFocus();
+            return false;
+        }
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etEmail.setError("Email inválido");
+            etEmail.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 
     private void realizarLogin() {
         String email = etEmail.getText().toString().trim();
         String senha = etSenha.getText().toString().trim();
 
-        if (email.isEmpty()) {
-            etEmail.setError("Digite o email");
-            etEmail.requestFocus();
+        if (!validarCampos(email, senha)) {
             return;
         }
 
-        if (senha.isEmpty()) {
-            etSenha.setError("Digite a senha");
-            etSenha.requestFocus();
+        progressBar.setVisibility(View.VISIBLE);
+        btnLogin.setEnabled(false);
+
+        // ✅ SE MODO OFFLINE FORÇADO, PULAR API
+        if (forcarModoOffline) {
+            Log.d(TAG, "📱 Modo OFFLINE FORÇADO");
+            tentarLoginLocal(email, senha);
             return;
         }
 
-        mostrarLoading(true);
+        // ✅ VERIFICAR DISPONIBILIDADE EM BACKGROUND
+        new Thread(() -> {
+            final boolean apiOnline = NetworkHelper.apiDisponivel(
+                    this,
+                    RetrofitClient.getBaseUrl()
+            );
 
-        // ✅ TENTAR LOGIN VIA API PRIMEIRO
-        loginViaAPI(email, senha);
+            runOnUiThread(() -> {
+                if (apiOnline) {
+                    Log.d(TAG, "🌐 Modo ONLINE - Tentando login via API");
+                    tentarLoginAPI(email, senha);
+                } else {
+                    Log.d(TAG, "📱 Modo OFFLINE - Tentando login local");
+                    tentarLoginLocal(email, senha);
+                }
+            });
+        }).start();
     }
 
-    private void loginViaAPI(String email, String senha) {
-        Log.d(TAG, "🌐 Tentando login via API...");
+    private void tentarLoginAPI(String email, String senha) {
+        LoginRequest loginRequest = new LoginRequest(email, senha);
 
-        LoginRequest request = new LoginRequest(email, senha);
-
-        RetrofitClient.getApiService().login(request).enqueue(new Callback<LoginResponse>() {
+        UsuarioService service = RetrofitClient.getRetrofit().create(UsuarioService.class);
+        service.login(loginRequest).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                progressBar.setVisibility(View.GONE);
+                btnLogin.setEnabled(true);
+
                 if (response.isSuccessful() && response.body() != null) {
                     LoginResponse loginResponse = response.body();
+
                     Log.d(TAG, "✅ Login via API bem-sucedido!");
-                    Log.d(TAG, "📊 Dados recebidos:");
-                    Log.d(TAG, "   ID: " + loginResponse.getId());
-                    Log.d(TAG, "   Nome: " + loginResponse.getNome());
-                    Log.d(TAG, "   Email: " + loginResponse.getEmail());
-                    Log.d(TAG, "   Tipo: " + loginResponse.getTipo());
-                    Log.d(TAG, "   Token: " + loginResponse.getToken().substring(0, 20) + "...");
 
-                    processarLoginSucesso(loginResponse);
+                    // ✅ SALVAR TODOS OS DADOS INCLUINDO TIPO!
+                    sessionManager.saveToken(loginResponse.getToken());
+                    sessionManager.saveUserId(loginResponse.getUserId());
+                    sessionManager.saveUserName(loginResponse.getUserName());
+                    sessionManager.saveUserEmail(email);
+                    sessionManager.saveUserType(loginResponse.getTipo()); // ✅ ADICIONAR ESTA LINHA!
+
+                    Log.d(TAG, "🔑 Tipo de usuário salvo: " + loginResponse.getTipo());
+
+                    // Salvar no SQLite para uso offline
+                    salvarUsuarioOffline(loginResponse, senha);
+
+                    Toast.makeText(LoginActivity.this,
+                            "✅ Login realizado (Online)", Toast.LENGTH_SHORT).show();
+
+                    irParaHome();
                 } else {
-                    Log.e(TAG, "❌ Erro na API: " + response.code());
-                    Log.e(TAG, "❌ Mensagem: " + response.message());
-
-                    // Fallback: tentar login offline
-                    loginOffline(email, senha);
+                    Log.w(TAG, "API falhou, tentando login local...");
+                    tentarLoginLocal(email, senha);
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Log.e(TAG, "❌ Falha na conexão com API: " + t.getMessage());
-                t.printStackTrace();
-
-                // Fallback: tentar login offline
-                loginOffline(email, senha);
+                Log.e(TAG, "Erro na API, usando modo offline", t);
+                tentarLoginLocal(email, senha);
             }
         });
     }
 
-    private void loginOffline(String email, String senha) {
+    private void tentarLoginLocal(String email, String senha) {
         Log.d(TAG, "💾 Tentando login OFFLINE...");
 
+        // Buscar no SQLite local
         usuarioDAO.open();
         Usuario usuario = usuarioDAO.verificarLogin(email, senha);
         usuarioDAO.close();
 
+        progressBar.setVisibility(View.GONE);
+        btnLogin.setEnabled(true);
+
         if (usuario != null) {
             Log.d(TAG, "✅ Login offline bem-sucedido!");
 
-            // Salvar sessão SEM token (modo offline)
-            sessionManager.createLoginSession(
-                    usuario.getId(),
-                    usuario.getEmail(),
-                    usuario.getNome(),
-                    usuario.getTipo()
-            );
+            // ✅ SALVAR TODOS OS DADOS INCLUINDO TIPO!
+            sessionManager.saveUserId(usuario.getId());
+            sessionManager.saveUserName(usuario.getNome());
+            sessionManager.saveUserEmail(usuario.getEmail());
+            sessionManager.saveUserType(usuario.getTipo()); // ✅ ADICIONAR ESTA LINHA!
+
+            Log.d(TAG, "🔑 Tipo de usuário salvo: " + usuario.getTipo());
 
             // Registrar auditoria
-            AuditoriaHelper.registrarLogin(LoginActivity.this, usuario.getId(), usuario.getNome());
+            try {
+                AuditoriaHelper.registrarLogin(this, usuario.getId(), usuario.getNome());
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao registrar auditoria", e);
+            }
 
-            String tipoUsuario = usuario.getTipo() == 1 ? "Administrador" : "Cliente";
+            Toast.makeText(this,
+                    "✅ Login realizado (Offline)", Toast.LENGTH_SHORT).show();
 
-            Toast.makeText(LoginActivity.this,
-                    "✅ Login offline realizado!\n" +
-                            "Bem-vindo, " + usuario.getNome() + " (" + tipoUsuario + ")\n" +
-                            "Modo: Offline",
-                    Toast.LENGTH_SHORT).show();
-
-            mostrarLoading(false);
-            redirecionarParaMain();
+            irParaHome();
         } else {
-            Log.e(TAG, "❌ Login offline falhou - usuário não encontrado");
-            mostrarLoading(false);
-            Toast.makeText(LoginActivity.this,
-                    "❌ Email ou senha inválidos\n(Sem conexão com a API)",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,
+                    "❌ Email ou senha incorretos", Toast.LENGTH_LONG).show();
         }
     }
 
-    private void processarLoginSucesso(LoginResponse response) {
-        // 1. Salvar no banco local
-        salvarUsuarioLocal(response);
-
-        // 2. Salvar sessão COM token
-        sessionManager.createLoginSession(
-                response.getId(),
-                response.getEmail(),
-                response.getNome(),
-                response.getTipo()
-        );
-
-        // 3. Salvar token
-        sessionManager.saveToken(response.getToken());
-
-        Log.d(TAG, "🔑 Token salvo com sucesso");
-
-        // 4. Registrar auditoria
-        AuditoriaHelper.registrarLogin(this, response.getId(), response.getNome());
-
-        String tipoUsuario = response.getTipo() == 1 ? "Administrador" : "Cliente";
-
-        Toast.makeText(this,
-                "✅ Login realizado com sucesso!\n" +
-                        "Bem-vindo, " + response.getNome() + " (" + tipoUsuario + ")\n" +
-                        "Modo: Online",
-                Toast.LENGTH_SHORT).show();
-
-        mostrarLoading(false);
-        redirecionarParaMain();
-    }
-
-    private void salvarUsuarioLocal(LoginResponse response) {
+    private void salvarUsuarioOffline(LoginResponse loginResponse, String senha) {
         usuarioDAO.open();
 
         try {
-            // Verificar se usuário já existe
-            Usuario usuarioExistente = usuarioDAO.buscarPorEmail(response.getEmail());
+            Usuario usuarioExistente = usuarioDAO.buscarPorEmail(loginResponse.getEmail());
 
             if (usuarioExistente == null) {
-                // Criar novo usuário local
+                // Criar novo usuário
                 Usuario novoUsuario = new Usuario();
-                novoUsuario.setNome(response.getNome());
-                novoUsuario.setEmail(response.getEmail());
-                novoUsuario.setSenha(""); // Não salvar senha vinda da API
-                novoUsuario.setTipo(response.getTipo());
+                novoUsuario.setNome(loginResponse.getUserName());
+                novoUsuario.setEmail(loginResponse.getEmail());
+                novoUsuario.setSenha(senha); // Salvar senha para uso offline
+                novoUsuario.setTipo(loginResponse.getTipo());
 
                 long id = usuarioDAO.inserirUsuario(novoUsuario);
                 Log.d(TAG, "💾 Usuário salvo localmente com ID: " + id);
             } else {
-                // Atualizar dados do usuário existente
-                usuarioExistente.setNome(response.getNome());
-                usuarioExistente.setTipo(response.getTipo());
-
+                // Atualizar usuário existente
+                usuarioExistente.setNome(loginResponse.getUserName());
+                usuarioExistente.setSenha(senha);
+                usuarioExistente.setTipo(loginResponse.getTipo());
                 usuarioDAO.atualizarUsuario(usuarioExistente);
                 Log.d(TAG, "💾 Usuário atualizado localmente");
             }
@@ -256,16 +279,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void mostrarLoading(boolean mostrar) {
-        if (progressBar != null) {
-            progressBar.setVisibility(mostrar ? View.VISIBLE : View.GONE);
-        }
-
-        btnLogin.setEnabled(!mostrar);
-        btnTesteAdmin.setEnabled(!mostrar);
-        btnTesteCliente.setEnabled(!mostrar);
-        etEmail.setEnabled(!mostrar);
-        etSenha.setEnabled(!mostrar);
+    private void irParaHome() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void criarUsuariosIniciais() {
@@ -278,12 +295,12 @@ public class LoginActivity extends AppCompatActivity {
             if (totalUsuarios == 0) {
                 Log.d(TAG, "🔧 Criando usuários iniciais...");
 
-                // ✅ CORRETO: Admin com tipo = 1
+                // Admin
                 Usuario admin = new Usuario();
                 admin.setNome("Administrador");
                 admin.setEmail("admin@helpdesk.com");
                 admin.setSenha("admin123");
-                admin.setTipo(1); // ✅ 1 = Admin
+                admin.setTipo(1);
 
                 long adminId = usuarioDAO.inserirUsuario(admin);
                 if (adminId > 0) {
@@ -292,12 +309,12 @@ public class LoginActivity extends AppCompatActivity {
                     Log.e(TAG, "❌ Erro ao criar admin");
                 }
 
-                // ✅ CORRETO: Cliente com tipo = 0
+                // Cliente
                 Usuario cliente = new Usuario();
                 cliente.setNome("Cliente Teste");
                 cliente.setEmail("cliente@helpdesk.com");
                 cliente.setSenha("123456");
-                cliente.setTipo(0); // ✅ 0 = Cliente
+                cliente.setTipo(0);
 
                 long clienteId = usuarioDAO.inserirUsuario(cliente);
                 if (clienteId > 0) {
@@ -307,21 +324,19 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 Toast.makeText(this,
-                        "✅ Usuários criados com sucesso!\n\n" +
+                        "✅ Usuários criados!\n\n" +
                                 "👨‍💼 Admin: admin@helpdesk.com / admin123\n" +
                                 "👤 Cliente: cliente@helpdesk.com / 123456",
                         Toast.LENGTH_LONG).show();
 
             } else {
-                Log.d(TAG, "✅ Usuários já existem no banco (" + totalUsuarios + " usuários)");
+                Log.d(TAG, "✅ Usuários já existem (" + totalUsuarios + " usuários)");
             }
 
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao criar usuários iniciais", e);
-            Toast.makeText(this, "❌ Erro ao criar usuários: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         } finally {
             usuarioDAO.close();
         }
     }
-    ApiService service = RetrofitClient.getRetrofit().create(ApiService.class);
 }

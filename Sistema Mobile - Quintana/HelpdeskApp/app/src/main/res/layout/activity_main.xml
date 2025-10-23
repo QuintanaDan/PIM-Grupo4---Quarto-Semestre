@@ -240,7 +240,7 @@
                         <androidx.cardview.widget.CardView
                             android:id="@+id/cardAbrirChamadoRapido"
                             android:layout_width="0dp"
-                            android:layout_height="90dp"
+                            android:layout_height="100dp"
                             android:layout_weight="1"
                             android:layout_margin="6dp"
                             app:cardCornerRadius="12dp"
@@ -276,7 +276,7 @@
                         <androidx.cardview.widget.CardView
                             android:id="@+id/cardMeusChamadosRapido"
                             android:layout_width="0dp"
-                            android:layout_height="90dp"
+                            android:layout_height="100dp"
                             android:layout_weight="1"
                             android:layout_margin="6dp"
                             app:cardCornerRadius="12dp"

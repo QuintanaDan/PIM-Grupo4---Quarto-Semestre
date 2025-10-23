@@ -17,8 +17,6 @@ import java.util.Locale;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import com.example.helpdeskapp.api.ApiService;
-
 
 public class SyncHelper {
 
@@ -30,7 +28,7 @@ public class SyncHelper {
     }
 
     /**
-     * Sincronizar chamados da API para o banco local
+     * ✅ SINCRONIZAR CHAMADOS DA API (SEM DUPLICAR)
      */
     public static void sincronizarChamados(Context context, SyncCallback callback) {
         SessionManager sessionManager = new SessionManager(context);
@@ -52,7 +50,7 @@ public class SyncHelper {
                 if (response.isSuccessful() && response.body() != null) {
                     List<ChamadoResponse> chamadosAPI = response.body();
 
-                    Log.d(TAG, "✅ Recebidos " + chamadosAPI.size() + " chamados da API");
+                    Log.d(TAG, "📥 Recebidos " + chamadosAPI.size() + " chamados da API");
 
                     salvarChamadosLocalmente(context, chamadosAPI);
 
@@ -77,33 +75,60 @@ public class SyncHelper {
         });
     }
 
+    /**
+     * ✅ SALVAR CHAMADOS LOCALMENTE (SEM DUPLICAR)
+     */
     private static void salvarChamadosLocalmente(Context context, List<ChamadoResponse> chamadosAPI) {
         ChamadoDAO dao = new ChamadoDAO(context);
         dao.open();
 
-        for (ChamadoResponse chamadoAPI : chamadosAPI) {
-            // Verificar se já existe localmente (por protocolo)
-            Chamado existente = dao.buscarPorProtocolo(chamadoAPI.getProtocolo());
+        int novos = 0;
+        int atualizados = 0;
 
-            if (existente == null) {
-                // Inserir novo
-                Chamado novoChamado = converterParaChamado(chamadoAPI);
-                long id = dao.inserir(novoChamado);
-                Log.d(TAG, "💾 Chamado inserido localmente: " + chamadoAPI.getProtocolo() + " (ID: " + id + ")");
-            } else {
-                // Atualizar existente
-                Chamado atualizado = converterParaChamado(chamadoAPI);
-                atualizado.setId(existente.getId());
-                dao.atualizar(atualizado);
-                Log.d(TAG, "🔄 Chamado atualizado localmente: " + chamadoAPI.getProtocolo());
+        try {
+            for (ChamadoResponse chamadoAPI : chamadosAPI) {
+                // ✅ BUSCAR POR ID (não por protocolo)
+                Chamado existente = dao.buscarPorId(chamadoAPI.getId());
+
+                Chamado chamado = converterParaChamado(chamadoAPI);
+
+                if (existente == null) {
+                    // ✅ NÃO EXISTE: INSERIR COM ID DA API
+                    long id = dao.inserirComId(chamado);
+
+                    if (id > 0) {
+                        novos++;
+                        Log.d(TAG, "   ➕ Novo: #" + chamadoAPI.getId() + " - " + chamadoAPI.getTitulo());
+                    }
+                } else {
+                    // ✅ JÁ EXISTE: ATUALIZAR
+                    int rows = dao.atualizar(chamado);
+
+                    if (rows > 0) {
+                        atualizados++;
+                        Log.d(TAG, "   🔄 Atualizado: #" + chamadoAPI.getId() + " - " + chamadoAPI.getTitulo());
+                    }
+                }
             }
-        }
 
-        dao.close();
+            Log.d(TAG, String.format("✅ Sincronização concluída: %d novos, %d atualizados", novos, atualizados));
+
+        } catch (Exception e) {
+            Log.e(TAG, "❌ Erro ao salvar chamados localmente", e);
+            e.printStackTrace();
+        } finally {
+            dao.close();
+        }
     }
 
+    /**
+     * ✅ CONVERTER ChamadoResponse para Chamado
+     */
     private static Chamado converterParaChamado(ChamadoResponse response) {
         Chamado chamado = new Chamado();
+
+        // ✅ MANTER O ID DA API
+        chamado.setId(response.getId());
 
         chamado.setNumero(response.getProtocolo());
         chamado.setTitulo(response.getTitulo());
@@ -113,7 +138,11 @@ public class SyncHelper {
         chamado.setPrioridade(response.getPrioridade());
         chamado.setStatus(response.getStatus());
 
-        // Converter data (simplificado)
+        // Datas
+        chamado.setCreatedAt(response.getDataAbertura());
+        chamado.setUpdatedAt(response.getDataAbertura()); // Se não tiver dataUpdate
+
+        // Converter data para Date
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
 
@@ -128,6 +157,4 @@ public class SyncHelper {
 
         return chamado;
     }
-
-    ApiService service = RetrofitClient.getRetrofit().create(ApiService.class);
 }

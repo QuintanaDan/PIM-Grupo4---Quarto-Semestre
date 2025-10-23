@@ -106,20 +106,53 @@ public class BuscarChamadoActivity extends AppCompatActivity {
     }
 
     private void carregarChamados() {
-        try {
-            long clienteId = sessionManager.getUserId();
-            todosOsChamados = chamadoDAO.listarChamadosPorCliente(clienteId);
+        Log.d(TAG, "=== CARREGANDO CHAMADOS ===");
 
-            if (todosOsChamados == null) {
-                todosOsChamados = new ArrayList<>();
+        try {
+            // ✅ ABRIR O BANCO ANTES DE USAR!
+            chamadoDAO.open();
+
+            long userId = sessionManager.getUserId();
+            Log.d(TAG, "User ID: " + userId);
+
+            List<Chamado> chamados;
+
+            if (sessionManager.isAdmin()) {
+                Log.d(TAG, "Carregando TODOS os chamados (Admin)");
+                chamados = chamadoDAO.buscarTodosChamados();
+            } else {
+                Log.d(TAG, "Carregando chamados do cliente: " + userId);
+                chamados = chamadoDAO.listarChamadosPorCliente(userId);
             }
 
-            Log.d(TAG, "Total de chamados carregados: " + todosOsChamados.size());
+            Log.d(TAG, "Total de chamados: " + chamados.size());
+
+            // ✅ ATUALIZAR A LISTA COMPLETA (para busca funcionar)
+            todosOsChamados.clear();
+            todosOsChamados.addAll(chamados);
+
+            if (chamados.isEmpty()) {
+                Toast.makeText(this, "Nenhum chamado encontrado", Toast.LENGTH_SHORT).show();
+                mostrarMensagemInicial();
+            } else {
+                // Mostrar todos inicialmente
+                resultadosBusca.clear();
+                resultadosBusca.addAll(chamados);
+
+                // ✅ USAR updateList() ao invés de atualizarLista()
+                if (adapter != null) {
+                    adapter.updateList(resultadosBusca);
+                }
+
+                mostrarResultados();
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "Erro ao carregar chamados: ", e);
-            Toast.makeText(this, "Erro ao carregar chamados: " + e.getMessage(),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "❌ Erro ao carregar chamados", Toast.LENGTH_SHORT).show();
+        } finally {
+            // ✅ FECHAR O BANCO DEPOIS DE USAR!
+            chamadoDAO.close();
         }
     }
 

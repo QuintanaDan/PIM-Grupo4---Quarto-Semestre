@@ -178,44 +178,44 @@ public class MeusChamadosActivity extends AppCompatActivity {
     private void carregarChamados() {
         Log.d(TAG, "=== INICIANDO CARREGAMENTO ===");
 
-        if (sessionManager == null || !sessionManager.isLoggedIn()) {
-            Log.e(TAG, "❌ SessionManager inválido ou usuário não logado!");
-            mostrarMensagemVazia();
-            return;
-        }
-
-        long clienteId = sessionManager.getUserId();
-        Log.d(TAG, "Cliente ID obtido: " + clienteId);
-
-        if (clienteId <= 0) {
-            Log.e(TAG, "❌ Cliente ID inválido: " + clienteId);
-            mostrarMensagemVazia();
-            return;
-        }
-
-        if (chamadoDAO == null) {
-            Log.e(TAG, "❌ ChamadoDAO é null!");
-            mostrarMensagemVazia();
-            return;
-        }
-
         try {
-            chamadoDAO.debugInfo();
-            todosOsChamados = chamadoDAO.listarChamadosPorCliente(clienteId);
+            long clienteId = sessionManager.getUserId();
+            Log.d(TAG, "Cliente ID obtido: " + clienteId);
 
-            if (todosOsChamados != null && !todosOsChamados.isEmpty()) {
-                Log.d(TAG, "✅ CHAMADOS ENCONTRADOS: " + todosOsChamados.size());
-                aplicarFiltro(filtroAtual);
-                mostrarListaChamados(chamadosFiltrados);
-            } else {
-                Log.w(TAG, "❌ NENHUM CHAMADO ENCONTRADO");
+            if (clienteId <= 0) {
+                Log.e(TAG, "❌ Cliente ID inválido: " + clienteId);
                 mostrarMensagemVazia();
+                return;
+            }
+
+            // ✅ ABRIR O BANCO
+            ChamadoDAO chamadoDAO = new ChamadoDAO(this);
+            chamadoDAO.open();
+
+            List<Chamado> chamados = chamadoDAO.listarChamadosPorCliente(clienteId);
+
+            chamadoDAO.close();
+
+            Log.d(TAG, "✅ Chamados carregados: " + chamados.size());
+
+            // ✅ USAR O MÉTODO CORRETO
+            todosOsChamados.clear();
+            todosOsChamados.addAll(chamados);
+            chamadosFiltrados.clear();
+            chamadosFiltrados.addAll(chamados);
+
+            if (chamados.isEmpty()) {
+                mostrarMensagemVazia();
+            } else {
+                // ✅ USAR O MÉTODO QUE EXISTE
+                mostrarListaChamados(chamados);
             }
 
         } catch (Exception e) {
             Log.e(TAG, "❌ ERRO AO CARREGAR CHAMADOS: ", e);
-            Toast.makeText(this, "Erro ao carregar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             mostrarMensagemVazia();
+            Toast.makeText(this, "Erro ao carregar chamados: " + e.getMessage(),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 

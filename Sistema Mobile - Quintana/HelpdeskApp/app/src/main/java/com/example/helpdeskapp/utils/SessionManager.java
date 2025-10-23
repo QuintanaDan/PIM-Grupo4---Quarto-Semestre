@@ -2,10 +2,11 @@ package com.example.helpdeskapp.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 public class SessionManager {
-
-    private static final String PREF_NAME = "HelpDeskSession";
+    private static final String TAG = "SessionManager";
+    private static final String PREF_NAME = "HelpdeskPrefs";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     private static final String KEY_USER_ID = "userId";
     private static final String KEY_USER_NAME = "userName";
@@ -13,90 +14,180 @@ public class SessionManager {
     private static final String KEY_USER_TYPE = "userType";
     private static final String KEY_TOKEN = "token";
 
-    private SharedPreferences sharedPreferences;
+    private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
     private Context context;
 
     public SessionManager(Context context) {
         this.context = context;
-        this.sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        this.editor = sharedPreferences.edit();
+        prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        editor = prefs.edit();
     }
 
-    // Criar sessão de login
-    public void createLoginSession(long userId, String email, String name, int userType) {
-        editor.putBoolean(KEY_IS_LOGGED_IN, true);
-        editor.putLong(KEY_USER_ID, userId);
-        editor.putString(KEY_USER_EMAIL, email);
-        editor.putString(KEY_USER_NAME, name);
-        editor.putInt(KEY_USER_TYPE, userType);
-        editor.apply();
-    }
+    // ========================================
+    // MÉTODOS DE TOKEN JWT
+    // ========================================
 
-    // Salvar token JWT
     public void saveToken(String token) {
         editor.putString(KEY_TOKEN, token);
         editor.apply();
+        Log.d(TAG, "✅ Token JWT salvo");
     }
 
-    // Obter token
     public String getToken() {
-        return sharedPreferences.getString(KEY_TOKEN, null);
+        String token = prefs.getString(KEY_TOKEN, null);
+        if (token != null) {
+            Log.d(TAG, "✅ Token recuperado: " + token.substring(0, Math.min(20, token.length())) + "...");
+        } else {
+            Log.w(TAG, "⚠️ Token não encontrado no SharedPreferences");
+        }
+        return token;
     }
 
-    // Obter header de autenticação
     public String getAuthHeader() {
         String token = getToken();
-        if (token != null) {
+        if (token != null && !token.isEmpty()) {
             return "Bearer " + token;
         }
+        Log.w(TAG, "⚠️ Token não disponível para header de autorização");
         return null;
     }
 
-    // Verificar se está logado
+    public void clearToken() {
+        editor.remove(KEY_TOKEN);
+        editor.apply();
+        Log.d(TAG, "✅ Token removido");
+    }
+
+    // ========================================
+    // MÉTODOS DE SESSÃO DO USUÁRIO
+    // ========================================
+
+    public void saveUserData(long userId, String userName, String userEmail, int userType) {
+        editor.putBoolean(KEY_IS_LOGGED_IN, true);
+        editor.putLong(KEY_USER_ID, userId);
+        editor.putString(KEY_USER_NAME, userName);
+        editor.putString(KEY_USER_EMAIL, userEmail);
+        editor.putInt(KEY_USER_TYPE, userType);
+        editor.apply();
+
+        Log.d(TAG, "✅ Dados do usuário salvos:");
+        Log.d(TAG, "   ID: " + userId);
+        Log.d(TAG, "   Nome: " + userName);
+        Log.d(TAG, "   Email: " + userEmail);
+        Log.d(TAG, "   Tipo: " + userType);
+    }
+
+    public void createLoginSession(long userId, String userEmail, String userName, int userType) {
+        saveUserData(userId, userName, userEmail, userType);
+    }
+
     public boolean isLoggedIn() {
-        return sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false);
+        return prefs.getBoolean(KEY_IS_LOGGED_IN, false);
     }
 
-    // Obter ID do usuário
     public long getUserId() {
-        return sharedPreferences.getLong(KEY_USER_ID, -1);
+        return prefs.getLong(KEY_USER_ID, 0);
     }
 
-    // Obter nome do usuário
     public String getUserName() {
-        return sharedPreferences.getString(KEY_USER_NAME, "");
+        return prefs.getString(KEY_USER_NAME, "");
     }
 
-    // Obter email do usuário
     public String getUserEmail() {
-        return sharedPreferences.getString(KEY_USER_EMAIL, "");
+        return prefs.getString(KEY_USER_EMAIL, "");
     }
 
-    // Obter tipo do usuário (0 = Cliente, 1 = Admin)
     public int getUserType() {
-        return sharedPreferences.getInt(KEY_USER_TYPE, 0);
+        return prefs.getInt(KEY_USER_TYPE, 0);
     }
 
-    // Verificar se é admin
+    public String getUserTypeText() {
+        int tipo = getUserType();
+        return tipo == 1 ? "Administrador" : "Cliente";
+    }
+
     public boolean isAdmin() {
         return getUserType() == 1;
     }
 
-    // Obter texto do tipo de usuário
-    public String getUserTypeText() {
-        return isAdmin() ? "Administrador" : "Cliente";
+    public String getUserInitials() {
+        String nome = getUserName();
+        if (nome == null || nome.isEmpty()) {
+            return "?";
+        }
+
+        String[] partes = nome.trim().split("\\s+");
+        if (partes.length == 1) {
+            return partes[0].substring(0, 1).toUpperCase();
+        } else {
+            return (partes[0].substring(0, 1) + partes[partes.length - 1].substring(0, 1)).toUpperCase();
+        }
     }
 
-    // Limpar sessão (logout)
+    // ========================================
+    // MÉTODOS INDIVIDUAIS (para compatibilidade)
+    // ========================================
+
+    public void saveUserId(long userId) {
+        editor.putLong(KEY_USER_ID, userId);
+        editor.putBoolean(KEY_IS_LOGGED_IN, true);
+        editor.apply();
+    }
+
+    public void saveUserName(String userName) {
+        editor.putString(KEY_USER_NAME, userName);
+        editor.apply();
+    }
+
+    public void saveUserEmail(String email) {
+        editor.putString(KEY_USER_EMAIL, email);
+        editor.apply();
+    }
+
+    public void saveUserType(int userType) {
+        editor.putInt(KEY_USER_TYPE, userType);
+        editor.apply();
+    }
+
+    // ========================================
+    // LOGOUT
+    // ========================================
+
     public void logout() {
         editor.clear();
         editor.apply();
+        Log.d(TAG, "✅ Logout realizado - todos os dados limpos (incluindo token)");
     }
 
-    // Limpar apenas o token
-    public void clearToken() {
-        editor.remove(KEY_TOKEN);
+    // ========================================
+    // MÉTODOS DE PREFERÊNCIAS (TEMA, ETC)
+    // ========================================
+
+    public void savePreference(String key, String value) {
+        editor.putString(key, value);
         editor.apply();
+    }
+
+    public String getPreference(String key, String defaultValue) {
+        return prefs.getString(key, defaultValue);
+    }
+
+    public void savePreference(String key, boolean value) {
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+
+    public boolean getPreference(String key, boolean defaultValue) {
+        return prefs.getBoolean(key, defaultValue);
+    }
+
+    public void savePreference(String key, int value) {
+        editor.putInt(key, value);
+        editor.apply();
+    }
+
+    public int getPreference(String key, int defaultValue) {
+        return prefs.getInt(key, defaultValue);
     }
 }

@@ -20,7 +20,8 @@
             android:id="@+id/nav_todos_chamados"
             android:icon="@drawable/ic_dashboard"
             android:title="Todos Chamados"
-            android:visible="false" /> </group>
+            android:visible="false" />
+    </group>
 
     <item android:title="Administração">
         <menu>
@@ -47,10 +48,11 @@
             <item
                 android:id="@+id/nav_diversidade"
                 android:icon="@drawable/ic_diversity_two"
-                android:title="Consciência e Diversidade" /> <item
-            android:id="@+id/nav_personalizar_tema"
-            android:icon="@drawable/ic_palette"
-            android:title="Personalizar Tema" />
+                android:title="Consciência e Diversidade" />
+            <item
+                android:id="@+id/nav_personalizar_tema"
+                android:icon="@drawable/ic_palette"
+                android:title="Personalizar Tema" />
             <item
                 android:id="@+id/nav_mover"
                 android:icon="@drawable/ic_diversity"
