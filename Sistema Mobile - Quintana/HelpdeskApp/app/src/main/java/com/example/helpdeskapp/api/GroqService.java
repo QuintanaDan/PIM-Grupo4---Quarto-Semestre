@@ -11,6 +11,7 @@ public interface GroqService {
     @Headers({
             "Content-Type: application/json"
     })
-    @POST("openai/v1/chat/completions")
+    
+    @POST("chat/completions")
     Call<GroqResponse> createChatCompletion(@Body GroqRequest request);
 }

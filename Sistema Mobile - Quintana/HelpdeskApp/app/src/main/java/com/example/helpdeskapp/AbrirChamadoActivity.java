@@ -430,6 +430,8 @@ public class AbrirChamadoActivity extends AppCompatActivity {
     // ========== FUNCIONALIDADE IA (mantida igual) ==========
 
     private void buscarPerguntasIA() {
+        Log.d(TAG, "🤖 === BUSCAR PERGUNTAS IA - INÍCIO ===");
+
         String titulo = etTitulo.getText().toString().trim();
 
         if (titulo.isEmpty()) {
@@ -445,7 +447,9 @@ public class AbrirChamadoActivity extends AppCompatActivity {
 
         String categoria = spinnerCategoria.getSelectedItem().toString();
 
-        Log.d(TAG, "🤖 Buscando perguntas IA...");
+        Log.d(TAG, "📝 Dados coletados:");
+        Log.d(TAG, "   Título: " + titulo);
+        Log.d(TAG, "   Categoria: " + categoria);
 
         cardPerguntasIA.setVisibility(View.VISIBLE);
         progressBarPerguntasIA.setVisibility(View.VISIBLE);
@@ -462,6 +466,8 @@ public class AbrirChamadoActivity extends AppCompatActivity {
                 "Título do problema: " + titulo + "\n\n" +
                 "Formato da resposta: Liste as 5 perguntas numeradas (1. 2. 3. 4. 5.) sem texto adicional.";
 
+        Log.d(TAG, "📋 Prompt criado, montando request...");
+
         List<GroqRequest.Message> messages = new ArrayList<>();
         messages.add(new GroqRequest.Message("system",
                 "Você é um especialista em suporte técnico de TI."));
@@ -474,29 +480,71 @@ public class AbrirChamadoActivity extends AppCompatActivity {
                 500
         );
 
+        Log.d(TAG, "🚀 Criando GroqService...");
+
         GroqService service = GroqClient.getRetrofit().create(GroqService.class);
+
+        Log.d(TAG, "📤 Enviando requisição para Groq API...");
+
         service.createChatCompletion(request).enqueue(new Callback<GroqResponse>() {
             @Override
             public void onResponse(Call<GroqResponse> call, Response<GroqResponse> response) {
+                Log.d(TAG, "📥 === RESPOSTA RECEBIDA ===");
+                Log.d(TAG, "   Código HTTP: " + response.code());
+                Log.d(TAG, "   Mensagem: " + response.message());
+                Log.d(TAG, "   Sucesso: " + response.isSuccessful());
+                Log.d(TAG, "   Body null: " + (response.body() == null));
+
                 btnAssistenteIA.setEnabled(true);
                 progressBarPerguntasIA.setVisibility(View.GONE);
 
                 if (response.isSuccessful() && response.body() != null) {
                     GroqResponse groqResponse = response.body();
+
+                    Log.d(TAG, "✅ Body não é null");
+                    Log.d(TAG, "   Choices null: " + (groqResponse.getChoices() == null));
+                    Log.d(TAG, "   Choices size: " + (groqResponse.getChoices() != null ? groqResponse.getChoices().size() : 0));
+
                     if (groqResponse.getChoices() != null && !groqResponse.getChoices().isEmpty()) {
                         perguntasGeradas = groqResponse.getChoices().get(0).getMessage().getContent();
+
+                        Log.d(TAG, "✨ Perguntas geradas com sucesso!");
+                        Log.d(TAG, "   Tamanho: " + perguntasGeradas.length() + " caracteres");
+                        Log.d(TAG, "   Preview: " + perguntasGeradas.substring(0, Math.min(100, perguntasGeradas.length())));
+
                         exibirPerguntas(perguntasGeradas);
                     } else {
+                        Log.e(TAG, "❌ Choices vazio ou null!");
                         exibirErroPergunta("Nenhuma pergunta gerada. Tente novamente.");
                     }
                 } else {
-                    exibirErroPergunta("Erro ao gerar perguntas: " + response.message());
+                    Log.e(TAG, "❌ Resposta não foi bem-sucedida!");
+                    Log.e(TAG, "   Código: " + response.code());
+
+                    // ✅ LER O ERRO DA API
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorBody = response.errorBody().string();
+                            Log.e(TAG, "   Error Body: " + errorBody);
+                            exibirErroPergunta("Erro da API: " + errorBody);
+                        } else {
+                            exibirErroPergunta("Erro ao gerar perguntas: " + response.message());
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "   Erro ao ler errorBody", e);
+                        exibirErroPergunta("Erro ao gerar perguntas: " + response.message());
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<GroqResponse> call, Throwable t) {
-                Log.e(TAG, "Falha na IA", t);
+                Log.e(TAG, "❌ === FALHA NA REQUISIÇÃO ===");
+                Log.e(TAG, "   Tipo de erro: " + t.getClass().getSimpleName());
+                Log.e(TAG, "   Mensagem: " + t.getMessage());
+                Log.e(TAG, "   Causa: " + (t.getCause() != null ? t.getCause().getMessage() : "null"));
+                t.printStackTrace();
+
                 btnAssistenteIA.setEnabled(true);
                 progressBarPerguntasIA.setVisibility(View.GONE);
                 exibirErroPergunta("Erro de conexão: " + t.getMessage());

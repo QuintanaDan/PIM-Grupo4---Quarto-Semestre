@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\HelpDeskAPI.csproj": {}
+    "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpdeskApi\\HelpDeskAPI\\HelpDeskAPI.csproj": {}
   },
   "projects": {
-    "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\HelpDeskAPI.csproj": {
+    "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpdeskApi\\HelpDeskAPI\\HelpDeskAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\HelpDeskAPI.csproj",
+        "projectUniqueName": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpdeskApi\\HelpDeskAPI\\HelpDeskAPI.csproj",
         "projectName": "HelpDeskAPI",
-        "projectPath": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\HelpDeskAPI.csproj",
+        "projectPath": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpdeskApi\\HelpDeskAPI\\HelpDeskAPI.csproj",
         "packagesPath": "C:\\Users\\Usuário\\.nuget\\packages\\",
         "outputPath": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpdeskApi\\HelpDeskAPI\\obj\\",
         "projectStyle": "PackageReference",

@@ -90,11 +90,24 @@
       "DocumentGroups": [
         {
           "DockedHeight": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Program.cs",
+              "RelativeDocumentMoniker": "HelpDeskAPI\\Program.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Program.cs",
+              "RelativeToolTip": "HelpDeskAPI\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-17T09:38:39.192Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -143,19 +156,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-17T09:38:01.074Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Program.cs",
-              "RelativeDocumentMoniker": "HelpDeskAPI\\Program.cs",
-              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\Program.cs",
-              "RelativeToolTip": "HelpDeskAPI\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-17T09:38:39.192Z",
-              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -329,9 +329,9 @@
               "$type": "Document",
               "DocumentIndex": 19,
               "Title": "HelpDeskAPI.csproj",
-              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\HelpDeskAPI.csproj",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpdeskApi\\HelpDeskAPI\\HelpDeskAPI.csproj",
               "RelativeDocumentMoniker": "HelpDeskAPI\\HelpDeskAPI.csproj",
-              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpDeskAPI\\HelpDeskAPI\\HelpDeskAPI.csproj",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\Sistema Mobile - Quintana\\HelpdeskApi\\HelpDeskAPI\\HelpDeskAPI.csproj",
               "RelativeToolTip": "HelpDeskAPI\\HelpDeskAPI.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
