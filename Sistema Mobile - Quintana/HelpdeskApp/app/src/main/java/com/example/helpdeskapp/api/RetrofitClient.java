@@ -11,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 public class RetrofitClient {
 
-    // ✅ URL da API
-    private static final String BASE_URL = "http://192.168.1.220:7170/";
+    // ✅ URL do Render
+    private static final String BASE_URL = "https://helpdeskapi-qzp2.onrender.com/";
 
     private static Retrofit retrofit = null;
     private static Context appContext = null;
