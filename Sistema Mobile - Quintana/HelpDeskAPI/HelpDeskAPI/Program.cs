@@ -7,11 +7,6 @@ using HelpDeskAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Ler connection string de variável de ambiente (Render) ou appsettings
-var connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION")
-    ?? Environment.GetEnvironmentVariable("DATABASE_URL")
-    ?? builder.Configuration.GetConnectionString("DefaultConnection");
-
 var postgresConn = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION");
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection");
