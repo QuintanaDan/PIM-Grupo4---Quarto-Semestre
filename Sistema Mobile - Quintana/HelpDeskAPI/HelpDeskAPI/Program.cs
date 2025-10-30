@@ -12,6 +12,17 @@ var connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION")
     ?? Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
+var postgresConn = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION");
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection");
+
+Console.WriteLine($"DEBUG - POSTGRES_CONNECTION: {postgresConn?.Substring(0, Math.Min(50, postgresConn?.Length ?? 0))}...");
+Console.WriteLine($"DEBUG - DATABASE_URL: {databaseUrl?.Substring(0, Math.Min(50, databaseUrl?.Length ?? 0))}...");
+Console.WriteLine($"DEBUG - DefaultConnection: {defaultConn?.Substring(0, Math.Min(50, defaultConn?.Length ?? 0))}...");
+
+var connectionString = postgresConn ?? databaseUrl ?? defaultConn;
+Console.WriteLine($"DEBUG - Using connection: {connectionString?.Substring(0, Math.Min(50, connectionString?.Length ?? 0))}...");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
