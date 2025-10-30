@@ -4,14 +4,11 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using HelpDeskAPI.Data;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Forçar HTTP em todas as interfaces
-builder.WebHost.UseUrls("http://0.0.0.0:7170");
-
-// Add services to the container.
+// ✅ REMOVER linhas UseUrls - deixar Render configurar a porta!
+// NÃO usar builder.WebHost.UseUrls()
 
 // ✅ Ler connection string de variável de ambiente (Render) ou appsettings
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
@@ -20,7 +17,7 @@ var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// Configurar CORS (permitir qualquer origem por enquanto)
+// Configurar CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -60,7 +57,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// ✅ CONFIGURAR SWAGGER COM SUPORTE A JWT (BOTÃO AUTHORIZE)
+// Configurar Swagger
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -74,7 +71,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Definir esquema de segurança Bearer JWT
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -89,7 +85,6 @@ builder.Services.AddSwaggerGen(options =>
                       Exemplo: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'"
     });
 
-    // Adicionar requisito de segurança global
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -106,26 +101,19 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.WebHost.UseUrls("http://0.0.0.0:7170");
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "HelpDeskAPI v1");
-        c.RoutePrefix = "swagger";
-    });
-
-//app.UseHttpsRedirection();
+// ✅ Swagger sempre ativo
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HelpDeskAPI v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseCors("AllowAll");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
