@@ -85,3 +85,18 @@ fastlane/screenshots
 fastlane/test_output
 
 fastlane/readme.md
+
+# Visual Studio
+.vs/
+bin/
+obj/
+*.suo
+*.user
+*.vsidx
+*.backup.json
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
