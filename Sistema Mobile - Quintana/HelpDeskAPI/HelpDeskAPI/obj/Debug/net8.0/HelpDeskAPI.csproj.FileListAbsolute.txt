@@ -148,3 +148,5 @@ C:\PIM-Grupo4---Quarto-Semestre\Sistema Mobile - Quintana\HelpdeskApi\HelpDeskAP
 C:\PIM-Grupo4---Quarto-Semestre\Sistema Mobile - Quintana\HelpdeskApi\HelpDeskAPI\obj\Debug\net8.0\HelpDeskAPI.pdb
 C:\PIM-Grupo4---Quarto-Semestre\Sistema Mobile - Quintana\HelpdeskApi\HelpDeskAPI\obj\Debug\net8.0\HelpDeskAPI.genruntimeconfig.cache
 C:\PIM-Grupo4---Quarto-Semestre\Sistema Mobile - Quintana\HelpdeskApi\HelpDeskAPI\obj\Debug\net8.0\ref\HelpDeskAPI.dll
+C:\PIM-Grupo4---Quarto-Semestre\Sistema Mobile - Quintana\HelpdeskApi\HelpDeskAPI\bin\Debug\net8.0\Npgsql.dll
+C:\PIM-Grupo4---Quarto-Semestre\Sistema Mobile - Quintana\HelpdeskApi\HelpDeskAPI\bin\Debug\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
