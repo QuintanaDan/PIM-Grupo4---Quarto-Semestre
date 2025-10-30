@@ -111,15 +111,13 @@ builder.WebHost.UseUrls("http://0.0.0.0:7170");
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "HelpDeskAPI v1");
         c.RoutePrefix = "swagger";
     });
-}
 
 //app.UseHttpsRedirection();
 
