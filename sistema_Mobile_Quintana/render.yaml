@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: helpdeskapi
+    runtime: docker
+    repo: https://github.com/QuintanaDan/PIM-Grupo4---Quarto-Semestre
+    dockerfilePath: ./Sistema Mobile - Quintana/HelpDeskAPI/HelpDeskAPI/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:5000
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
