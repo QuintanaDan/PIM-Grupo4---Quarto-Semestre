@@ -7,9 +7,6 @@ using HelpDeskAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ REMOVER linhas UseUrls - deixar Render configurar a porta!
-// NÃO usar builder.WebHost.UseUrls()
-
 // ✅ Ler connection string de variável de ambiente (Render) ou appsettings
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
@@ -28,8 +25,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+// ✅ Ler configurações JWT de variáveis de ambiente primeiro
+var jwtKey = Environment.GetEnvironmentVariable("Jwt__Key")
+    ?? builder.Configuration["Jwt:Key"];
+
+var jwtIssuer = Environment.GetEnvironmentVariable("Jwt__Issuer")
+    ?? builder.Configuration["Jwt:Issuer"];
+
+var jwtAudience = Environment.GetEnvironmentVariable("Jwt__Audience")
+    ?? builder.Configuration["Jwt:Audience"];
+
 // Configurar autenticação JWT
-var jwtKey = builder.Configuration["Jwt:Key"];
 var key = Encoding.ASCII.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
@@ -46,9 +52,9 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidIssuer = jwtIssuer,
         ValidateAudience = true,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidAudience = jwtAudience,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
