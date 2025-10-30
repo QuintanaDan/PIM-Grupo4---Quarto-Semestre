@@ -69,25 +69,75 @@
                         android:hint="Título do problema"
                         android:inputType="textCapSentences"
                         android:padding="12dp" />
-                    <!-- Descrição -->
-                    <TextView
+
+
+
+                    <!-- CARD DE PERGUNTAS DA IA -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/cardPerguntasIA"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="8dp"
-                        android:text="Descrição"
-                        android:textColor="@color/text_dark"
-                        android:textSize="16sp" />
+                        android:layout_marginBottom="16dp"
+                        android:visibility="gone"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="4dp"
+                        app:cardBackgroundColor="@color/card_background">
 
-                    <EditText
-                        android:id="@+id/etDescricao"
-                        android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:background="@drawable/edit_text_background"
-                        android:gravity="top"
-                        android:hint="Descreva o problema detalhadamente"
-                        android:inputType="textMultiLine"
-                        android:padding="12dp" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="💡 Perguntas da IA para melhorar sua descrição:"
+                                android:textStyle="bold"
+                                android:textSize="14sp"
+                                android:textColor="@color/colorPrimary"
+                                android:layout_marginBottom="12dp" />
+
+                            <ProgressBar
+                                android:id="@+id/progressBarPerguntasIA"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:visibility="visible" />
+
+                            <TextView
+                                android:id="@+id/tvPerguntasIA"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="14sp"
+                                android:lineSpacingExtra="4dp"
+                                android:textColor="@color/text_primary"
+                                android:visibility="gone" />
+
+                            <EditText
+                                android:id="@+id/etRespostasIA"
+                                android:layout_width="match_parent"
+                                android:layout_height="120dp"
+                                android:hint="Digite suas respostas aqui..."
+                                android:gravity="top|start"
+                                android:padding="12dp"
+                                android:background="@drawable/edittext_background"
+                                android:textSize="14sp"
+                                android:layout_marginTop="12dp"
+                                android:visibility="gone" />
+
+                            <Button
+                                android:id="@+id/btnGerarDescricao"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="✨ Gerar Descrição Completa"
+                                android:textColor="@color/white"
+                                android:backgroundTint="@color/colorPrimary"
+                                android:layout_marginTop="12dp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
                     <!-- Categoria -->
                     <TextView
                         android:layout_width="match_parent"
@@ -104,6 +154,41 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/edit_text_background"
                         android:minHeight="48dp" />
+
+                    <!-- BOTÃO ASSISTENTE IA -->
+                    <Button
+                        android:id="@+id/btnAssistenteIA"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="🤖 Pedir ajuda da IA para descrever melhor"
+                        android:textColor="@color/white"
+                        android:backgroundTint="@color/colorAccent"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:padding="10dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="1dp"
+                        android:elevation="2dp" />
+
+                    <!-- Descrição -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="8dp"
+                        android:text="Descrição"
+                        android:textColor="@color/text_dark"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/etDescricao"
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:background="@drawable/edit_text_background"
+                        android:gravity="top"
+                        android:hint="Descreva o problema detalhadamente"
+                        android:inputType="textMultiLine"
+                        android:padding="12dp" />
                     <!-- Prioridade -->
                     <TextView
                         android:layout_width="match_parent"

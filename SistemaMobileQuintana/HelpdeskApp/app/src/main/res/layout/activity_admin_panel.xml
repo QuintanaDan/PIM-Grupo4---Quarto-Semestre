@@ -296,22 +296,22 @@
 
         </androidx.cardview.widget.CardView>
 
+
+        <!-- Lista de Chamados -->
         <Button
             android:id="@+id/btnGerarRelatorio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="8dp"
+            android:backgroundTint="#E91E63"
+            android:paddingVertical="16dp"
             android:text="📄 GERAR RELATÓRIO PDF"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:backgroundTint="#E91E63"
-            android:paddingVertical="16dp"
-            app:cardCornerRadius="20dp"/>
+            app:cardCornerRadius="20dp" />
 
-
-        <!-- Lista de Chamados -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTodosChamados"
             android:layout_width="match_parent"

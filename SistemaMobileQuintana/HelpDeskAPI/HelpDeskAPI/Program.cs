@@ -7,19 +7,19 @@ using HelpDeskAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var postgresConn = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION");
+// ✅ Ler DATABASE_URL do Render (PostgreSQL nativo)
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection");
 
-Console.WriteLine($"DEBUG - POSTGRES_CONNECTION: {postgresConn?.Substring(0, Math.Min(50, postgresConn?.Length ?? 0))}...");
-Console.WriteLine($"DEBUG - DATABASE_URL: {databaseUrl?.Substring(0, Math.Min(50, databaseUrl?.Length ?? 0))}...");
-Console.WriteLine($"DEBUG - DefaultConnection: {defaultConn?.Substring(0, Math.Min(50, defaultConn?.Length ?? 0))}...");
+if (string.IsNullOrEmpty(databaseUrl))
+{
+    // Fallback local
+    databaseUrl = builder.Configuration.GetConnectionString("DefaultConnection");
+}
 
-var connectionString = postgresConn ?? databaseUrl ?? defaultConn;
-Console.WriteLine($"DEBUG - Using connection: {connectionString?.Substring(0, Math.Min(50, connectionString?.Length ?? 0))}...");
+Console.WriteLine($"DEBUG - Using DATABASE_URL: {databaseUrl?.Substring(0, 50)}...");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(databaseUrl));
 
 // Configurar CORS
 builder.Services.AddCors(options =>
@@ -32,7 +32,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ Ler configurações JWT de variáveis de ambiente primeiro
+// ✅ Ler configurações JWT de variáveis de ambiente
 var jwtKey = Environment.GetEnvironmentVariable("Jwt__Key")
     ?? builder.Configuration["Jwt:Key"];
 
