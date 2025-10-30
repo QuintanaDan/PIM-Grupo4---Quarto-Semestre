@@ -8,7 +8,8 @@ using HelpDeskAPI.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // ✅ Ler connection string de variável de ambiente (Render) ou appsettings
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+var connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION")
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
