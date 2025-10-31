@@ -51,7 +51,7 @@ namespace HelpDeskAPI.Controllers
                 UsuarioId = usuario.Id,
                 Acao = "Login",
                 Descricao = $"Login realizado - {usuario.Nome}",
-                EnderecoIP = HttpContext.Connection.RemoteIpAddress?.ToString()
+                EnderecoIP = HttpContext.Connection.RemoteIpAddress?.ToString(),
                 DataHora = DateTime.UtcNow
             };
             _context.Auditorias.Add(auditoria);
