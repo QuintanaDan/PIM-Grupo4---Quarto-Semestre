@@ -3,11 +3,10 @@ package com.example.helpdeskapp;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +17,7 @@ import com.example.helpdeskapp.api.responses.LoginResponse;
 import com.example.helpdeskapp.dao.UsuarioDAO;
 import com.example.helpdeskapp.helpers.AuditoriaHelper;
 import com.example.helpdeskapp.models.Usuario;
+import com.example.helpdeskapp.utils.LoadingDialog;
 import com.example.helpdeskapp.utils.NetworkHelper;
 import com.example.helpdeskapp.utils.SessionManager;
 import com.example.helpdeskapp.utils.ThemeManager;
@@ -27,15 +27,18 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
+
     private static final String TAG = "LoginActivity";
 
     private EditText etEmail, etSenha;
     private Button btnLogin, btnTesteAdmin, btnTesteCliente;
     private TextView tvModoOffline;
-    private ProgressBar progressBar;
+
+    // ✅ SUBSTITUÍDO: ProgressBar por LoadingDialog
+    private LoadingDialog loadingDialog;
+
     private UsuarioDAO usuarioDAO;
     private SessionManager sessionManager;
-
     private boolean forcarModoOffline = false;
 
     @Override
@@ -53,9 +56,11 @@ public class LoginActivity extends AppCompatActivity {
 
         inicializarComponentes();
         configurarEventos();
-
         usuarioDAO = new UsuarioDAO(this);
         criarUsuariosIniciais();
+
+        // ✅ INICIALIZAR LOADING DIALOG
+        loadingDialog = new LoadingDialog(this);
     }
 
     private void inicializarComponentes() {
@@ -66,10 +71,7 @@ public class LoginActivity extends AppCompatActivity {
         btnTesteCliente = findViewById(R.id.btnTestCliente);
         tvModoOffline = findViewById(R.id.tvModoOffline);
 
-        progressBar = findViewById(R.id.progressBar);
-        if (progressBar != null) {
-            progressBar.setVisibility(View.GONE);
-        }
+        // ✅ REMOVIDO: progressBar (não é mais necessário)
     }
 
     private void configurarEventos() {
@@ -91,7 +93,6 @@ public class LoginActivity extends AppCompatActivity {
         if (tvModoOffline != null) {
             tvModoOffline.setOnClickListener(v -> {
                 forcarModoOffline = !forcarModoOffline;
-
                 if (forcarModoOffline) {
                     tvModoOffline.setText("✅ Modo Offline ATIVADO");
                     tvModoOffline.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
@@ -111,19 +112,16 @@ public class LoginActivity extends AppCompatActivity {
             etEmail.requestFocus();
             return false;
         }
-
         if (senha.isEmpty()) {
             etSenha.setError("Senha obrigatória");
             etSenha.requestFocus();
             return false;
         }
-
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             etEmail.setError("Email inválido");
             etEmail.requestFocus();
             return false;
         }
-
         return true;
     }
 
@@ -135,13 +133,19 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        progressBar.setVisibility(View.VISIBLE);
-        btnLogin.setEnabled(false);
+        // ✅ MOSTRAR LOADING DIALOG LOGO NO INÍCIO
+        loadingDialog.show("Verificando conexão...", "Aguarde um momento");
 
         // ✅ SE MODO OFFLINE FORÇADO, PULAR API
         if (forcarModoOffline) {
             Log.d(TAG, "📱 Modo OFFLINE FORÇADO");
-            tentarLoginLocal(email, senha);
+            loadingDialog.updateMessage("Autenticando offline...");
+            loadingDialog.updateSubMessage("Buscando dados locais");
+
+            // Adicionar pequeno delay para melhor UX
+            new Handler().postDelayed(() -> {
+                tentarLoginLocal(email, senha);
+            }, 800);
             return;
         }
 
@@ -155,10 +159,18 @@ public class LoginActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 if (apiOnline) {
                     Log.d(TAG, "🌐 Modo ONLINE - Tentando login via API");
+                    loadingDialog.updateMessage("Conectando ao servidor...");
+                    loadingDialog.updateSubMessage("Autenticando usuário");
                     tentarLoginAPI(email, senha);
                 } else {
                     Log.d(TAG, "📱 Modo OFFLINE - Tentando login local");
-                    tentarLoginLocal(email, senha);
+                    loadingDialog.updateMessage("Modo offline ativado");
+                    loadingDialog.updateSubMessage("Autenticando localmente");
+
+                    // Pequeno delay para mostrar a mensagem
+                    new Handler().postDelayed(() -> {
+                        tentarLoginLocal(email, senha);
+                    }, 600);
                 }
             });
         }).start();
@@ -166,25 +178,24 @@ public class LoginActivity extends AppCompatActivity {
 
     private void tentarLoginAPI(String email, String senha) {
         LoginRequest loginRequest = new LoginRequest(email, senha);
-
         UsuarioService service = RetrofitClient.getRetrofit().create(UsuarioService.class);
+
         service.login(loginRequest).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                progressBar.setVisibility(View.GONE);
-                btnLogin.setEnabled(true);
+                // ✅ FECHAR LOADING DIALOG
+                loadingDialog.dismiss();
 
                 if (response.isSuccessful() && response.body() != null) {
                     LoginResponse loginResponse = response.body();
-
                     Log.d(TAG, "✅ Login via API bem-sucedido!");
 
-                    // ✅ SALVAR TODOS OS DADOS INCLUINDO TIPO!
+                    // ✅ SALVAR TODOS OS DADOS INCLUINDO TIPO
                     sessionManager.saveToken(loginResponse.getToken());
                     sessionManager.saveUserId(loginResponse.getUserId());
                     sessionManager.saveUserName(loginResponse.getUserName());
                     sessionManager.saveUserEmail(email);
-                    sessionManager.saveUserType(loginResponse.getTipo()); // ✅ ADICIONAR ESTA LINHA!
+                    sessionManager.saveUserType(loginResponse.getTipo());
 
                     Log.d(TAG, "🔑 Tipo de usuário salvo: " + loginResponse.getTipo());
 
@@ -197,14 +208,23 @@ public class LoginActivity extends AppCompatActivity {
                     irParaHome();
                 } else {
                     Log.w(TAG, "API falhou, tentando login local...");
-                    tentarLoginLocal(email, senha);
+                    loadingDialog.show("Tentando modo offline...", "Buscando dados locais");
+
+                    new Handler().postDelayed(() -> {
+                        tentarLoginLocal(email, senha);
+                    }, 600);
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Log.e(TAG, "Erro na API, usando modo offline", t);
-                tentarLoginLocal(email, senha);
+                loadingDialog.updateMessage("Sem conexão com servidor");
+                loadingDialog.updateSubMessage("Tentando modo offline");
+
+                new Handler().postDelayed(() -> {
+                    tentarLoginLocal(email, senha);
+                }, 800);
             }
         });
     }
@@ -217,17 +237,17 @@ public class LoginActivity extends AppCompatActivity {
         Usuario usuario = usuarioDAO.verificarLogin(email, senha);
         usuarioDAO.close();
 
-        progressBar.setVisibility(View.GONE);
-        btnLogin.setEnabled(true);
+        // ✅ FECHAR LOADING DIALOG
+        loadingDialog.dismiss();
 
         if (usuario != null) {
             Log.d(TAG, "✅ Login offline bem-sucedido!");
 
-            // ✅ SALVAR TODOS OS DADOS INCLUINDO TIPO!
+            // ✅ SALVAR TODOS OS DADOS INCLUINDO TIPO
             sessionManager.saveUserId(usuario.getId());
             sessionManager.saveUserName(usuario.getNome());
             sessionManager.saveUserEmail(usuario.getEmail());
-            sessionManager.saveUserType(usuario.getTipo()); // ✅ ADICIONAR ESTA LINHA!
+            sessionManager.saveUserType(usuario.getTipo());
 
             Log.d(TAG, "🔑 Tipo de usuário salvo: " + usuario.getTipo());
 
@@ -250,7 +270,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void salvarUsuarioOffline(LoginResponse loginResponse, String senha) {
         usuarioDAO.open();
-
         try {
             Usuario usuarioExistente = usuarioDAO.buscarPorEmail(loginResponse.getEmail());
 
@@ -261,7 +280,6 @@ public class LoginActivity extends AppCompatActivity {
                 novoUsuario.setEmail(loginResponse.getEmail());
                 novoUsuario.setSenha(senha); // Salvar senha para uso offline
                 novoUsuario.setTipo(loginResponse.getTipo());
-
                 long id = usuarioDAO.inserirUsuario(novoUsuario);
                 Log.d(TAG, "💾 Usuário salvo localmente com ID: " + id);
             } else {
@@ -287,7 +305,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void criarUsuariosIniciais() {
         usuarioDAO.open();
-
         try {
             int totalUsuarios = usuarioDAO.contarUsuarios();
             Log.d(TAG, "📊 Total de usuários no banco: " + totalUsuarios);
@@ -301,8 +318,8 @@ public class LoginActivity extends AppCompatActivity {
                 admin.setEmail("admin@helpdesk.com");
                 admin.setSenha("admin123");
                 admin.setTipo(1);
-
                 long adminId = usuarioDAO.inserirUsuario(admin);
+
                 if (adminId > 0) {
                     Log.d(TAG, "✅ Admin criado com ID: " + adminId);
                 } else {
@@ -315,8 +332,8 @@ public class LoginActivity extends AppCompatActivity {
                 cliente.setEmail("cliente@helpdesk.com");
                 cliente.setSenha("123456");
                 cliente.setTipo(0);
-
                 long clienteId = usuarioDAO.inserirUsuario(cliente);
+
                 if (clienteId > 0) {
                     Log.d(TAG, "✅ Cliente criado com ID: " + clienteId);
                 } else {
@@ -328,15 +345,22 @@ public class LoginActivity extends AppCompatActivity {
                                 "👨‍💼 Admin: admin@helpdesk.com / admin123\n" +
                                 "👤 Cliente: cliente@helpdesk.com / 123456",
                         Toast.LENGTH_LONG).show();
-
             } else {
                 Log.d(TAG, "✅ Usuários já existem (" + totalUsuarios + " usuários)");
             }
-
         } catch (Exception e) {
             Log.e(TAG, "❌ Erro ao criar usuários iniciais", e);
         } finally {
             usuarioDAO.close();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // ✅ GARANTIR QUE O DIALOG SEJA FECHADO AO DESTRUIR A ACTIVITY
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
         }
     }
 }

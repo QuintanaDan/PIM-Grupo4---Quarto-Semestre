@@ -19,7 +19,7 @@ namespace HelpDeskAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // ✅ Apenas mapear nomes de tabelas (snake_case)
+            // Apenas mapear nomes de tabelas (snake_case)
             modelBuilder.Entity<Usuario>().ToTable("usuarios");
             modelBuilder.Entity<Chamado>().ToTable("chamados");
             modelBuilder.Entity<Comentario>().ToTable("comentarios");
@@ -28,9 +28,15 @@ namespace HelpDeskAPI.Data
             modelBuilder.Entity<Notificacao>().ToTable("notificacoes");
             modelBuilder.Entity<Auditoria>().ToTable("auditorias");
 
-            // ✅ Configurar chave composta de ChamadoTag
+            // Configurar chave composta de ChamadoTag
             modelBuilder.Entity<ChamadoTag>()
                 .HasKey(ct => new { ct.ChamadoId, ct.TagId });
+
+            //Converter DateTime para UTC
+    modelBuilder.Entity<Auditoria>()
+        .Property(a => a.DataHora)
+        .HasConversion(v => v.ToUniversalTime(),
+                       v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
         }
     }
 }

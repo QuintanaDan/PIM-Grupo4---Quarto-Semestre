@@ -138,6 +138,17 @@
                     android:layout_marginBottom="16dp"
                     android:visibility="gone" />
 
+                <TextView
+                    android:id="@+id/tvLoadingMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Verificando conexão..."
+                    android:textSize="13sp"
+                    android:textColor="@color/text_secondary"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone" />
+
                 <!-- Botão Login -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnLogin"
