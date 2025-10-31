@@ -14,7 +14,8 @@ if (!string.IsNullOrEmpty(databaseUrl) && databaseUrl.StartsWith("postgres"))
 {
     // Converter de postgresql:// para formato Npgsql
     var uri = new Uri(databaseUrl);
-    databaseUrl = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.Trim('/')};Username={uri.UserInfo.Split(':')[0]};Password={uri.UserInfo.Split(':')[1]};SSL Mode=Require;Trust Server Certificate=true";
+    var port = uri.Port > 0 ? uri.Port : 5432; // Porta padrão PostgreSQL
+    databaseUrl = $"Host={uri.Host};Port={port};Database={uri.AbsolutePath.Trim('/')};Username={uri.UserInfo.Split(':')[0]};Password={uri.UserInfo.Split(':')[1]};SSL Mode=Require;Trust Server Certificate=true";
 }
 else if (string.IsNullOrEmpty(databaseUrl))
 {
