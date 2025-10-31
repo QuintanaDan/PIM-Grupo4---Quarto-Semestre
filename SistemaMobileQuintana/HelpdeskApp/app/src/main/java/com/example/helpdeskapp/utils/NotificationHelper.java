@@ -126,7 +126,7 @@ public class NotificationHelper {
         // Intent para abrir o chamado
         Intent intent = new Intent(context, DetalheChamadoActivity.class);
         intent.putExtra("chamado_id", chamadoId);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context,
@@ -174,7 +174,7 @@ public class NotificationHelper {
         // Intent
         Intent intent = new Intent(context, DetalheChamadoActivity.class);
         intent.putExtra("chamado_id", chamadoId);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context,
@@ -216,7 +216,7 @@ public class NotificationHelper {
         // Intent
         Intent intent = new Intent(context, DetalheChamadoActivity.class);
         intent.putExtra("chamado_id", chamadoId);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context,
@@ -255,7 +255,7 @@ public class NotificationHelper {
         // Intent
         Intent intent = new Intent(context, DetalheChamadoActivity.class);
         intent.putExtra("chamado_id", chamadoId);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 context,

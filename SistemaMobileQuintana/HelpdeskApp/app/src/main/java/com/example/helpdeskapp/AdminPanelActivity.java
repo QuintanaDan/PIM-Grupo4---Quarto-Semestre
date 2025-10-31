@@ -14,14 +14,20 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.helpdeskapp.adapters.ChamadoAdapter;
+import com.example.helpdeskapp.api.ApiService;
+import com.example.helpdeskapp.api.RetrofitClient;
 import com.example.helpdeskapp.dao.ChamadoDAO;
 import com.example.helpdeskapp.database.DatabaseHelper;
 import com.example.helpdeskapp.models.Chamado;
+import com.example.helpdeskapp.models.ChamadoUpdateDto;
 import com.example.helpdeskapp.utils.SessionManager;
 import com.example.helpdeskapp.utils.PDFHelper;
 import com.example.helpdeskapp.helpers.AuditoriaHelper;
 import com.example.helpdeskapp.utils.ThemeManager;
 import com.example.helpdeskapp.utils.NotificationHelper;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -354,35 +360,64 @@ public class AdminPanelActivity extends AppCompatActivity {
     private void alterarStatus(Chamado chamado, String novoStatus) {
         ChamadoDAO chamadoDAO = new ChamadoDAO(this);
         String statusAntigo = chamado.getStatus();
-        boolean sucesso = chamadoDAO.atualizarStatus(chamado.getId(), novoStatus);
 
-        if (sucesso) {
-            // Registrar auditoria
-            AuditoriaHelper.registrarAlteracaoStatus(
-                    this,
-                    sessionManager.getUserId(),
-                    chamado.getId(),
-                    statusAntigo,
-                    novoStatus
-            );
+        // ✅ PRIMEIRO: Atualizar na API
+        ApiService apiService = RetrofitClient.getApiService();
+        ChamadoUpdateDto updateDto = new ChamadoUpdateDto();
+        updateDto.setStatus(novoStatus);
 
-            // ATUALIZADO: Notificar cliente sobre mudança de status
-            NotificationHelper notificationHelper = new NotificationHelper(this);
-            notificationHelper.enviarNotificacaoMudancaStatus(
-                    chamado.getClienteId(),
-                    chamado.getId(),
-                    chamado.getTitulo(),
-                    novoStatus
-            );
+        apiService.atualizarChamado(chamado.getId(), updateDto).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(AdminPanelActivity.this,
+                            "✅ Status alterado com sucesso!",
+                            Toast.LENGTH_SHORT).show();
 
-            Toast.makeText(this, "✅ Status alterado para: " + novoStatus,
-                    Toast.LENGTH_SHORT).show();
-            carregarDados();
-        } else {
-            Toast.makeText(this, "❌ Erro ao alterar status",
-                    Toast.LENGTH_SHORT).show();
-        }
+                    // --- INÍCIO DA CORREÇÃO ---
+
+                    // 1. Encontre o chamado na lista principal 'todosChamados' e atualize seu status localmente.
+                    // Isso é crucial para que os recálculos e filtros funcionem corretamente.
+                    for (Chamado c : todosChamados) {
+                        if (c.getId() == chamado.getId()) {
+                            c.setStatus(novoStatus);
+                            break; // Encontrou e atualizou, pode sair do loop.
+                        }
+                    }
+
+                    // 2. Recalcule as estatísticas (Abertos, Fechados, etc.) com a lista atualizada.
+                    calcularEstatisticas();
+
+                    // 3. Reaplique o filtro atual para que a lista visível seja atualizada.
+                    // O método aplicarFiltro já chama o adapter.updateList() no final.
+                    aplicarFiltro(filtroAtual);
+
+                    // Opcional: Se você quiser garantir que o adapter seja notificado
+                    // sem reaplicar o filtro completo (uma otimização), você pode chamar:
+                    // adapter.notifyDataSetChanged();
+                    // Mas usar aplicarFiltro é mais seguro para garantir a consistência da UI.
+
+                    // --- FIM DA CORREÇÃO ---
+
+                    // ❌ NÃO FAÇA ISSO: A linha abaixo é ineficiente e causa o problema.
+                    // carregarDados();
+
+                } else {
+                    Toast.makeText(AdminPanelActivity.this,
+                            "❌ Erro ao alterar status",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(AdminPanelActivity.this, "❌ Erro de conexão: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
 
 // ========== NOVO: FUNCIONALIDADES DE PDF ==========
 

@@ -2,6 +2,7 @@ package com.example.helpdeskapp.api;
 
 import com.example.helpdeskapp.api.requests.*;
 import com.example.helpdeskapp.api.responses.*;
+import com.example.helpdeskapp.models.ChamadoUpdateDto;
 
 import java.util.List;
 
@@ -59,6 +60,9 @@ public interface ApiService {
             @Header("Authorization") String token,
             @Path("id") long id
     );
+
+    @PUT("api/chamados/{id}")
+    Call<Void> atualizarChamado(@Path("id") long id, @Body ChamadoUpdateDto dto);
 
     // ══════════════════════════════════════
     // COMENTÁRIOS

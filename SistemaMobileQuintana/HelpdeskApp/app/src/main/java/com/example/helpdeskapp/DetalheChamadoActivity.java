@@ -534,82 +534,178 @@ public class DetalheChamadoActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        // Tentar receber o objeto Chamado serializable
-        if (intent.hasExtra("chamado")) {
-            chamado = (Chamado) intent.getSerializableExtra("chamado");
-            Log.d(TAG, "✅ Chamado recebido via Serializable");
-        }
+        // --- INÍCIO DA CORREÇÃO ---
 
-        // Se não recebeu o objeto, criar a partir dos extras individuais
-        if (chamado == null) {
-            Log.d(TAG, "⚠️ Objeto Chamado null, tentando criar a partir dos extras...");
-            chamado = new Chamado();
+        // Tentar receber o objeto Chamado completo (vindo da lista)
+        chamado = (Chamado) intent.getSerializableExtra("chamado");
+
+        if (chamado != null) {
+            // ✅ Recebeu objeto completo - usar diretamente
+            Log.d(TAG, "✅ Chamado recebido via Serializable (vindo da lista)");
+            chamadoId = chamado.getId();
+            exibirDadosNaTela();
+            carregarTags();
+            verificarSePodeAvaliar(chamado);
+        } else {
+            // ❌ Não recebeu objeto - veio da NOTIFICAÇÃO com apenas o ID
+            Log.d(TAG, "⚠️ Objeto Chamado null, verificando se veio ID da notificação...");
 
             if (intent.hasExtra("chamado_id")) {
-                chamado.setId(intent.getLongExtra("chamado_id", 0));
-            }
-            if (intent.hasExtra("chamado_protocolo")) {
-                chamado.setNumero(intent.getStringExtra("chamado_protocolo"));
-            }
-            if (intent.hasExtra("chamado_titulo")) {
-                chamado.setTitulo(intent.getStringExtra("chamado_titulo"));
-            }
-            if (intent.hasExtra("chamado_descricao")) {
-                chamado.setDescricao(intent.getStringExtra("chamado_descricao"));
-            }
-            if (intent.hasExtra("chamado_categoria")) {
-                chamado.setCategoria(intent.getStringExtra("chamado_categoria"));
-            }
-            if (intent.hasExtra("chamado_prioridade")) {
-                chamado.setPrioridade(intent.getStringExtra("chamado_prioridade"));
-            }
-            if (intent.hasExtra("chamado_status")) {
-                chamado.setStatus(intent.getStringExtra("chamado_status"));
-            }
-            // ✅ CORRETO:
-            // ✅ CORRETO (converter String para Date):
-            if (intent.hasExtra("chamado_data")) {
-                String dataStr = intent.getStringExtra("chamado_data");
+                chamadoId = intent.getLongExtra("chamado_id", 0);
 
-                if (dataStr != null && !dataStr.isEmpty()) {
-                    try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                        Date data = sdf.parse(dataStr);
-                        chamado.setDataCriacao(data);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Erro ao converter data: " + dataStr, e);
-                        // Se falhar, usar data atual
-                        chamado.setDataCriacao(new Date());
-                    }
+                if (chamadoId > 0) {
+                    Log.d(TAG, "🔍 ID recebido da notificação: " + chamadoId);
+                    Log.d(TAG, "📡 Buscando dados completos da API...");
+
+                    // ✅ CHAMADA CRÍTICA - Buscar dados completos da API
+                    buscarChamadoDaAPI(chamadoId);
+
+                } else {
+                    Log.e(TAG, "❌ ID inválido: " + chamadoId);
+                    Toast.makeText(this, "Erro: ID do chamado inválido", Toast.LENGTH_LONG).show();
+                    finish();
                 }
+            } else {
+                Log.e(TAG, "❌ Nenhum dado recebido (nem objeto nem ID)");
+                Toast.makeText(this, "Erro: Nenhum dado do chamado foi recebido", Toast.LENGTH_LONG).show();
+                finish();
             }
-            if (intent.hasExtra("chamado_resposta")) {
-                chamado.setResposta(intent.getStringExtra("chamado_resposta"));
-            }
+        }
+        // --- FIM DA CORREÇÃO ---
+    }
 
-            Log.d(TAG, "✅ Chamado criado a partir dos extras");
+    // NOVO MÉTODO: Buscar chamado completo da API
+    private void buscarChamadoDaAPI(long id) {
+        Log.d(TAG, "🌐 Iniciando busca na API para ID: " + id);
+
+        // Mostrar loading (se tiver um ProgressBar na tela)
+        if (progressBarIA != null) {
+            progressBarIA.setVisibility(View.VISIBLE);
         }
 
-        // Verificar se chamado foi carregado
-        if (chamado == null) {
-            Log.e(TAG, "❌ ERRO: Chamado continua null após todas tentativas");
-            Toast.makeText(this, "Erro ao carregar dados do chamado", Toast.LENGTH_SHORT).show();
+        // Desabilitar botões enquanto carrega
+        if (btnVoltar != null) btnVoltar.setEnabled(false);
+        if (btnEnviarComentario != null) btnEnviarComentario.setEnabled(false);
+        if (btnAnexarFoto != null) btnAnexarFoto.setEnabled(false);
+
+        // Obter token de autenticação
+        String token = sessionManager.getAuthHeader();
+        if (token == null) {
+            Log.e(TAG, "❌ Token não encontrado!");
+            Toast.makeText(this, "Erro: Sessão expirada. Faça login novamente.", Toast.LENGTH_LONG).show();
             finish();
             return;
         }
 
-        // Log dos dados recebidos
-        Log.d(TAG, "📊 Dados do chamado carregados:");
-        Log.d(TAG, "   ID: " + chamado.getId());
-        Log.d(TAG, "   Número: " + (chamado.getNumero() != null ? chamado.getNumero() : "null"));
-        Log.d(TAG, "   Título: " + (chamado.getTitulo() != null ? chamado.getTitulo() : "null"));
-        Log.d(TAG, "   Descrição: " + (chamado.getDescricao() != null ? chamado.getDescricao().substring(0, Math.min(50, chamado.getDescricao().length())) + "..." : "null"));
-        Log.d(TAG, "   Categoria: " + (chamado.getCategoria() != null ? chamado.getCategoria() : "null"));
-        Log.d(TAG, "   Prioridade: " + (chamado.getPrioridade() != null ? chamado.getPrioridade() : "null"));
-        Log.d(TAG, "   Status: " + (chamado.getStatus() != null ? chamado.getStatus() : "null"));
+        // Chamar API
+        com.example.helpdeskapp.api.ApiService apiService =
+                com.example.helpdeskapp.api.RetrofitClient.getApiService();
 
-        // Exibir dados na tela
-        exibirDadosNaTela();
+        apiService.getChamadoById(token, id).enqueue(new retrofit2.Callback<com.example.helpdeskapp.api.responses.ChamadoResponse>() {
+            @Override
+            public void onResponse(retrofit2.Call<com.example.helpdeskapp.api.responses.ChamadoResponse> call,
+                                   retrofit2.Response<com.example.helpdeskapp.api.responses.ChamadoResponse> response) {
+
+                // Esconder loading
+                if (progressBarIA != null) {
+                    progressBarIA.setVisibility(View.GONE);
+                }
+
+                // Reabilitar botões
+                if (btnVoltar != null) btnVoltar.setEnabled(true);
+                if (btnEnviarComentario != null) btnEnviarComentario.setEnabled(true);
+                if (btnAnexarFoto != null) btnAnexarFoto.setEnabled(true);
+
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.d(TAG, "✅ Dados recebidos da API com sucesso!");
+
+                    // Converter ChamadoResponse para Chamado
+                    com.example.helpdeskapp.api.responses.ChamadoResponse chamadoResponse = response.body();
+                    chamado = converterResponseParaChamado(chamadoResponse);
+
+                    // Exibir dados na tela
+                    exibirDadosNaTela();
+                    carregarTags();
+                    verificarSePodeAvaliar(chamado);
+
+                    Log.d(TAG, "✅ Tela atualizada com dados da API");
+
+                } else {
+                    Log.e(TAG, "❌ Erro na resposta da API: " + response.code());
+                    Toast.makeText(DetalheChamadoActivity.this,
+                            "Erro ao carregar chamado. Código: " + response.code(),
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<com.example.helpdeskapp.api.responses.ChamadoResponse> call, Throwable t) {
+                Log.e(TAG, "❌ Falha na requisição: ", t);
+
+                // Esconder loading
+                if (progressBarIA != null) {
+                    progressBarIA.setVisibility(View.GONE);
+                }
+
+                // Reabilitar botões
+                if (btnVoltar != null) btnVoltar.setEnabled(true);
+                if (btnEnviarComentario != null) btnEnviarComentario.setEnabled(true);
+                if (btnAnexarFoto != null) btnAnexarFoto.setEnabled(true);
+
+                Toast.makeText(DetalheChamadoActivity.this,
+                        "Erro de conexão: " + t.getMessage(),
+                        Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
+    }
+
+    // MÉTODO CORRIGIDO: Converter ChamadoResponse para Chamado
+    private Chamado converterResponseParaChamado(com.example.helpdeskapp.api.responses.ChamadoResponse response) {
+        Chamado chamado = new Chamado();
+
+        chamado.setId(response.getId());
+        chamado.setNumero(response.getProtocolo());  // ✅ protocolo em vez de numero
+        chamado.setTitulo(response.getTitulo());
+        chamado.setDescricao(response.getDescricao());
+        chamado.setCategoria(response.getCategoria());
+        chamado.setPrioridade(response.getPrioridade());
+        chamado.setStatus(response.getStatus());
+        chamado.setClienteId(response.getUsuarioId());
+
+        // Converter dataAbertura
+        if (response.getDataAbertura() != null) {
+            try {
+                java.text.SimpleDateFormat sdf;
+
+                if (response.getDataAbertura().contains("T")) {
+                    if (response.getDataAbertura().contains(".")) {
+                        sdf = new java.text.SimpleDateFormat(
+                                "yyyy-MM-dd'T'HH:mm:ss.SSS", java.util.Locale.getDefault());
+                    } else {
+                        sdf = new java.text.SimpleDateFormat(
+                                "yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault());
+                    }
+                } else {
+                    sdf = new java.text.SimpleDateFormat(
+                            "yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault());
+                }
+
+                chamado.setDataCriacao(sdf.parse(response.getDataAbertura()));
+
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Erro ao converter data: " + response.getDataAbertura(), e);
+                chamado.setDataCriacao(new java.util.Date());
+            }
+        } else {
+            chamado.setDataCriacao(new java.util.Date());
+        }
+
+        chamado.setResposta(null);  // Não tem no response
+
+        Log.d(TAG, "✅ ChamadoResponse convertido para Chamado");
+        return chamado;
     }
 
     private void exibirDadosNaTela() {
