@@ -125,7 +125,8 @@ namespace HelpDeskAPI.Controllers
                 UsuarioId = dto.UsuarioId,
                 Categoria = dto.Categoria,
                 Prioridade = dto.Prioridade,
-                Status = "Aberto"
+                Status = "Aberto",
+                DataAbertura = DateTime.UtcNow
             };
 
             _context.Chamados.Add(chamado);
@@ -197,7 +198,7 @@ namespace HelpDeskAPI.Controllers
                 // Se fechou o chamado, registrar data
                 if (dto.Status == "Fechado" && statusAntigo != "Fechado")
                 {
-                    chamado.DataFechamento = DateTime.Now;
+                    chamado.DataFechamento = DateTime.UtcNow;
                 }
 
                 // Notificar cliente sobre mudança de status

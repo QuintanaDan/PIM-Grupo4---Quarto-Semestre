@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ChamadosController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controllers\\ChamadosController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\AuthController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controllers\\AuthController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -26,7 +30,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -44,19 +48,32 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "ChamadosController.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ChamadosController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ChamadosController.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ChamadosController.cs",
+              "RelativeToolTip": "Controllers\\ChamadosController.cs",
+              "ViewState": "AgIAAJEAAAAAAAAAAAAswH8AAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-31T15:59:46.252Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
               "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\AuthController.cs",
               "RelativeToolTip": "Controllers\\AuthController.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAswDUAAABQAAAAAAAAAA==",
+              "ViewState": "AgIAAIEAAAAAAAAAAAAAAC4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-31T14:22:29.45Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "AppDbContext.cs",
               "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Data\\AppDbContext.cs",
               "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
@@ -64,8 +81,7 @@
               "RelativeToolTip": "Data\\AppDbContext.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-31T08:46:53.125Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-31T08:46:53.125Z"
             }
           ]
         }

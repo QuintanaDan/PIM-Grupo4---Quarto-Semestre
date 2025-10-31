@@ -84,7 +84,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         btnTesteCliente.setOnClickListener(v -> {
-            etEmail.setText("cliente@helpdesk.com");
+            etEmail.setText("" +
+                    "");
             etSenha.setText("123456");
             realizarLogin();
         });

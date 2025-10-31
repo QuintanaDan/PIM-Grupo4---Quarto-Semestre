@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class RetrofitClient {
 
     // ✅ URL do Render
-    private static final String BASE_URL = "https://helpdeskapi-qzp2.onrender.com/";
+    private static final String BASE_URL = "https://helpdeskapi-final.onrender.com/";
 
     private static Retrofit retrofit = null;
     private static Context appContext = null;
