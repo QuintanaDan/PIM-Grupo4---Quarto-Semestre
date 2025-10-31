@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\Controllers",
-    "\\Data"
+    "\\Data",
+    "\\Models"
   ],
-  "SelectedNode": "\\Controllers\\ChamadosController.cs",
+  "SelectedNode": "\\Models\\Comentario.cs",
   "PreviewInSolutionExplorer": false
 }

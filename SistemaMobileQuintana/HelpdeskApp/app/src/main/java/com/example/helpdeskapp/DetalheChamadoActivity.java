@@ -578,7 +578,7 @@ public class DetalheChamadoActivity extends AppCompatActivity {
     private void buscarChamadoDaAPI(long id) {
         Log.d(TAG, "🌐 Iniciando busca na API para ID: " + id);
 
-        // Mostrar loading (se tiver um ProgressBar na tela)
+        // Mostrar loading
         if (progressBarIA != null) {
             progressBarIA.setVisibility(View.VISIBLE);
         }
@@ -588,75 +588,100 @@ public class DetalheChamadoActivity extends AppCompatActivity {
         if (btnEnviarComentario != null) btnEnviarComentario.setEnabled(false);
         if (btnAnexarFoto != null) btnAnexarFoto.setEnabled(false);
 
-        // Obter token de autenticação
-        String token = sessionManager.getAuthHeader();
-        if (token == null) {
+        // ✅ OBTER TOKEN COM O MÉTODO CORRETO
+        String authHeader = sessionManager.getAuthHeader();
+
+        if (authHeader == null || authHeader.isEmpty()) {
             Log.e(TAG, "❌ Token não encontrado!");
-            Toast.makeText(this, "Erro: Sessão expirada. Faça login novamente.", Toast.LENGTH_LONG).show();
-            finish();
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Sessão expirada. Faça login novamente.", Toast.LENGTH_LONG).show();
+                finish();
+            });
             return;
         }
 
-        // Chamar API
-        com.example.helpdeskapp.api.ApiService apiService =
-                com.example.helpdeskapp.api.RetrofitClient.getApiService();
+        Log.d(TAG, "🔑 Token obtido: " + authHeader.substring(0, Math.min(20, authHeader.length())) + "...");
 
-        apiService.getChamadoById(token, id).enqueue(new retrofit2.Callback<com.example.helpdeskapp.api.responses.ChamadoResponse>() {
+        // ✅ USAR ChamadoService CORRETO
+        com.example.helpdeskapp.api.ChamadoService apiService =
+                com.example.helpdeskapp.api.RetrofitClient.getRetrofit()
+                        .create(com.example.helpdeskapp.api.ChamadoService.class);
+
+        // ✅ CHAMAR COM TOKEN
+        apiService.buscarChamado(authHeader, id).enqueue(new retrofit2.Callback<Chamado>() {
             @Override
-            public void onResponse(retrofit2.Call<com.example.helpdeskapp.api.responses.ChamadoResponse> call,
-                                   retrofit2.Response<com.example.helpdeskapp.api.responses.ChamadoResponse> response) {
+            public void onResponse(retrofit2.Call<Chamado> call,
+                                   retrofit2.Response<Chamado> response) {
 
-                // Esconder loading
-                if (progressBarIA != null) {
-                    progressBarIA.setVisibility(View.GONE);
-                }
+                Log.d(TAG, "📥 Resposta recebida. Código: " + response.code());
 
-                // Reabilitar botões
-                if (btnVoltar != null) btnVoltar.setEnabled(true);
-                if (btnEnviarComentario != null) btnEnviarComentario.setEnabled(true);
-                if (btnAnexarFoto != null) btnAnexarFoto.setEnabled(true);
+                // Esconder loading e reabilitar botões
+                runOnUiThread(() -> {
+                    if (progressBarIA != null) {
+                        progressBarIA.setVisibility(View.GONE);
+                    }
+                    if (btnVoltar != null) btnVoltar.setEnabled(true);
+                    if (btnEnviarComentario != null) btnEnviarComentario.setEnabled(true);
+                    if (btnAnexarFoto != null) btnAnexarFoto.setEnabled(true);
+                });
 
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.d(TAG, "✅ Dados recebidos da API com sucesso!");
+                    chamado = response.body();
 
-                    // Converter ChamadoResponse para Chamado
-                    com.example.helpdeskapp.api.responses.ChamadoResponse chamadoResponse = response.body();
-                    chamado = converterResponseParaChamado(chamadoResponse);
+                    Log.d(TAG, "✅ Chamado recebido da API!");
+                    Log.d(TAG, "   ID: " + chamado.getId());
+                    Log.d(TAG, "   Título: " + chamado.getTitulo());
+                    Log.d(TAG, "   Status: " + chamado.getStatus());
 
-                    // Exibir dados na tela
-                    exibirDadosNaTela();
-                    carregarTags();
-                    verificarSePodeAvaliar(chamado);
-
-                    Log.d(TAG, "✅ Tela atualizada com dados da API");
+                    runOnUiThread(() -> {
+                        exibirDadosNaTela();
+                        carregarTags();
+                        verificarSePodeAvaliar(chamado);
+                        Toast.makeText(DetalheChamadoActivity.this,
+                                "✅ Dados carregados da API",
+                                Toast.LENGTH_SHORT).show();
+                    });
 
                 } else {
-                    Log.e(TAG, "❌ Erro na resposta da API: " + response.code());
-                    Toast.makeText(DetalheChamadoActivity.this,
-                            "Erro ao carregar chamado. Código: " + response.code(),
-                            Toast.LENGTH_LONG).show();
-                    finish();
+                    Log.e(TAG, "❌ Erro na resposta: " + response.code());
+
+                    // Ler erro detalhado
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorBody = response.errorBody().string();
+                            Log.e(TAG, "   Error Body: " + errorBody);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "   Erro ao ler errorBody", e);
+                    }
+
+                    runOnUiThread(() -> {
+                        Toast.makeText(DetalheChamadoActivity.this,
+                                "Erro ao carregar: " + response.code(),
+                                Toast.LENGTH_LONG).show();
+                        finish();
+                    });
                 }
             }
 
             @Override
-            public void onFailure(retrofit2.Call<com.example.helpdeskapp.api.responses.ChamadoResponse> call, Throwable t) {
+            public void onFailure(retrofit2.Call<Chamado> call, Throwable t) {
                 Log.e(TAG, "❌ Falha na requisição: ", t);
 
-                // Esconder loading
-                if (progressBarIA != null) {
-                    progressBarIA.setVisibility(View.GONE);
-                }
+                runOnUiThread(() -> {
+                    // Esconder loading e reabilitar botões
+                    if (progressBarIA != null) {
+                        progressBarIA.setVisibility(View.GONE);
+                    }
+                    if (btnVoltar != null) btnVoltar.setEnabled(true);
+                    if (btnEnviarComentario != null) btnEnviarComentario.setEnabled(true);
+                    if (btnAnexarFoto != null) btnAnexarFoto.setEnabled(true);
 
-                // Reabilitar botões
-                if (btnVoltar != null) btnVoltar.setEnabled(true);
-                if (btnEnviarComentario != null) btnEnviarComentario.setEnabled(true);
-                if (btnAnexarFoto != null) btnAnexarFoto.setEnabled(true);
-
-                Toast.makeText(DetalheChamadoActivity.this,
-                        "Erro de conexão: " + t.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                finish();
+                    Toast.makeText(DetalheChamadoActivity.this,
+                            "Erro de conexão: " + t.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                });
             }
         });
     }

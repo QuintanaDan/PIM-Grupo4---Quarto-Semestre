@@ -220,6 +220,20 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         Log.d(TAG, "   Status: " + chamado.getStatus());
         Log.d(TAG, "   Usuario ID: " + chamado.getClienteId());
 
+        // ✅ PEGAR O TOKEN DO SESSION MANAGER
+        String authHeader = sessionManager.getAuthHeader();
+
+        if (authHeader == null || authHeader.isEmpty()) {
+            Log.e(TAG, "❌ Token não encontrado! Redirecionando para login...");
+            Toast.makeText(this, "Sessão expirada. Faça login novamente.", Toast.LENGTH_LONG).show();
+            btnSalvar.setEnabled(true);
+            btnSalvar.setText("Salvar");
+            finish();
+            return;
+        }
+
+        Log.d(TAG, "🔑 Usando Authorization Header: " + authHeader.substring(0, Math.min(20, authHeader.length())) + "...");
+
         ChamadoRequest request = new ChamadoRequest();
         request.setTitulo(chamado.getTitulo());
         request.setDescricao(chamado.getDescricao());
@@ -228,11 +242,12 @@ public class AbrirChamadoActivity extends AppCompatActivity {
         request.setStatus(chamado.getStatus());
         request.setUsuarioId(chamado.getClienteId());
 
-        Log.d(TAG, "📦 Request montado, chamando API...");
+        Log.d(TAG, "📦 Request montado, chamando API com autenticação...");
 
         ChamadoService service = RetrofitClient.getRetrofit().create(ChamadoService.class);
 
-        service.criarChamado(request).enqueue(new Callback<Chamado>() {
+        // ✅ PASSAR O TOKEN NO HEADER
+        service.criarChamado(authHeader, request).enqueue(new Callback<Chamado>() {
             @Override
             public void onResponse(Call<Chamado> call, Response<Chamado> response) {
                 Log.d(TAG, "📥 === RESPOSTA DA API ===");
@@ -296,6 +311,14 @@ public class AbrirChamadoActivity extends AppCompatActivity {
                         if (response.errorBody() != null) {
                             String errorBody = response.errorBody().string();
                             Log.e(TAG, "   Error Body: " + errorBody);
+
+                            // ✅ SE FOR 401, TALVEZ O TOKEN EXPIROU
+                            if (response.code() == 401) {
+                                Log.e(TAG, "   ⚠️ Token inválido ou expirado!");
+                                Toast.makeText(AbrirChamadoActivity.this,
+                                        "Sessão expirada. Salvando localmente...",
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "   Erro ao ler errorBody", e);
@@ -321,12 +344,30 @@ public class AbrirChamadoActivity extends AppCompatActivity {
     private void salvarCacheLocal(Chamado chamado) {
         new Thread(() -> {
             try {
-                chamadoDAO.open();
-                chamadoDAO.inserir(chamado);
-                chamadoDAO.close();
-                Log.d(TAG, "💾 Cache local salvo");
+                Log.d(TAG, "💾 === SALVANDO CACHE LOCAL ===");
+                Log.d(TAG, "   Chamado ID da API: " + chamado.getId());
+                Log.d(TAG, "   Título: " + chamado.getTitulo());
+                Log.d(TAG, "   Número/Protocolo: " + chamado.getNumero());
+
+                ChamadoDAO dao = new ChamadoDAO(this);
+                dao.open();
+
+                // ✅ USAR inserirComId() para manter ID e protocolo da API
+                long resultado = dao.inserirComId(chamado);
+
+                dao.close();
+
+                if (resultado > 0) {
+                    Log.d(TAG, "💾 ✅ Cache local salvo com sucesso!");
+                    Log.d(TAG, "   ID mantido: " + chamado.getId());
+                    Log.d(TAG, "   Protocolo: " + chamado.getNumero());
+                } else {
+                    Log.e(TAG, "❌ Erro ao salvar cache local. Resultado: " + resultado);
+                }
+
             } catch (Exception e) {
-                Log.e(TAG, "Erro ao salvar cache", e);
+                Log.e(TAG, "❌ Exceção ao salvar cache: ", e);
+                e.printStackTrace();
             }
         }).start();
     }

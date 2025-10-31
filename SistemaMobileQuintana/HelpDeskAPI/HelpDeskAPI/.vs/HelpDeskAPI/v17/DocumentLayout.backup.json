@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Comentario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Models\\Comentario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ComentariosController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controllers\\ComentariosController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ChamadosController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Controllers\\ChamadosController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -26,11 +34,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 179,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -42,12 +50,38 @@
               "IsPinned": true
             },
             {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Comentario.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Comentario.cs",
+              "RelativeDocumentMoniker": "Models\\Comentario.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Models\\Comentario.cs",
+              "RelativeToolTip": "Models\\Comentario.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-31T19:34:29.597Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ComentariosController.cs",
+              "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ComentariosController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ComentariosController.cs",
+              "ToolTip": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ComentariosController.cs",
+              "RelativeToolTip": "Controllers\\ComentariosController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-31T19:29:36.417Z",
+              "EditorCaption": ""
+            },
+            {
               "$type": "Bookmark",
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "ChamadosController.cs",
               "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\ChamadosController.cs",
               "RelativeDocumentMoniker": "Controllers\\ChamadosController.cs",
@@ -60,7 +94,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
@@ -72,7 +106,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "AppDbContext.cs",
               "DocumentMoniker": "C:\\PIM-Grupo4---Quarto-Semestre\\SistemaMobileQuintana\\HelpDeskAPI\\HelpDeskAPI\\Data\\AppDbContext.cs",
               "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
