@@ -249,7 +249,8 @@ namespace HelpDeskAPI.Controllers
                     ChamadoId = chamado.Id,
                     Titulo = "Novo Chamado Aberto",
                     Mensagem = $"{usuario.Nome} abriu o chamado #{chamado.Protocolo}: {chamado.Titulo}",
-                    Tipo = "NOVO_CHAMADO"
+                    Tipo = "NOVO_CHAMADO",
+                    DataHora = DateTime.UtcNow
                 };
 
                 _context.Notificacoes.Add(notificacao);
@@ -266,7 +267,8 @@ namespace HelpDeskAPI.Controllers
                 ChamadoId = chamado.Id,
                 Titulo = "Atualização no Chamado",
                 Mensagem = mensagem,
-                Tipo = "STATUS_ALTERADO"
+                Tipo = "STATUS_ALTERADO",
+                DataHora = DateTime.UtcNow
             };
 
             _context.Notificacoes.Add(notificacao);
