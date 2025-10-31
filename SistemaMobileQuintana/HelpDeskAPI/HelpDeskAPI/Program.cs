@@ -7,16 +7,22 @@ using HelpDeskAPI.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Ler DATABASE_URL do Render (PostgreSQL nativo)
+// ✅ Ler DATABASE_URL e converter formato
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-if (string.IsNullOrEmpty(databaseUrl))
+if (!string.IsNullOrEmpty(databaseUrl) && databaseUrl.StartsWith("postgres"))
+{
+    // Converter de postgresql:// para formato Npgsql
+    var uri = new Uri(databaseUrl);
+    databaseUrl = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.Trim('/')};Username={uri.UserInfo.Split(':')[0]};Password={uri.UserInfo.Split(':')[1]};SSL Mode=Require;Trust Server Certificate=true";
+}
+else if (string.IsNullOrEmpty(databaseUrl))
 {
     // Fallback local
     databaseUrl = builder.Configuration.GetConnectionString("DefaultConnection");
 }
 
-Console.WriteLine($"DEBUG - Using DATABASE_URL: {databaseUrl?.Substring(0, 50)}...");
+Console.WriteLine($"DEBUG - Using connection: {databaseUrl?.Substring(0, 50)}...");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(databaseUrl));
